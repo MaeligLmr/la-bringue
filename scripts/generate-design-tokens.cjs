@@ -253,27 +253,154 @@ function buildThemeFile() {
   const lightLines = buildTheme("Clair.tokens.json");
   const darkLines = buildTheme("Sombre.tokens.json");
 
-  return `/* AUTO-GENERATED from Collections/Design tokens/{Clair,Sombre}.tokens.json — do not edit by hand. */
-/* Semantic, component-level tokens (buttons, cards, tags, hero section...).
+  const withDanger = [
+    ...insertDangerTokens(lightLines),
+    ...SELECT_TOKEN_LINES.light,
+    ...ALERT_TOKEN_LINES.light,
+  ];
+  const darkWithDanger = [
+    ...insertDangerTokens(darkLines),
+    ...SELECT_TOKEN_LINES.dark,
+    ...ALERT_TOKEN_LINES.dark,
+  ];
+
+  return `/* Semantic, component-level tokens (buttons, cards, tags, hero section...).
    Light values are the default; dark values apply automatically by OS
    preference, or by setting data-theme="dark" on <html> (and vice versa
-   for a forced light theme on a dark OS). */
+   for a forced light theme on a dark OS).
+
+   Most of this file is AUTO-GENERATED from
+   Collections/Design tokens/{Clair,Sombre}.tokens.json by
+   scripts/generate-design-tokens.cjs — do not hand-edit those parts.
+   --button-danger-*, --select-* and --alert-danger-* are the exceptions:
+   they're hand-authored (see the comment above each block) and re-added
+   by that same script on every regeneration, so they survive it. */
 
 :root {
-${lightLines.join("\n")}
+${withDanger.join("\n")}
 }
 
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme="light"]) {
-${darkLines.map((l) => "  " + l).join("\n")}
+${darkWithDanger.map((l) => "  " + l).join("\n")}
   }
 }
 
 :root[data-theme="dark"] {
-${darkLines.join("\n")}
+${darkWithDanger.join("\n")}
 }
 `;
 }
+
+// --button-danger-* has no Button.Danger group in the Figma export at
+// all (only Primary, Secondary, Info do). Built from the real "red"
+// primitive scale using the exact same idle/hover/disabled formula as
+// the real --button-info-* tokens above it, so it's a drop-in
+// replacement if Figma ever publishes real Danger tokens. On request,
+// this lives inline in theme.css (not a separate file) but still needs
+// re-adding on every regeneration since the rest of this file is
+// rebuilt from scratch each time.
+const DANGER_TOKEN_LINES = [
+  "/* --button-danger-* is hand-authored (no Button.Danger group in the",
+  '   Figma export) — built from the real "red" primitive scale using',
+  "   the same idle/hover/disabled formula as --button-info-* above. */",
+  "--button-danger-full-idle-background: var(--color-red-500);",
+  "--button-danger-full-idle-text: var(--color-red-50);",
+  "--button-danger-full-idle-border: var(--color-red-500);",
+  "--button-danger-full-hover-background: var(--color-red-700);",
+  "--button-danger-full-hover-text: var(--color-red-50);",
+  "--button-danger-full-hover-border: var(--color-red-700);",
+  "--button-danger-full-disabled-background: var(--color-red-200);",
+  "--button-danger-full-disabled-text: var(--color-red-50);",
+  "--button-danger-full-disabled-border: var(--color-red-200);",
+  "--button-danger-outlined-idle-background: rgba(253, 236, 242, 0);",
+  "--button-danger-outlined-idle-text: var(--color-red-600);",
+  "--button-danger-outlined-idle-border: var(--color-red-500);",
+  "--button-danger-outlined-hover-background: rgba(251, 196, 216, 0.5);",
+  "--button-danger-outlined-hover-text: var(--color-red-600);",
+  "--button-danger-outlined-hover-border: var(--color-red-500);",
+  "--button-danger-outlined-disabled-background: rgba(253, 236, 242, 0);",
+  "--button-danger-outlined-disabled-text: var(--color-red-300);",
+  "--button-danger-outlined-disabled-border: var(--color-red-100);",
+  "--button-danger-ghost-idle-background: rgba(253, 236, 242, 0);",
+  "--button-danger-ghost-idle-text: var(--color-red-600);",
+  "--button-danger-ghost-idle-border: rgba(248, 27, 108, 0);",
+  "--button-danger-ghost-hover-background: rgba(251, 196, 216, 0.5);",
+  "--button-danger-ghost-hover-text: var(--color-red-600);",
+  "--button-danger-ghost-hover-border: rgba(248, 27, 108, 0);",
+  "--button-danger-ghost-disabled-background: rgba(253, 236, 242, 0);",
+  "--button-danger-ghost-disabled-text: var(--color-red-300);",
+  "--button-danger-ghost-disabled-border: rgba(251, 196, 216, 0);",
+];
+
+// Inserts the danger block right after the (real) --button-info-* lines,
+// falling back to the end of the list if that anchor ever moves.
+function insertDangerTokens(lines) {
+  const anchor = lines.findIndex((l) => l.startsWith("--button-medium-"));
+  const at = anchor === -1 ? lines.length : anchor;
+  return [...lines.slice(0, at), ...DANGER_TOKEN_LINES, ...lines.slice(at)];
+}
+
+// No Figma "Select" component was ever exported (only Button and Icon
+// were) — these are hand-authored directly from the real primitive color
+// scales, not from another component's tokens. The trigger deliberately
+// looks like Button's "primary outlined" variant (transparent
+// background, pink-bright border/text), rebuilt from the pink-bright
+// primitive scale rather than pointed at --button-primary-outlined-*.
+// The listbox background is deliberately lighter than the page's own
+// dark background in dark mode (an overlay needs to read as elevated,
+// not blend into or go even darker than the page).
+const SELECT_TOKEN_LINES = {
+  light: [
+    '/* --select-* is hand-authored (no Figma "Select" component was ever',
+    "   exported) — built from the real primitive color scales, not from",
+    "   another component's tokens. The trigger deliberately looks like",
+    '   Button\'s "primary outlined" variant (transparent background,',
+    "   pink-bright border/text), rebuilt from the pink-bright primitive",
+    "   scale rather than pointed at --button-primary-outlined-*. The",
+    "   listbox background is deliberately lighter than the page's own dark",
+    "   background in dark mode (an overlay needs to read as elevated). */",
+    "--select-trigger-background: transparent;",
+    "--select-trigger-hover-background: color-mix(in srgb, var(--color-pink-bright-100) 50%, transparent);",
+    "--select-trigger-text: var(--color-pink-bright-600);",
+    "--select-trigger-border: var(--color-pink-bright-500);",
+    "--select-trigger-focus-ring: color-mix(in srgb, var(--select-trigger-border) 20%, transparent);",
+    "--select-listbox-background: var(--color-violet-50);",
+    "--select-listbox-border: var(--color-violet-200);",
+    "--select-option-text: var(--color-violet-900);",
+    "--select-option-hover-background: color-mix(in srgb, var(--color-pink-bright-500) 12%, transparent);",
+    "--select-option-selected-text: var(--color-pink-bright-600);",
+  ],
+  dark: [
+    '/* --select-* is hand-authored — see the light block above. */',
+    "--select-trigger-hover-background: color-mix(in srgb, var(--color-pink-bright-700) 50%, transparent);",
+    "--select-trigger-text: var(--color-pink-bright-100);",
+    "--select-trigger-border: var(--color-pink-bright-100);",
+    "--select-listbox-background: var(--color-violet-700);",
+    "--select-listbox-border: var(--color-violet-500);",
+    "--select-option-text: var(--color-violet-50);",
+    "--select-option-selected-text: var(--color-pink-bright-200);",
+  ],
+};
+
+// No Figma "Alert"/error-message component was ever exported either —
+// hand-authored from the real "red" primitive scale. Used for form error
+// messages (see LoginForm.vue, SignUpForm.vue).
+const ALERT_TOKEN_LINES = {
+  light: [
+    '/* --alert-danger-* is hand-authored (no Figma "Alert" component was',
+    '   ever exported) — built from the real "red" primitive scale. */',
+    "--alert-danger-background: var(--color-red-50);",
+    "--alert-danger-border: var(--color-red-500);",
+    "--alert-danger-text: var(--color-red-700);",
+  ],
+  dark: [
+    "/* --alert-danger-* is hand-authored — see the light block above. */",
+    "--alert-danger-background: var(--color-red-900);",
+    "--alert-danger-border: var(--color-red-400);",
+    "--alert-danger-text: var(--color-red-100);",
+  ],
+};
 
 // ---- write ----------------------------------------------------------------
 
@@ -291,21 +418,19 @@ for (const [name, content] of Object.entries(files)) {
   console.log("wrote", path.join(OUT_DIR, name));
 }
 
-// placeholders.css is hand-authored (not generated from Collections/) —
-// see the comment at the top of that file. Only import it if present, and
-// keep the import so re-running this script doesn't silently drop it.
-const hasPlaceholders = fs.existsSync(path.join(OUT_DIR, "placeholders.css"));
-
 fs.writeFileSync(
   path.join(OUT_DIR, "index.css"),
-  `/* Entry point — imports all design-token layers in order. The first
-   four files are AUTO-GENERATED by this script; placeholders.css (if
-   present) is hand-authored — see the comment at its top. */
+  `/* Entry point — imports all design-token layers in order. primitives.css,
+   sizes.css and typography.css are AUTO-GENERATED by
+   scripts/generate-design-tokens.cjs. theme.css is mostly generated too,
+   except its --button-danger-*, --select-* and --alert-danger-* blocks,
+   which are hand-authored (see the comments at their top) and re-added
+   by that same script on every regeneration. */
 @import "./primitives.css";
 @import "./sizes.css";
 @import "./typography.css";
 @import "./theme.css";
-${hasPlaceholders ? '@import "./placeholders.css";\n' : ""}`,
+`,
   "utf8"
 );
 console.log("wrote", path.join(OUT_DIR, "index.css"));

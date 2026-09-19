@@ -1,8 +1,14 @@
-/* AUTO-GENERATED from Collections/Design tokens/{Clair,Sombre}.tokens.json — do not edit by hand. */
 /* Semantic, component-level tokens (buttons, cards, tags, hero section...).
    Light values are the default; dark values apply automatically by OS
    preference, or by setting data-theme="dark" on <html> (and vice versa
-   for a forced light theme on a dark OS). */
+   for a forced light theme on a dark OS).
+
+   Most of this file is AUTO-GENERATED from
+   Collections/Design tokens/{Clair,Sombre}.tokens.json by
+   scripts/generate-design-tokens.cjs — do not hand-edit those parts.
+   --button-danger-*, --select-* and --alert-danger-* are the exceptions:
+   they're hand-authored (see the comment above each block) and re-added
+   by that same script on every regeneration, so they survive it. */
 
 :root {
   --icon-small-height: 16px;
@@ -93,6 +99,36 @@
   --button-info-ghost-disabled-background: rgba(240, 247, 250, 0);
   --button-info-ghost-disabled-text: #92C7DD;
   --button-info-ghost-disabled-border: rgba(209, 231, 240, 0);
+  /* --button-danger-* is hand-authored (no Button.Danger group in the
+     Figma export) — built from the real "red" primitive scale using
+     the same idle/hover/disabled formula as --button-info-* above. */
+  --button-danger-full-idle-background: var(--color-red-500);
+  --button-danger-full-idle-text: var(--color-red-50);
+  --button-danger-full-idle-border: var(--color-red-500);
+  --button-danger-full-hover-background: var(--color-red-700);
+  --button-danger-full-hover-text: var(--color-red-50);
+  --button-danger-full-hover-border: var(--color-red-700);
+  --button-danger-full-disabled-background: var(--color-red-200);
+  --button-danger-full-disabled-text: var(--color-red-50);
+  --button-danger-full-disabled-border: var(--color-red-200);
+  --button-danger-outlined-idle-background: rgba(253, 236, 242, 0);
+  --button-danger-outlined-idle-text: var(--color-red-600);
+  --button-danger-outlined-idle-border: var(--color-red-500);
+  --button-danger-outlined-hover-background: rgba(251, 196, 216, 0.5);
+  --button-danger-outlined-hover-text: var(--color-red-600);
+  --button-danger-outlined-hover-border: var(--color-red-500);
+  --button-danger-outlined-disabled-background: rgba(253, 236, 242, 0);
+  --button-danger-outlined-disabled-text: var(--color-red-300);
+  --button-danger-outlined-disabled-border: var(--color-red-100);
+  --button-danger-ghost-idle-background: rgba(253, 236, 242, 0);
+  --button-danger-ghost-idle-text: var(--color-red-600);
+  --button-danger-ghost-idle-border: rgba(248, 27, 108, 0);
+  --button-danger-ghost-hover-background: rgba(251, 196, 216, 0.5);
+  --button-danger-ghost-hover-text: var(--color-red-600);
+  --button-danger-ghost-hover-border: rgba(248, 27, 108, 0);
+  --button-danger-ghost-disabled-background: rgba(253, 236, 242, 0);
+  --button-danger-ghost-disabled-text: var(--color-red-300);
+  --button-danger-ghost-disabled-border: rgba(251, 196, 216, 0);
   --button-medium-with-text-padding-x: 10px;
   --button-medium-with-text-padding-y: 8px;
   --button-medium-with-text-gap: 8px;
@@ -152,6 +188,29 @@
   --carrousel-gap: 30px;
   --carrousel-padding-x: 26px;
   --carrousel-padding-y: 26px;
+  /* --select-* is hand-authored (no Figma "Select" component was ever
+     exported) — built from the real primitive color scales, not from
+     another component's tokens. The trigger deliberately looks like
+     Button's "primary outlined" variant (transparent background,
+     pink-bright border/text), rebuilt from the pink-bright primitive
+     scale rather than pointed at --button-primary-outlined-*. The
+     listbox background is deliberately lighter than the page's own dark
+     background in dark mode (an overlay needs to read as elevated). */
+  --select-trigger-background: transparent;
+  --select-trigger-hover-background: color-mix(in srgb, var(--color-pink-bright-100) 50%, transparent);
+  --select-trigger-text: var(--color-pink-bright-600);
+  --select-trigger-border: var(--color-pink-bright-500);
+  --select-trigger-focus-ring: color-mix(in srgb, var(--select-trigger-border) 20%, transparent);
+  --select-listbox-background: var(--color-violet-50);
+  --select-listbox-border: var(--color-violet-200);
+  --select-option-text: var(--color-violet-900);
+  --select-option-hover-background: color-mix(in srgb, var(--color-pink-bright-500) 12%, transparent);
+  --select-option-selected-text: var(--color-pink-bright-600);
+  /* --alert-danger-* is hand-authored (no Figma "Alert" component was
+     ever exported) — built from the real "red" primitive scale. */
+  --alert-danger-background: var(--color-red-50);
+  --alert-danger-border: var(--color-red-500);
+  --alert-danger-text: var(--color-red-700);
 }
 
 @media (prefers-color-scheme: dark) {
@@ -244,6 +303,36 @@
     --button-info-ghost-disabled-background: rgba(240, 247, 250, 0);
     --button-info-ghost-disabled-text: #92C7DD;
     --button-info-ghost-disabled-border: rgba(209, 231, 240, 0);
+    /* --button-danger-* is hand-authored (no Button.Danger group in the
+       Figma export) — built from the real "red" primitive scale using
+       the same idle/hover/disabled formula as --button-info-* above. */
+    --button-danger-full-idle-background: var(--color-red-500);
+    --button-danger-full-idle-text: var(--color-red-50);
+    --button-danger-full-idle-border: var(--color-red-500);
+    --button-danger-full-hover-background: var(--color-red-700);
+    --button-danger-full-hover-text: var(--color-red-50);
+    --button-danger-full-hover-border: var(--color-red-700);
+    --button-danger-full-disabled-background: var(--color-red-200);
+    --button-danger-full-disabled-text: var(--color-red-50);
+    --button-danger-full-disabled-border: var(--color-red-200);
+    --button-danger-outlined-idle-background: rgba(253, 236, 242, 0);
+    --button-danger-outlined-idle-text: var(--color-red-600);
+    --button-danger-outlined-idle-border: var(--color-red-500);
+    --button-danger-outlined-hover-background: rgba(251, 196, 216, 0.5);
+    --button-danger-outlined-hover-text: var(--color-red-600);
+    --button-danger-outlined-hover-border: var(--color-red-500);
+    --button-danger-outlined-disabled-background: rgba(253, 236, 242, 0);
+    --button-danger-outlined-disabled-text: var(--color-red-300);
+    --button-danger-outlined-disabled-border: var(--color-red-100);
+    --button-danger-ghost-idle-background: rgba(253, 236, 242, 0);
+    --button-danger-ghost-idle-text: var(--color-red-600);
+    --button-danger-ghost-idle-border: rgba(248, 27, 108, 0);
+    --button-danger-ghost-hover-background: rgba(251, 196, 216, 0.5);
+    --button-danger-ghost-hover-text: var(--color-red-600);
+    --button-danger-ghost-hover-border: rgba(248, 27, 108, 0);
+    --button-danger-ghost-disabled-background: rgba(253, 236, 242, 0);
+    --button-danger-ghost-disabled-text: var(--color-red-300);
+    --button-danger-ghost-disabled-border: rgba(251, 196, 216, 0);
     --button-medium-with-text-padding-x: 10px;
     --button-medium-with-text-padding-y: 8px;
     --button-medium-with-text-gap: 8px;
@@ -303,6 +392,27 @@
     --carrousel-gap: 30px;
     --carrousel-padding-x: 26px;
     --carrousel-padding-y: 26px;
+    /* --select-* is hand-authored (no Figma "Select" component was ever
+       exported) — built from the real primitive color scales, not from
+       another component's tokens. The trigger deliberately looks like
+       Button's "primary outlined" variant (transparent background,
+       pink-bright border/text), rebuilt from the pink-bright primitive
+       scale rather than pointed at --button-primary-outlined-*. The
+       listbox background is deliberately lighter than the page's own
+       dark background in dark mode (an overlay needs to read as
+       elevated). */
+    --select-trigger-hover-background: color-mix(in srgb, var(--color-pink-bright-700) 50%, transparent);
+    --select-trigger-text: var(--color-pink-bright-100);
+    --select-trigger-border: var(--color-pink-bright-100);
+    --select-listbox-background: var(--color-violet-700);
+    --select-listbox-border: var(--color-violet-500);
+    --select-option-text: var(--color-violet-50);
+    --select-option-selected-text: var(--color-pink-bright-200);
+    /* --alert-danger-* is hand-authored (no Figma "Alert" component was
+       ever exported) — built from the real "red" primitive scale. */
+    --alert-danger-background: var(--color-red-900);
+    --alert-danger-border: var(--color-red-400);
+    --alert-danger-text: var(--color-red-100);
   }
 }
 
@@ -395,6 +505,36 @@
   --button-info-ghost-disabled-background: rgba(240, 247, 250, 0);
   --button-info-ghost-disabled-text: #92C7DD;
   --button-info-ghost-disabled-border: rgba(209, 231, 240, 0);
+  /* --button-danger-* is hand-authored (no Button.Danger group in the
+     Figma export) — built from the real "red" primitive scale using
+     the same idle/hover/disabled formula as --button-info-* above. */
+  --button-danger-full-idle-background: var(--color-red-500);
+  --button-danger-full-idle-text: var(--color-red-50);
+  --button-danger-full-idle-border: var(--color-red-500);
+  --button-danger-full-hover-background: var(--color-red-700);
+  --button-danger-full-hover-text: var(--color-red-50);
+  --button-danger-full-hover-border: var(--color-red-700);
+  --button-danger-full-disabled-background: var(--color-red-200);
+  --button-danger-full-disabled-text: var(--color-red-50);
+  --button-danger-full-disabled-border: var(--color-red-200);
+  --button-danger-outlined-idle-background: rgba(253, 236, 242, 0);
+  --button-danger-outlined-idle-text: var(--color-red-600);
+  --button-danger-outlined-idle-border: var(--color-red-500);
+  --button-danger-outlined-hover-background: rgba(251, 196, 216, 0.5);
+  --button-danger-outlined-hover-text: var(--color-red-600);
+  --button-danger-outlined-hover-border: var(--color-red-500);
+  --button-danger-outlined-disabled-background: rgba(253, 236, 242, 0);
+  --button-danger-outlined-disabled-text: var(--color-red-300);
+  --button-danger-outlined-disabled-border: var(--color-red-100);
+  --button-danger-ghost-idle-background: rgba(253, 236, 242, 0);
+  --button-danger-ghost-idle-text: var(--color-red-600);
+  --button-danger-ghost-idle-border: rgba(248, 27, 108, 0);
+  --button-danger-ghost-hover-background: rgba(251, 196, 216, 0.5);
+  --button-danger-ghost-hover-text: var(--color-red-600);
+  --button-danger-ghost-hover-border: rgba(248, 27, 108, 0);
+  --button-danger-ghost-disabled-background: rgba(253, 236, 242, 0);
+  --button-danger-ghost-disabled-text: var(--color-red-300);
+  --button-danger-ghost-disabled-border: rgba(251, 196, 216, 0);
   --button-medium-with-text-padding-x: 10px;
   --button-medium-with-text-padding-y: 8px;
   --button-medium-with-text-gap: 8px;
@@ -454,4 +594,24 @@
   --carrousel-gap: 30px;
   --carrousel-padding-x: 26px;
   --carrousel-padding-y: 26px;
+  /* --select-* is hand-authored (no Figma "Select" component was ever
+     exported) — built from the real primitive color scales, not from
+     another component's tokens. The trigger deliberately looks like
+     Button's "primary outlined" variant (transparent background,
+     pink-bright border/text), rebuilt from the pink-bright primitive
+     scale rather than pointed at --button-primary-outlined-*. The
+     listbox background is deliberately lighter than the page's own dark
+     background in dark mode (an overlay needs to read as elevated). */
+  --select-trigger-hover-background: color-mix(in srgb, var(--color-pink-bright-700) 50%, transparent);
+  --select-trigger-text: var(--color-pink-bright-100);
+  --select-trigger-border: var(--color-pink-bright-100);
+  --select-listbox-background: var(--color-violet-700);
+  --select-listbox-border: var(--color-violet-500);
+  --select-option-text: var(--color-violet-50);
+  --select-option-selected-text: var(--color-pink-bright-200);
+  /* --alert-danger-* is hand-authored (no Figma "Alert" component was
+     ever exported) — built from the real "red" primitive scale. */
+  --alert-danger-background: var(--color-red-900);
+  --alert-danger-border: var(--color-red-400);
+  --alert-danger-text: var(--color-red-100);
 }
