@@ -1,20 +1,38 @@
 <script setup lang="ts">
 import { computed, onBeforeUnmount, onMounted, ref } from 'vue'
 import Icon from './Icon.vue'
-import type { SelectOption } from './select-types'
+import type { SelectOption } from '../../types/select'
+// Reusing Button's size type/tokens on purpose: a Select must line up at
+// the same height as a Button of the same size wherever they sit next to
+// each other (e.g. the Navbar), so they share one size vocabulary.
+import type { ButtonSize } from '../../types/button'
 
 const props = withDefaults(
   defineProps<{
     modelValue: string
     options: SelectOption[]
+    size?: ButtonSize
     ariaLabel?: string
     placeholder?: string
     disabled?: boolean
   }>(),
   {
+    size: 'medium',
     disabled: false,
   }
 )
+
+// Points --select-size-* at the matching Button size tokens (padding,
+// gap, font-size) — see Button.vue's tokenStyle for the same pattern.
+const sizeStyle = computed(() => {
+  const sizeSlot = `--button-${props.size}-with-text`
+  return {
+    '--select-padding-x': `var(${sizeSlot}-padding-x)`,
+    '--select-padding-y': `var(${sizeSlot}-padding-y)`,
+    '--select-gap': `var(${sizeSlot}-gap)`,
+    '--select-font-size': `var(--font-size-button-${props.size})`,
+  }
+})
 
 const emit = defineEmits<{ 'update:modelValue': [value: string] }>()
 
@@ -97,7 +115,7 @@ onBeforeUnmount(() => document.removeEventListener('click', onClickOutside))
 </script>
 
 <template>
-  <div ref="rootEl" class="select" :class="{ 'select--open': isOpen }">
+  <div ref="rootEl" class="select" :class="{ 'select--open': isOpen }" :style="sizeStyle">
     <button
       type="button"
       class="select__trigger"
@@ -111,7 +129,11 @@ onBeforeUnmount(() => document.removeEventListener('click', onClickOutside))
       @keydown="onTriggerKeydown"
     >
       <span class="select__value">{{ selectedOption?.label ?? placeholder }}</span>
-      <Icon name="arrow-right" size="small" class="select__arrow" />
+      <!-- Sized to exactly 1em via :deep() below (not the small/medium/large
+           scale): a content icon that size would make the trigger taller
+           than a same-size Button with no icon (Button's own height is
+           driven by line-height when it has no icon). -->
+      <Icon name="chevron-down" size="small" class="select__arrow" />
     </button>
 
     <ul v-if="isOpen" :id="listboxId" class="select__listbox" role="listbox">
@@ -141,30 +163,36 @@ onBeforeUnmount(() => document.removeEventListener('click', onClickOutside))
 }
 
 .select__trigger {
+  /* Same box model as a Button of the same size (padding tokens,
+     font-size, line-height, border width) so a Select sits at the same
+     height as a Button next to it — e.g. the theme switcher and the auth
+     buttons in the Navbar. --select-* set by sizeStyle in the script. */
   display: inline-flex;
   align-items: center;
-  gap: var(--space-2);
+  gap: var(--select-gap);
   min-width: 9rem;
-  padding: 0.5rem 0.75rem;
-  border: 1px solid var(--border);
-  border-radius: var(--radius-medium, 8px);
-  background: var(--bg);
-  color: var(--text-h);
-  font: inherit;
+  padding: var(--select-padding-y) var(--select-padding-x);
+  border: 1px solid var(--select-trigger-border);
+  border-radius: var(--radius-medium);
+  background: var(--select-trigger-background);
+  color: var(--select-trigger-text);
+  font-family: inherit;
+  font-size: var(--select-font-size);
+  font-weight: var(--font-weight-medium);
+  line-height: 1;
   cursor: pointer;
   transition:
-    border-color 0.15s ease,
+    background-color 0.15s ease,
     box-shadow 0.15s ease;
 }
 
 .select__trigger:hover:not(:disabled) {
-  border-color: var(--accent);
+  background: var(--select-trigger-hover-background);
 }
 
 .select__trigger:focus-visible {
   outline: none;
-  border-color: var(--accent);
-  box-shadow: 0 0 0 3px var(--accent-bg);
+  box-shadow: 0 0 0 3px var(--select-trigger-focus-ring);
 }
 
 .select__trigger:disabled {
@@ -178,17 +206,29 @@ onBeforeUnmount(() => document.removeEventListener('click', onClickOutside))
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+  font-family: inherit;
+  font-size: var(--select-font-size);
+  font-weight: var(--font-weight-medium);
+  line-height: 1;
 }
 
 .select__arrow {
   flex-shrink: 0;
-  color: var(--text);
-  transform: rotate(90deg);
+  color: var(--select-trigger-text);
   transition: transform 0.15s ease;
 }
 
+/* Overrides Icon's small/medium/large scale: sized relative to the
+   trigger's own font-size (1em) instead, so — combined with line-height:
+   1 above — the chevron never exceeds the text's line box and the
+   trigger ends up exactly as tall as a same-size Button with no icon. */
+.select__trigger :deep(.icon) {
+  width: 1em;
+  height: 1em;
+}
+
 .select--open .select__arrow {
-  transform: rotate(-90deg);
+  transform: rotate(180deg);
 }
 
 .select__listbox {
@@ -200,26 +240,26 @@ onBeforeUnmount(() => document.removeEventListener('click', onClickOutside))
   margin: 0;
   padding: 0.25rem;
   list-style: none;
-  border: 1px solid var(--border);
-  border-radius: var(--radius-medium, 8px);
-  background: var(--bg);
+  border: 1px solid var(--select-listbox-border);
+  border-radius: var(--radius-medium);
+  background: var(--select-listbox-background);
   box-shadow: var(--shadow);
 }
 
 .select__option {
   padding: 0.5rem 0.75rem;
-  border-radius: calc(var(--radius-medium, 8px) - 4px);
-  color: var(--text-h);
+  border-radius: calc(var(--radius-medium) - 0.25rem);
+  color: var(--select-option-text);
   white-space: nowrap;
   cursor: pointer;
 }
 
 .select__option--active {
-  background: var(--accent-bg);
+  background: var(--select-option-hover-background);
 }
 
 .select__option--selected {
-  color: var(--accent);
-  font-weight: var(--font-weight-medium, 500);
+  color: var(--select-option-selected-text);
+  font-weight: var(--font-weight-medium);
 }
 </style>

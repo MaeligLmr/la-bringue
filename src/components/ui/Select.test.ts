@@ -100,6 +100,19 @@ describe('Select', () => {
     wrapper.unmount()
   })
 
+  it('pointe la taille (padding/police) vers les tokens Button correspondants', () => {
+    const wrapper = mount(Select, {
+      props: { modelValue: 'system', options: OPTIONS, size: 'large' },
+      attachTo: document.body,
+    })
+
+    const style = wrapper.attributes('style') ?? ''
+    expect(style).toContain('var(--button-large-with-text-padding-x)')
+    expect(style).toContain('var(--font-size-button-large)')
+
+    wrapper.unmount()
+  })
+
   it('disabled empêche l\'ouverture', async () => {
     const wrapper = mount(Select, {
       props: { modelValue: 'system', options: OPTIONS, disabled: true },
