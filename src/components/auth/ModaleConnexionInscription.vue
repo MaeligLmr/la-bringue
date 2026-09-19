@@ -4,6 +4,7 @@ import { useAuthModal } from '../../composables/useAuthModal'
 import { useFocusTrap } from '../../composables/useFocusTrap'
 import LoginForm from './LoginForm.vue'
 import SignUpForm from './SignUpForm.vue'
+import Button from '../ui/Button.vue'
 
 const { isOpen, activeView, close, switchTo } = useAuthModal()
 
@@ -23,7 +24,15 @@ watch(isOpen, async (open) => {
   <Teleport to="body">
     <div v-if="isOpen" class="auth-modal__backdrop" @click.self="close" @keydown.esc="close">
       <div ref="dialogEl" class="auth-modal__dialog" role="dialog" aria-modal="true" aria-labelledby="auth-modal-title">
-        <button type="button" class="auth-modal__close" aria-label="Fermer" @click="close">×</button>
+        <Button
+          type="button"
+          color="secondary"
+          variant="ghost"
+          icon-only="close"
+          label="Fermer"
+          class="auth-modal__close"
+          @click="close"
+        />
         <h2 id="auth-modal-title">{{ activeView === 'login' ? 'Se connecter' : 'Créer un compte' }}</h2>
 
         <LoginForm
@@ -74,11 +83,5 @@ watch(isOpen, async (open) => {
   position: absolute;
   top: 0.5rem;
   right: 0.5rem;
-  border: none;
-  background: none;
-  font-size: 1.5rem;
-  line-height: 1;
-  cursor: pointer;
-  color: var(--text-h);
 }
 </style>

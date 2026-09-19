@@ -81,7 +81,7 @@ describe('LoginForm', () => {
     await wrapper.find('#login-password').setValue('password123')
     await wrapper.find('form').trigger('submit')
 
-    const button = wrapper.find('.auth-form__submit')
+    const button = wrapper.find('button[type="submit"]')
     expect(button.attributes('disabled')).toBeDefined()
     expect(button.text()).toContain('Connexion en cours')
 
@@ -109,7 +109,7 @@ describe('LoginForm', () => {
 
   it('émet "switch" au clic sur le lien de bascule', async () => {
     const wrapper = mount(LoginForm)
-    await wrapper.find('.auth-form__switch').trigger('click')
+    await wrapper.find('button[type="button"]').trigger('click')
     expect(wrapper.emitted('switch')).toBeTruthy()
   })
 

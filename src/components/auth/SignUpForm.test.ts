@@ -68,7 +68,7 @@ describe('SignUpForm', () => {
     await wrapper.find('#signup-password').setValue('password123')
     await wrapper.find('form').trigger('submit')
 
-    const button = wrapper.find('.auth-form__submit')
+    const button = wrapper.find('button[type="submit"]')
     expect(button.attributes('disabled')).toBeDefined()
     expect(button.text()).toContain('Création en cours')
   })
@@ -100,7 +100,7 @@ describe('SignUpForm', () => {
 
     expect(wrapper.text()).toContain('alice@example.com')
     expect(wrapper.emitted('success')).toBeFalsy()
-    expect(document.activeElement).toBe(wrapper.find('.auth-form__switch').element)
+    expect(document.activeElement).toBe(wrapper.find('button[type="button"]').element)
 
     wrapper.unmount()
   })

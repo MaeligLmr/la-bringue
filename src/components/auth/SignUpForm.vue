@@ -4,6 +4,7 @@ import { supabase } from '../../supabase.js'
 import { validateSignupFields, type FieldErrors } from '../../lib/auth-validation'
 import { mapAuthError, isObfuscatedDuplicateSignup, EMAIL_ALREADY_USED_MESSAGE } from '../../lib/auth-errors'
 import { withTimeout } from '../../lib/with-timeout'
+import Button from '../ui/Button.vue'
 
 const emit = defineEmits<{ switch: []; success: [] }>()
 
@@ -16,7 +17,7 @@ const confirmationSent = ref(false)
 
 const emailInputEl = ref<HTMLInputElement | null>(null)
 const passwordInputEl = ref<HTMLInputElement | null>(null)
-const confirmationSwitchEl = ref<HTMLButtonElement | null>(null)
+const confirmationSwitchEl = ref<{ focus: () => void } | null>(null)
 
 function focusFirstField() {
   if (confirmationSent.value) confirmationSwitchEl.value?.focus()
@@ -88,14 +89,16 @@ async function handleSubmit() {
       Compte créé ! Vérifie ta boîte mail (<strong>{{ email }}</strong>) et clique sur le lien de
       confirmation avant de te connecter.
     </p>
-    <button
+    <Button
       ref="confirmationSwitchEl"
       type="button"
+      color="primary"
+      variant="ghost"
       class="auth-form__switch"
       @click="emit('switch')"
     >
       Aller à la connexion
-    </button>
+    </Button>
   </div>
 
   <form v-else class="auth-form" novalidate @submit.prevent="handleSubmit">
@@ -135,13 +138,25 @@ async function handleSubmit() {
       </p>
     </div>
 
-    <button type="submit" class="auth-form__submit" :disabled="isSubmitting">
+    <Button
+      type="submit"
+      color="primary"
+      variant="full"
+      class="auth-form__submit"
+      :disabled="isSubmitting"
+    >
       {{ isSubmitting ? 'Création en cours…' : 'Créer un compte' }}
-    </button>
+    </Button>
 
-    <button type="button" class="auth-form__switch" @click="emit('switch')">
+    <Button
+      type="button"
+      color="primary"
+      variant="ghost"
+      class="auth-form__switch"
+      @click="emit('switch')"
+    >
       Déjà un compte ? Se connecter
-    </button>
+    </Button>
   </form>
 </template>
 
@@ -169,43 +184,19 @@ async function handleSubmit() {
 }
 
 .auth-form__field input[aria-invalid='true'] {
-  border-color: #d33;
+  border-color: var(--alert-danger-border);
 }
 
 .auth-form__error {
   margin: 0;
-  color: #d33;
+  color: var(--alert-danger-text);
   font-size: 0.85em;
 }
 
 .auth-form__error--general {
-  padding: 0.5rem;
-  border: 1px solid #d33;
-  border-radius: 4px;
-}
-
-.auth-form__submit {
-  padding: 0.6rem;
-  border: none;
-  border-radius: 4px;
-  background: var(--accent);
-  color: #fff;
-  font: inherit;
-  cursor: pointer;
-}
-
-.auth-form__submit:disabled {
-  opacity: 0.6;
-  cursor: not-allowed;
-}
-
-.auth-form__switch {
-  background: none;
-  border: none;
-  color: var(--accent);
-  text-decoration: underline;
-  cursor: pointer;
-  font: inherit;
-  padding: 0;
+  padding: var(--space-3) var(--space-4);
+  border: 1px solid var(--alert-danger-border);
+  border-radius: var(--radius-medium);
+  background: var(--alert-danger-background);
 }
 </style>
