@@ -25,12 +25,13 @@ function onThemeChange(value: string) {
     <nav class="navbar__actions">
       <Select
         aria-label="Thème"
+        size="large"
         :model-value="preference"
         :options="THEME_OPTIONS"
         @update:model-value="onThemeChange"
       />
-      <Button color="primary" variant="outlined" @click="open('login')">Se connecter</Button>
-      <Button color="primary" variant="full" @click="open('signup')">Créer un compte</Button>
+      <Button color="primary" size="large" variant="outlined" @click="open('login')">Se connecter</Button>
+      <Button color="primary" size="large" variant="full" @click="open('signup')">Créer un compte</Button>
     </nav>
   </header>
 </template>
