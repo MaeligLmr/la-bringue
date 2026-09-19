@@ -2,12 +2,20 @@
 import { useAuthModal } from '../../composables/useAuthModal'
 import { useTheme } from '../../composables/useTheme'
 import type { ThemePreference } from '../../composables/useTheme'
+import Button from '../ui/Button.vue'
+import Select from '../ui/Select.vue'
 
 const { open } = useAuthModal()
 const { preference, setPreference } = useTheme()
 
-function onThemeChange(event: Event) {
-  setPreference((event.target as HTMLSelectElement).value as ThemePreference)
+const THEME_OPTIONS: { value: ThemePreference; label: string }[] = [
+  { value: 'system', label: 'Par défaut' },
+  { value: 'light', label: 'Clair' },
+  { value: 'dark', label: 'Sombre' },
+]
+
+function onThemeChange(value: string) {
+  setPreference(value as ThemePreference)
 }
 </script>
 
@@ -15,18 +23,14 @@ function onThemeChange(event: Event) {
   <header class="navbar">
     <span class="navbar__brand">La Bringue</span>
     <nav class="navbar__actions">
-      <select
-        class="navbar__theme-select"
+      <Select
         aria-label="Thème"
-        :value="preference"
-        @change="onThemeChange"
-      >
-        <option value="system">Par défaut</option>
-        <option value="light">Clair</option>
-        <option value="dark">Sombre</option>
-      </select>
-      <button type="button" @click="open('login')">Se connecter</button>
-      <button type="button" @click="open('signup')">Créer un compte</button>
+        :model-value="preference"
+        :options="THEME_OPTIONS"
+        @update:model-value="onThemeChange"
+      />
+      <Button color="primary" variant="outlined" @click="open('login')">Se connecter</Button>
+      <Button color="primary" variant="full" @click="open('signup')">Créer un compte</Button>
     </nav>
   </header>
 </template>
@@ -47,26 +51,7 @@ function onThemeChange(event: Event) {
 
 .navbar__actions {
   display: flex;
+  align-items: center;
   gap: 0.5rem;
-}
-
-.navbar__actions button {
-  padding: 0.5rem 1rem;
-  border: 1px solid var(--border);
-  border-radius: 4px;
-  background: var(--bg);
-  color: var(--text-h);
-  font: inherit;
-  cursor: pointer;
-}
-
-.navbar__theme-select {
-  padding: 0.5rem 1rem;
-  border: 1px solid var(--border);
-  border-radius: 4px;
-  background: var(--bg);
-  color: var(--text-h);
-  font: inherit;
-  cursor: pointer;
 }
 </style>
