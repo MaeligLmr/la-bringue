@@ -1,8 +1,8 @@
 <script setup lang="ts">
-import { computed } from 'vue'
+import { computed, ref } from 'vue'
 import Icon from './Icon.vue'
-import type { IconName, IconSize } from './icon-names'
-import type { ButtonColor, ButtonVariant, ButtonSize } from './button-types'
+import type { IconName, IconSize } from '../../types/icon'
+import type { ButtonColor, ButtonVariant, ButtonSize } from '../../types/button'
 
 const props = withDefaults(
   defineProps<{
@@ -33,11 +33,17 @@ if (import.meta.env.DEV && props.iconOnly && !props.label) {
 
 const iconSize = computed<IconSize>(() => (props.size === 'large' ? 'large' : 'medium'))
 
+const buttonEl = ref<HTMLButtonElement | null>(null)
+defineExpose({
+  /** Programmatically focus this button — e.g. `buttonRef.value?.focus()`. */
+  focus: () => buttonEl.value?.focus(),
+})
+
 // Points this button's local --btn-* custom properties at the right set
 // of design tokens for its color/variant/size, instead of hand-writing a
 // CSS rule for every color × variant × state combination — see
-// src/styles/tokens/theme.css (--button-{color}-{variant}-{state}-{prop})
-// and src/styles/tokens/placeholders.css (--button-danger-*).
+// src/styles/tokens/theme.css (--button-{color}-{variant}-{state}-{prop},
+// including the hand-authored --button-danger-* block).
 const tokenStyle = computed(() => {
   const colorVariant = `--button-${props.color}-${props.variant}`
   const sizeSlot = `--button-${props.size}-${props.iconOnly ? 'icon-only' : 'with-text'}`
@@ -60,6 +66,7 @@ const tokenStyle = computed(() => {
 
 <template>
   <button
+    ref="buttonEl"
     :type="type"
     class="button"
     :class="[`button--${size}`, { 'button--icon-only': !!iconOnly }]"
@@ -87,7 +94,7 @@ const tokenStyle = computed(() => {
   border-radius: var(--button-radius);
   background: var(--btn-idle-bg);
   color: var(--btn-idle-text);
-  font: inherit;
+  font-family: inherit;
   font-weight: var(--font-weight-medium);
   line-height: 1;
   cursor: pointer;

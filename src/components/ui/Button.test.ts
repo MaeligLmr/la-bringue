@@ -33,11 +33,11 @@ describe('Button', () => {
     expect(wrapper.attributes('disabled')).toBeDefined()
   })
 
-  it("affiche seulement l'icône en mode icon-only, avec un aria-label", () => {
+  it("affiche seulement l'icône en mode icon-only, avec un aria-label", async () => {
     const wrapper = mount(Button, { props: { iconOnly: 'heart', label: 'Ajouter aux favoris' } })
 
     expect(wrapper.text()).toBe('')
-    expect(wrapper.find('svg').exists()).toBe(true)
+    await vi.waitFor(() => expect(wrapper.find('svg').exists()).toBe(true))
     expect(wrapper.attributes('aria-label')).toBe('Ajouter aux favoris')
   })
 
