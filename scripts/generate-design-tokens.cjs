@@ -144,11 +144,7 @@ function buildPrimitives() {
   const data = readJSON(path.join(COLLECTIONS, "Primitive Colors", "Mode 1.tokens.json"));
   const lines = [];
   walk(data, ["color"], (segs, node) => emitLeaf(lines, segs, node));
-  return `/* AUTO-GENERATED from Collections/Primitive Colors/Mode 1.tokens.json — do not edit by hand. */
-/* Raw color scales exported from Figma. Prefer the semantic tokens in
-   theme.css for actual UI colors; use these only when adding a new
-   semantic token or a one-off that has no semantic equivalent yet. */
-:root {
+  return `:root {
 ${lines.join("\n")}
 }
 `;
@@ -160,8 +156,7 @@ function buildSizes() {
   const data = readJSON(path.join(COLLECTIONS, "Sizes", "Mode 1.tokens.json"));
   const lines = [];
   walk(data, ["space"], (segs, node) => emitLeaf(lines, segs, node));
-  return `/* AUTO-GENERATED from Collections/Sizes/Mode 1.tokens.json — do not edit by hand. */
-:root {
+  return `:root {
 ${lines.join("\n")}
 }
 `;
@@ -214,12 +209,8 @@ function buildTypography() {
     ([slug, num]) => `  --font-weight-${slug}: ${num};`
   );
 
-  return `/* AUTO-GENERATED from Collections/Typography/Desktop.tokens.json — do not edit by hand. */
-:root {
+  return `:root {
 ${lines.join("\n")}
-
-  /* Numeric CSS font-weight equivalents of the Figma style names above.
-     --font-weight-black-italic also requires font-style: italic. */
 ${weightLines.join("\n")}
 }
 `;
@@ -261,19 +252,7 @@ function buildThemeFile() {
     ...ALERT_TOKEN_LINES.dark,
   ];
 
-  return `/* Semantic, component-level tokens (buttons, cards, tags, hero section...).
-   Light values are the default; dark values apply automatically by OS
-   preference, or by setting data-theme="dark" on <html> (and vice versa
-   for a forced light theme on a dark OS).
-
-   Most of this file is AUTO-GENERATED from
-   Collections/Design tokens/{Clair,Sombre}.tokens.json by
-   scripts/generate-design-tokens.cjs — do not hand-edit those parts.
-   --button-danger-*, --select-* and --alert-danger-* are the exceptions:
-   they're hand-authored (see the comment above each block) and re-added
-   by that same script on every regeneration, so they survive it. */
-
-:root {
+  return `:root {
 ${withDanger.join("\n")}
 }
 
@@ -298,9 +277,6 @@ ${darkWithDanger.join("\n")}
 // re-adding on every regeneration since the rest of this file is
 // rebuilt from scratch each time.
 const DANGER_TOKEN_LINES = [
-  "/* --button-danger-* is hand-authored (no Button.Danger group in the",
-  '   Figma export) — built from the real "red" primitive scale using',
-  "   the same idle/hover/disabled formula as --button-info-* above. */",
   "--button-danger-full-idle-background: var(--color-red-500);",
   "--button-danger-full-idle-text: var(--color-red-50);",
   "--button-danger-full-idle-border: var(--color-red-500);",
@@ -344,38 +320,31 @@ function insertDangerTokens(lines) {
 // looks like Button's "primary outlined" variant (transparent
 // background, pink-bright border/text), rebuilt from the pink-bright
 // primitive scale rather than pointed at --button-primary-outlined-*.
-// The listbox background is deliberately lighter than the page's own
-// dark background in dark mode (an overlay needs to read as elevated,
-// not blend into or go even darker than the page).
+// The listbox background matches Main.Background/Main.Color's actual
+// values (pink-50 light, pink-bright-900 dark — Main happens to draw
+// from a different primitive per mode) so the dropdown surface reads as
+// part of the same page; border/text lean on pink-bright (the accent
+// scale) for enough contrast against that background.
 const SELECT_TOKEN_LINES = {
   light: [
-    '/* --select-* is hand-authored (no Figma "Select" component was ever',
-    "   exported) — built from the real primitive color scales, not from",
-    "   another component's tokens. The trigger deliberately looks like",
-    '   Button\'s "primary outlined" variant (transparent background,',
-    "   pink-bright border/text), rebuilt from the pink-bright primitive",
-    "   scale rather than pointed at --button-primary-outlined-*. The",
-    "   listbox background is deliberately lighter than the page's own dark",
-    "   background in dark mode (an overlay needs to read as elevated). */",
     "--select-trigger-background: transparent;",
     "--select-trigger-hover-background: color-mix(in srgb, var(--color-pink-bright-100) 50%, transparent);",
     "--select-trigger-text: var(--color-pink-bright-600);",
     "--select-trigger-border: var(--color-pink-bright-500);",
     "--select-trigger-focus-ring: color-mix(in srgb, var(--select-trigger-border) 20%, transparent);",
-    "--select-listbox-background: var(--color-violet-50);",
-    "--select-listbox-border: var(--color-violet-200);",
-    "--select-option-text: var(--color-violet-900);",
+    "--select-listbox-background: var(--color-pink-50);",
+    "--select-listbox-border: var(--color-pink-bright-400);",
+    "--select-option-text: var(--color-pink-bright-900);",
     "--select-option-hover-background: color-mix(in srgb, var(--color-pink-bright-500) 12%, transparent);",
     "--select-option-selected-text: var(--color-pink-bright-600);",
   ],
   dark: [
-    '/* --select-* is hand-authored — see the light block above. */',
     "--select-trigger-hover-background: color-mix(in srgb, var(--color-pink-bright-700) 50%, transparent);",
     "--select-trigger-text: var(--color-pink-bright-100);",
     "--select-trigger-border: var(--color-pink-bright-100);",
-    "--select-listbox-background: var(--color-violet-700);",
-    "--select-listbox-border: var(--color-violet-500);",
-    "--select-option-text: var(--color-violet-50);",
+    "--select-listbox-background: var(--color-pink-bright-900);",
+    "--select-listbox-border: var(--color-pink-bright-100);",
+    "--select-option-text: var(--color-pink-bright-100);",
     "--select-option-selected-text: var(--color-pink-bright-200);",
   ],
 };
@@ -385,14 +354,11 @@ const SELECT_TOKEN_LINES = {
 // messages (see LoginForm.vue, SignUpForm.vue).
 const ALERT_TOKEN_LINES = {
   light: [
-    '/* --alert-danger-* is hand-authored (no Figma "Alert" component was',
-    '   ever exported) — built from the real "red" primitive scale. */',
     "--alert-danger-background: var(--color-red-50);",
     "--alert-danger-border: var(--color-red-500);",
     "--alert-danger-text: var(--color-red-700);",
   ],
   dark: [
-    "/* --alert-danger-* is hand-authored — see the light block above. */",
     "--alert-danger-background: var(--color-red-900);",
     "--alert-danger-border: var(--color-red-400);",
     "--alert-danger-text: var(--color-red-100);",
@@ -417,13 +383,7 @@ for (const [name, content] of Object.entries(files)) {
 
 fs.writeFileSync(
   path.join(OUT_DIR, "index.css"),
-  `/* Entry point — imports all design-token layers in order. primitives.css,
-   sizes.css and typography.css are AUTO-GENERATED by
-   scripts/generate-design-tokens.cjs. theme.css is mostly generated too,
-   except its --button-danger-*, --select-* and --alert-danger-* blocks,
-   which are hand-authored (see the comments at their top) and re-added
-   by that same script on every regeneration. */
-@import "./primitives.css";
+  `@import "./primitives.css";
 @import "./sizes.css";
 @import "./typography.css";
 @import "./theme.css";

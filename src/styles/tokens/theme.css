@@ -87,7 +87,6 @@
   --button-info-ghost-disabled-background: rgba(240, 247, 250, 0);
   --button-info-ghost-disabled-text: #92C7DD;
   --button-info-ghost-disabled-border: rgba(209, 231, 240, 0);
-  
   --button-danger-full-idle-background: var(--color-red-500);
   --button-danger-full-idle-text: var(--color-red-50);
   --button-danger-full-idle-border: var(--color-red-500);
@@ -174,18 +173,16 @@
   --carrousel-gap: 1.875rem;
   --carrousel-padding-x: 1.625rem;
   --carrousel-padding-y: 1.625rem;
-  
   --select-trigger-background: transparent;
   --select-trigger-hover-background: color-mix(in srgb, var(--color-pink-bright-100) 50%, transparent);
   --select-trigger-text: var(--color-pink-bright-600);
   --select-trigger-border: var(--color-pink-bright-500);
   --select-trigger-focus-ring: color-mix(in srgb, var(--select-trigger-border) 20%, transparent);
-  --select-listbox-background: var(--color-violet-50);
-  --select-listbox-border: var(--color-violet-200);
-  --select-option-text: var(--color-violet-900);
+  --select-listbox-background: var(--color-pink-50);
+  --select-listbox-border: var(--color-pink-bright-400);
+  --select-option-text: var(--color-pink-bright-900);
   --select-option-hover-background: color-mix(in srgb, var(--color-pink-bright-500) 12%, transparent);
   --select-option-selected-text: var(--color-pink-bright-600);
-  
   --alert-danger-background: var(--color-red-50);
   --alert-danger-border: var(--color-red-500);
   --alert-danger-text: var(--color-red-700);
@@ -280,7 +277,6 @@
     --button-info-ghost-disabled-background: rgba(240, 247, 250, 0);
     --button-info-ghost-disabled-text: #92C7DD;
     --button-info-ghost-disabled-border: rgba(209, 231, 240, 0);
-    
     --button-danger-full-idle-background: var(--color-red-500);
     --button-danger-full-idle-text: var(--color-red-50);
     --button-danger-full-idle-border: var(--color-red-500);
@@ -367,15 +363,13 @@
     --carrousel-gap: 1.875rem;
     --carrousel-padding-x: 1.625rem;
     --carrousel-padding-y: 1.625rem;
-    
     --select-trigger-hover-background: color-mix(in srgb, var(--color-pink-bright-700) 50%, transparent);
     --select-trigger-text: var(--color-pink-bright-100);
     --select-trigger-border: var(--color-pink-bright-100);
-    --select-listbox-background: var(--color-violet-700);
-    --select-listbox-border: var(--color-violet-500);
-    --select-option-text: var(--color-violet-50);
+    --select-listbox-background: var(--color-pink-bright-900);
+    --select-listbox-border: var(--color-pink-bright-100);
+    --select-option-text: var(--color-pink-bright-100);
     --select-option-selected-text: var(--color-pink-bright-200);
-    
     --alert-danger-background: var(--color-red-900);
     --alert-danger-border: var(--color-red-400);
     --alert-danger-text: var(--color-red-100);
@@ -470,7 +464,6 @@
   --button-info-ghost-disabled-background: rgba(240, 247, 250, 0);
   --button-info-ghost-disabled-text: #92C7DD;
   --button-info-ghost-disabled-border: rgba(209, 231, 240, 0);
-  
   --button-danger-full-idle-background: var(--color-red-500);
   --button-danger-full-idle-text: var(--color-red-50);
   --button-danger-full-idle-border: var(--color-red-500);
@@ -557,15 +550,13 @@
   --carrousel-gap: 1.875rem;
   --carrousel-padding-x: 1.625rem;
   --carrousel-padding-y: 1.625rem;
-  
   --select-trigger-hover-background: color-mix(in srgb, var(--color-pink-bright-700) 50%, transparent);
   --select-trigger-text: var(--color-pink-bright-100);
   --select-trigger-border: var(--color-pink-bright-100);
-  --select-listbox-background: var(--color-violet-700);
-  --select-listbox-border: var(--color-violet-500);
-  --select-option-text: var(--color-violet-50);
+  --select-listbox-background: var(--color-pink-bright-900);
+  --select-listbox-border: var(--color-pink-bright-100);
+  --select-option-text: var(--color-pink-bright-100);
   --select-option-selected-text: var(--color-pink-bright-200);
-  
   --alert-danger-background: var(--color-red-900);
   --alert-danger-border: var(--color-red-400);
   --alert-danger-text: var(--color-red-100);
