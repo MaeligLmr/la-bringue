@@ -1,8 +1,7 @@
-// The set of icons available through <Icon name="..." />, matching the
-// Figma "Icons" component page. Generic UI icons are rendered via
-// @lucide/vue; the four social/brand icons have no equivalent in that
-// library (Lucide dropped brand logos) and are hand-authored SVGs under
-// ./brand-icons/.
+// The set of icons available through <Icon name="..." />, lazy-loaded
+// from the raw SVGs in src/assets/icons/ (see Icon.vue's FILENAME_BY_ICON
+// for the name -> file mapping, needed since filenames don't all match
+// these names one-to-one).
 export const ICON_NAMES = [
   'user',
   'heart',
@@ -29,6 +28,12 @@ export const ICON_NAMES = [
   'search',
   'filter',
   'filter-filled',
+  // Not part of the Figma export (no chevron/close in the "Icons" page) —
+  // added for UI affordances. "close" reuses the "plus" glyph rotated 45°
+  // (a perfect X, since plus.svg is a symmetric cross) rather than a new
+  // hand-drawn SVG — see Icon.vue.
+  'chevron-down',
+  'close',
 ] as const
 
 export type IconName = (typeof ICON_NAMES)[number]

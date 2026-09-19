@@ -1,78 +1,103 @@
 <script setup lang="ts">
-import { computed } from 'vue'
-import type { IconName, IconSize } from './icon-names'
-
-// Raw SVG markup exported from Figma (src/assets/icons/ — originally
-// dropped in public/assets/icons/, moved here so Vite can inline them:
-// files under public/ can't be imported as modules, and inlining is what
-// lets fill="currentColor" pick up the surrounding text color). Two
-// filenames keep source typos (arrow-rigth, prohibided) — this map is the
-// only place that needs to know about them.
-import user from '../../assets/icons/user.svg?raw'
-import heart from '../../assets/icons/heart-empty.svg?raw'
-import heartFilled from '../../assets/icons/heart-filled.svg?raw'
-import share from '../../assets/icons/share.svg?raw'
-import menu from '../../assets/icons/burger.svg?raw'
-import check from '../../assets/icons/check.svg?raw'
-import ticket from '../../assets/icons/ticket.svg?raw'
-import instagram from '../../assets/icons/insta.svg?raw'
-import facebook from '../../assets/icons/facebook.svg?raw'
-import whatsapp from '../../assets/icons/whatsapp.svg?raw'
-import tiktok from '../../assets/icons/tiktok.svg?raw'
-import arrowRight from '../../assets/icons/arrow-rigth.svg?raw'
-import arrowLeft from '../../assets/icons/arrow-left.svg?raw'
-import eye from '../../assets/icons/eye-open.svg?raw'
-import eyeOff from '../../assets/icons/eye-closed.svg?raw'
-import settings from '../../assets/icons/cog.svg?raw'
-import map from '../../assets/icons/map.svg?raw'
-import edit from '../../assets/icons/pen.svg?raw'
-import ban from '../../assets/icons/prohibided.svg?raw'
-import cart from '../../assets/icons/cart.svg?raw'
-import plus from '../../assets/icons/plus.svg?raw'
-import minus from '../../assets/icons/minus.svg?raw'
-import search from '../../assets/icons/search.svg?raw'
-import filter from '../../assets/icons/filter-empty.svg?raw'
-import filterFilled from '../../assets/icons/filter-filled.svg?raw'
+import { ref, watchEffect } from 'vue'
+import type { IconName, IconSize } from '../../types/icon'
 
 const props = withDefaults(defineProps<{ name: IconName; size?: IconSize }>(), {
   size: 'medium',
 })
 
-const REGISTRY: Record<IconName, string> = {
-  user,
-  heart,
-  'heart-filled': heartFilled,
-  share,
-  menu,
-  check,
-  ticket,
-  instagram,
-  facebook,
-  whatsapp,
-  tiktok,
-  'arrow-right': arrowRight,
-  'arrow-left': arrowLeft,
-  eye,
-  'eye-off': eyeOff,
-  settings,
-  map,
-  edit,
-  ban,
-  cart,
-  plus,
-  minus,
-  search,
-  filter,
-  'filter-filled': filterFilled,
+// Lazy: each SVG becomes its own chunk, fetched only the first time that
+// icon is actually rendered, instead of bundling all of them into every
+// page that uses <Icon> for even one icon. (Figma exports live in
+// src/assets/icons/ — files under public/ can't be imported as modules,
+// and inlining raw markup is what lets fill="currentColor" pick up the
+// surrounding text color.)
+const iconModules = import.meta.glob('../../assets/icons/*.svg', {
+  query: '?raw',
+  import: 'default',
+}) as Record<string, () => Promise<string>>
+
+const loaderByFilename: Record<string, () => Promise<string>> = {}
+for (const [filePath, loader] of Object.entries(iconModules)) {
+  loaderByFilename[filePath.split('/').pop()!] = loader
 }
+
+// Two filenames keep source typos (arrow-rigth, prohibided) — this map is
+// the only place that needs to know about them.
+const FILENAME_BY_ICON: Record<IconName, string> = {
+  user: 'user.svg',
+  heart: 'heart-empty.svg',
+  'heart-filled': 'heart-filled.svg',
+  share: 'share.svg',
+  menu: 'burger.svg',
+  check: 'check.svg',
+  ticket: 'ticket.svg',
+  instagram: 'insta.svg',
+  facebook: 'facebook.svg',
+  whatsapp: 'whatsapp.svg',
+  tiktok: 'tiktok.svg',
+  'arrow-right': 'arrow-rigth.svg',
+  'arrow-left': 'arrow-left.svg',
+  eye: 'eye-open.svg',
+  'eye-off': 'eye-closed.svg',
+  settings: 'cog.svg',
+  map: 'map.svg',
+  edit: 'pen.svg',
+  ban: 'prohibided.svg',
+  cart: 'cart.svg',
+  plus: 'plus.svg',
+  minus: 'minus.svg',
+  search: 'search.svg',
+  filter: 'filter-empty.svg',
+  'filter-filled': 'filter-filled.svg',
+  'chevron-down': 'chevron-down.svg',
+  // Reuses "plus" rotated 45° below — plus.svg is a symmetric cross, so
+  // the rotation produces a perfect X with no separate SVG needed.
+  close: 'plus.svg',
+}
+
+const ROTATE_45: ReadonlySet<IconName> = new Set(['close'])
+
+// Loaded icons stay cached (module-level, shared by every <Icon>
+// instance) so switching back to a previously-shown icon, or mounting a
+// second instance of the same one, doesn't re-fetch its chunk.
+const cache = new Map<string, string>()
 
 // Rendered via v-html in the template — safe here since this is static,
 // build-time SVG content, never user input.
-const markup = computed(() => REGISTRY[props.name])
+const markup = ref('')
+
+watchEffect(() => {
+  const filename = FILENAME_BY_ICON[props.name]
+  const cached = cache.get(filename)
+  if (cached !== undefined) {
+    markup.value = cached
+    return
+  }
+
+  const loader = loaderByFilename[filename]
+  if (!loader) {
+    markup.value = ''
+    return
+  }
+
+  const requestedFilename = filename
+  loader().then((content) => {
+    cache.set(requestedFilename, content)
+    // Guard against a fast prop change resolving out of order: only
+    // apply this result if it's still the icon actually requested.
+    if (FILENAME_BY_ICON[props.name] === requestedFilename) markup.value = content
+  })
+})
 </script>
 
 <template>
-  <span class="icon" :class="`icon--${size}`" aria-hidden="true" v-html="markup" />
+  <span
+    class="icon"
+    :class="[`icon--${size}`, { 'icon--rotate-45': ROTATE_45.has(name) }]"
+    aria-hidden="true"
+    v-html="markup"
+  />
 </template>
 
 <style scoped>
@@ -103,5 +128,9 @@ const markup = computed(() => REGISTRY[props.name])
 .icon--large {
   width: var(--icon-large-width);
   height: var(--icon-large-height);
+}
+
+.icon--rotate-45 {
+  transform: rotate(45deg);
 }
 </style>
