@@ -1,0 +1,61 @@
+/* AUTO-GENERATED from Collections/Primitive Colors/Mode 1.tokens.json — do not edit by hand. */
+/* Raw color scales exported from Figma. Prefer the semantic tokens in
+   theme.css for actual UI colors; use these only when adding a new
+   semantic token or a one-off that has no semantic equivalent yet. */
+:root {
+  --color-blue-50: #F0F7FA;
+  --color-blue-100: #D1E7F0;
+  --color-blue-200: #B2D6E6;
+  --color-blue-300: #92C7DD;
+  --color-blue-500: #4CA3C8;
+  --color-blue-600: #3689AC;
+  --color-blue-700: #2B6A85;
+  --color-blue-800: #1F4C5F;
+  --color-blue-900: #132D39;
+  --color-blue-950: #070F13;
+  --color-blue-400: #72B7D5;
+  --color-violet-50: #F6F3F7;
+  --color-violet-100: #E4DDE8;
+  --color-violet-200: #D3C7D9;
+  --color-violet-300: #C2B1CA;
+  --color-violet-500: #997BA6;
+  --color-violet-600: #7F5F8D;
+  --color-violet-700: #634A6D;
+  --color-violet-800: #46354E;
+  --color-violet-900: #2A202E;
+  --color-violet-950: #0E0A0F;
+  --color-violet-400: #B29ABC;
+  --color-pink-50: #FAF0F4;
+  --color-pink-100: #F1D4E1;
+  --color-pink-200: #E8B8CD;
+  --color-pink-300: #E09BBA;
+  --color-pink-500: #CB568B;
+  --color-pink-600: #B43870;
+  --color-pink-700: #8B2D57;
+  --color-pink-800: #62203E;
+  --color-pink-900: #3A1425;
+  --color-pink-950: #13070C;
+  --color-pink-400: #D87DA6;
+  --color-pink-bright-50: #FCEEF5;
+  --color-pink-bright-100: #F7C9E1;
+  --color-pink-bright-200: #F2A4CE;
+  --color-pink-bright-300: #ED7FBA;
+  --color-pink-bright-400: #EA59A6;
+  --color-pink-bright-600: #CC1A79;
+  --color-pink-bright-700: #9D165E;
+  --color-pink-bright-800: #6F1043;
+  --color-pink-bright-900: #420A28;
+  --color-pink-bright-950: #16040D;
+  --color-pink-bright-500: #E73292;
+  --color-red-50: #FDECF2;
+  --color-red-100: #FBC4D8;
+  --color-red-200: #F99BBD;
+  --color-red-300: #F871A3;
+  --color-red-400: #F74788;
+  --color-red-600: #D90955;
+  --color-red-700: #A70943;
+  --color-red-800: #760730;
+  --color-red-900: #46051D;
+  --color-red-950: #18020A;
+  --color-red-500: #F81B6C;
+}

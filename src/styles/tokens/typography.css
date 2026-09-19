@@ -1,0 +1,71 @@
+/* AUTO-GENERATED from Collections/Typography/{Desktop,Phone}.tokens.json — do not edit by hand. */
+:root {
+  --font-family-body: "Instrument Sans";
+  --font-family-hero: "Alumni Sans Collegiate One";
+  --font-family-headings-summer: "Summer Energy";
+  --font-family-headings-2000: "Science Gothic";
+  --font-family-headings-chrome: "IntraNet";
+  --font-family-headings-soft: "Various DEMO";
+  --font-family-headings-root: "Bowlby One";
+  --font-size-hero: 150px;
+  --font-size-heading-1: 50px;
+  --font-size-heading-2: 32px;
+  --font-size-heading-3: 24px;
+  --font-size-large: 18px;
+  --font-size-medium: 16px;
+  --font-size-small: 14px;
+  --font-size-label: 12px;
+  --font-size-button-medium: 14px;
+  --font-size-button-large: 20px;
+  --line-height-hero: 170px;
+  --line-height-heading-1: 70px;
+  --line-height-heading-2: 32px;
+  --line-height-heading-3: 30px;
+  --line-height-large: 28px;
+  --line-height-medium: 20px;
+  --line-height-small: 16px;
+  --line-height-label: 14px;
+  --letter-spacing-positif: 0.03em;
+  --letter-spacing-negatif: -0.03em;
+
+  /* Numeric CSS font-weight equivalents of the Figma style names above.
+     --font-weight-black-italic also requires font-style: italic. */
+  --font-weight-regular: 400;
+  --font-weight-medium: 500;
+  --font-weight-semi-bold: 600;
+  --font-weight-black-italic: 900;
+}
+
+/* "Phone" mode from Figma — reuses the same breakpoint already used in
+   style.css for the base font-size drop. */
+@media (max-width: 1024px) {
+  :root {
+    --font-family-body: "Instrument Sans";
+    --font-family-hero: "Alumni Sans Collegiate One";
+    --font-family-headings-summer: "Summer Energy";
+    --font-family-headings-2000: "Science Gothic";
+    --font-family-headings-chrome: "IntraNet";
+    --font-family-headings-soft: "Various DEMO";
+    --font-family-headings-root: "Bowlby One";
+    --font-size-hero: 85px;
+    --font-size-heading-1: 35px;
+    --font-size-heading-2: 24px;
+    --font-size-heading-3: 20px;
+    --font-size-large: 14px;
+    --font-size-medium: 12px;
+    --font-size-small: 10px;
+    --font-size-label: 8px;
+    --font-size-button-medium: 10px;
+    --font-size-button-large: 12px;
+    --line-height-hero: 75px;
+    --line-height-heading-1: 70px;
+    --line-height-heading-2: 32px;
+    --line-height-heading-3: 30px;
+    --line-height-large: 28px;
+    --line-height-medium: 20px;
+    --line-height-small: 16px;
+    --line-height-label: 14px;
+    --letter-spacing-positif: 0.03em;
+    --letter-spacing-negatif: -0.03em;
+  }
+}
