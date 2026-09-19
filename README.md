@@ -10,6 +10,7 @@ Site web du festival **La Bringue**, organisé par l'association du même nom. U
 - [Sitemap](#sitemap)
 - [Stack technique](#stack-technique)
 - [Architecture du code](#architecture-du-code)
+- [Design system](#design-system)
 - [Démarrage](#démarrage)
 - [Variables d'environnement](#variables-denvironnement)
 - [Tests](#tests)
@@ -88,16 +89,27 @@ Seules l'authentification et les likes passent par Supabase pour l'instant. Tout
 
 ```
 src/
+├── assets/
+│   ├── icons/                               # SVG exportés de Figma, inlinés par <Icon>
+│   └── card/, footer/, hero/, logo/, scenes/  # autres images/illustrations exportées de Figma
 ├── components/
+│   ├── ui/
+│   │   ├── Icon.vue                         # <Icon name="..." size="small|medium|large" />
+│   │   ├── icon-names.ts                    # noms d'icônes valides (type IconName)
+│   │   ├── Button.vue                       # <Button color=... variant=... size=... />
+│   │   └── button-types.ts                  # couleurs/variantes/tailles valides
 │   ├── layout/
-│   │   └── Navbar.vue                      # boutons "Se connecter" / "Créer un compte"
+│   │   └── Navbar.vue
 │   └── auth/
 │       ├── LoginForm.vue
 │       ├── SignUpForm.vue
 │       └── ModaleConnexionInscription.vue  # modale portant les deux formulaires
 ├── composables/
 │   ├── useAuthModal.ts                     # état de la modale (ouverte/fermée, vue active)
-│   └── useFocusTrap.ts                     # piège de focus clavier réutilisable
+│   ├── useFocusTrap.ts                     # piège de focus clavier réutilisable
+│   └── useTheme.ts                         # thème clair/sombre/système (voir Design system)
+├── styles/
+│   └── tokens/                             # design tokens générés depuis Figma (voir Design system)
 ├── lib/
 │   ├── auth-validation.ts                  # validation des champs email/mot de passe
 │   ├── auth-errors.ts                      # traduction des erreurs Supabase Auth en messages FR
@@ -105,10 +117,60 @@ src/
 ├── supabase.js                             # client Supabase (config lue depuis .env.local)
 ├── App.vue
 ├── main.ts
-└── style.css
+└── style.css                               # importe les tokens, pont vers les variables globales
+scripts/
+└── generate-design-tokens.cjs              # régénère src/styles/tokens/ depuis un export Figma
 ```
 
 Chaque composant/fichier logique a ses tests co-localisés (ex. `LoginForm.test.ts` à côté de `LoginForm.vue`) — voir [Tests](#tests).
+
+---
+
+## Design system
+
+Le design system vient de Figma (Variables + composants `Button`/`Icon`) et vit dans le code à trois endroits :
+
+**1. Design tokens — `src/styles/tokens/`**
+
+Générés depuis un export Figma Variables (format W3C Design Tokens) par `scripts/generate-design-tokens.cjs` :
+
+```bash
+npm run tokens:generate
+```
+
+| Fichier | Contenu |
+|---|---|
+| `primitives.css` | Échelles de couleurs brutes (`--color-blue-500`, ...) |
+| `sizes.css` | Échelle d'espacement (`--space-4`, ...) |
+| `typography.css` | Polices, tailles, interlignage (desktop par défaut, variante mobile en media query) |
+| `theme.css` | Tokens sémantiques clair/sombre (boutons, cartes, tags, hero, ...) |
+| `placeholders.css` | Tokens **écrits à la main**, absents de l'export Figma (ex. `--button-danger-*`, construits depuis la vraie échelle "red") — voir le commentaire en tête de fichier |
+
+Pour mettre à jour après un changement dans Figma : exporter les 4 collections dans un dossier `Collections/` à la racine (voir le commentaire en tête de `scripts/generate-design-tokens.cjs` pour le détail), relancer `npm run tokens:generate`, puis supprimer `Collections/`.
+
+`src/style.css` importe ces tokens et fait le pont avec les variables déjà utilisées par les composants existants (`--text`, `--bg`, `--accent`, ...).
+
+**2. Thème clair/sombre — `useTheme()`**
+
+```ts
+import { useTheme } from './composables/useTheme' // chemin relatif au fichier appelant
+
+const { preference, resolvedTheme, setPreference, toggleTheme } = useTheme()
+```
+
+Par défaut, le thème suit la préférence de l'appareil (`prefers-color-scheme`). Un choix explicite (`setPreference('light' | 'dark' | 'system')`) est mémorisé dans `localStorage` et posé sur `<html data-theme="...">`. Le sélecteur clair/sombre/défaut de la Navbar en est la seule interface pour l'instant.
+
+**3. Composants `Icon` et `Button` — `src/components/ui/`**
+
+```vue
+<Icon name="heart-filled" size="large" />
+
+<Button color="primary" variant="outlined" size="medium" icon-left="search">
+  Rechercher
+</Button>
+```
+
+`Icon` inline les SVG exportés de Figma (`src/assets/icons/`, `fill="currentColor"` pour hériter la couleur ambiante). `Button` couvre `color` (`primary` / `secondary` / `info` / `danger`), `variant` (`full` / `outlined` / `ghost`) et `size` (`medium` / `large`) — chaque instance pointe simplement vers les tokens `--button-{color}-{variant}-{state}-*` correspondants, sans règle CSS dédiée par combinaison.
 
 ---
 
@@ -127,14 +189,14 @@ npm run build
 
 ## Variables d'environnement
 
-Créer un fichier `.env` à la racine du projet :
+Copier `.env.example` vers `.env.local` à la racine du projet, puis renseigner les vraies valeurs (Project Settings → API sur supabase.com) :
 
 ```bash
 VITE_SUPABASE_URL=https://xxxxx.supabase.co
 VITE_SUPABASE_PUBLISHABLE_KEY=sb_publishable_xxxxxxxxxxxxxxxxxxxxxx
 ```
 
-Ces clés sont utilisées uniquement par `supabase.js` pour l'authentification et la gestion des likes.
+Ces clés sont utilisées uniquement par `supabase.js` pour l'authentification et la gestion des likes. `.env.local` est ignoré par git (`*.local`) — sans lui, `supabase.js` lève une erreur au chargement et la page reste blanche.
 
 ## Tests
 
