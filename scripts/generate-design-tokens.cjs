@@ -115,21 +115,25 @@ function cssValueFor(node) {
   return JSON.stringify(node.$value);
 }
 
-// Leaves whose numeric value should carry a `px` unit.
-function isPxGroup(pathSegs) {
-  return true; // every number leaf in this export is a px value (size, radius, spacing, font metrics)
+// Every number leaf in this export is a px value from Figma (size,
+// radius, spacing, font metrics) — converted to rem (best practice: rem
+// scales with the user's font-size/zoom preferences, px doesn't).
+// Authoring conversion uses the standard 16px = 1rem baseline, regardless
+// of this app's own root font-size (that's the point of rem: the actual
+// rendered size still follows whatever the root computes to).
+const REM_BASE_PX = 16;
+function pxToRem(px) {
+  if (px === 0) return "0rem";
+  const rem = px / REM_BASE_PX;
+  const str = rem.toFixed(4).replace(/0+$/, "").replace(/\.$/, "");
+  return `${str}rem`;
 }
 
 function emitLeaf(lines, pathSegs, node, opts = {}) {
   const name = varName(pathSegs);
   let value = cssValueFor(node);
-  if (
-    node.$type === "number" &&
-    typeof node.$value === "number" &&
-    isPxGroup(pathSegs) &&
-    !opts.noUnit
-  ) {
-    value = `${value}px`;
+  if (node.$type === "number" && typeof node.$value === "number" && !opts.noUnit) {
+    value = pxToRem(node.$value);
   }
   lines.push(`  ${name}: ${value};`);
 }
@@ -176,54 +180,47 @@ const FONT_WEIGHT_MAP = {
   "black-italic": 900, // also implies font-style: italic
 };
 
+// Only the "Desktop" mode is used — no separate "Phone" scale. Figma's
+// Phone values aren't a uniform scale-down of Desktop (e.g. Hero goes
+// 150->85, a 43% cut, while Medium only goes 16->12, a 25% cut), so they
+// can't be derived from a single ratio either. Now that these are rem,
+// they already shrink on narrow screens for free via the root font-size
+// media query in style.css (18px -> 16px) — one scale, not two to
+// maintain, at the cost of not reproducing Figma's exact per-breakpoint
+// proportions.
 function buildTypography() {
   const desktop = readJSON(path.join(COLLECTIONS, "Typography", "Desktop.tokens.json"));
-  const phone = readJSON(path.join(COLLECTIONS, "Typography", "Phone.tokens.json"));
 
-  function build(data) {
-    const lines = [];
-    for (const topKey of Object.keys(data)) {
-      if (topKey.startsWith("$")) continue;
-      if (TYPOGRAPHY_SKIP_TOP_LEVEL.has(topKey)) continue;
-      // "Font weight" holds Figma style names ("Regular", "Semi Bold"...),
-      // not CSS-usable values — replaced below by FONT_WEIGHT_MAP instead.
-      if (topKey === "Font weight") continue;
-      walk(data[topKey], [topKey], (segs, node) => {
-        if (segs[0] === "Letter spacing") {
-          // Figma letter-spacing tokens here are percentages of font size;
-          // convert to an em fraction so the var is directly usable.
-          const name = varName(segs);
-          lines.push(`  ${name}: ${node.$value / 100}em;`);
-          return;
-        }
-        emitLeaf(lines, segs, node);
-      });
-    }
-    return lines;
+  const lines = [];
+  for (const topKey of Object.keys(desktop)) {
+    if (topKey.startsWith("$")) continue;
+    if (TYPOGRAPHY_SKIP_TOP_LEVEL.has(topKey)) continue;
+    // "Font weight" holds Figma style names ("Regular", "Semi Bold"...),
+    // not CSS-usable values — replaced below by FONT_WEIGHT_MAP instead.
+    if (topKey === "Font weight") continue;
+    walk(desktop[topKey], [topKey], (segs, node) => {
+      if (segs[0] === "Letter spacing") {
+        // Figma letter-spacing tokens here are percentages of font size;
+        // convert to an em fraction so the var is directly usable.
+        const name = varName(segs);
+        lines.push(`  ${name}: ${node.$value / 100}em;`);
+        return;
+      }
+      emitLeaf(lines, segs, node);
+    });
   }
-
-  const desktopLines = build(desktop);
-  const phoneLines = build(phone);
 
   const weightLines = Object.entries(FONT_WEIGHT_MAP).map(
     ([slug, num]) => `  --font-weight-${slug}: ${num};`
   );
 
-  return `/* AUTO-GENERATED from Collections/Typography/{Desktop,Phone}.tokens.json — do not edit by hand. */
+  return `/* AUTO-GENERATED from Collections/Typography/Desktop.tokens.json — do not edit by hand. */
 :root {
-${desktopLines.join("\n")}
+${lines.join("\n")}
 
   /* Numeric CSS font-weight equivalents of the Figma style names above.
      --font-weight-black-italic also requires font-style: italic. */
 ${weightLines.join("\n")}
-}
-
-/* "Phone" mode from Figma — reuses the same breakpoint already used in
-   style.css for the base font-size drop. */
-@media (max-width: 1024px) {
-  :root {
-${phoneLines.map((l) => "  " + l).join("\n")}
-  }
 }
 `;
 }
