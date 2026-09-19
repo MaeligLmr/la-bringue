@@ -90,14 +90,13 @@ Seules l'authentification et les likes passent par Supabase pour l'instant. Tout
 ```
 src/
 ├── assets/
-│   ├── icons/                               # SVG exportés de Figma, inlinés par <Icon>
+│   ├── icons/                               # SVG exportés de Figma, lazy-loadés par <Icon>
 │   └── card/, footer/, hero/, logo/, scenes/  # autres images/illustrations exportées de Figma
 ├── components/
 │   ├── ui/
 │   │   ├── Icon.vue                         # <Icon name="..." size="small|medium|large" />
-│   │   ├── icon-names.ts                    # noms d'icônes valides (type IconName)
 │   │   ├── Button.vue                       # <Button color=... variant=... size=... />
-│   │   └── button-types.ts                  # couleurs/variantes/tailles valides
+│   │   └── Select.vue                       # <Select v-model=... :options=... size=... />
 │   ├── layout/
 │   │   └── Navbar.vue
 │   └── auth/
@@ -108,6 +107,8 @@ src/
 │   ├── useAuthModal.ts                     # état de la modale (ouverte/fermée, vue active)
 │   ├── useFocusTrap.ts                     # piège de focus clavier réutilisable
 │   └── useTheme.ts                         # thème clair/sombre/système (voir Design system)
+├── types/
+│   ├── icon.ts, button.ts, select.ts       # noms/props valides des composants ui/ (IconName, ButtonColor, ...)
 ├── styles/
 │   └── tokens/                             # design tokens générés depuis Figma (voir Design system)
 ├── lib/
@@ -132,7 +133,7 @@ Le design system vient de Figma (Variables + composants `Button`/`Icon`) et vit 
 
 **1. Design tokens — `src/styles/tokens/`**
 
-Générés depuis un export Figma Variables (format W3C Design Tokens) par `scripts/generate-design-tokens.cjs` :
+`primitives.css`, `sizes.css`, `typography.css` et l'essentiel de `theme.css` sont générés depuis un export Figma Variables (format W3C Design Tokens) par `scripts/generate-design-tokens.cjs` :
 
 ```bash
 npm run tokens:generate
@@ -142,9 +143,17 @@ npm run tokens:generate
 |---|---|
 | `primitives.css` | Échelles de couleurs brutes (`--color-blue-500`, ...) |
 | `sizes.css` | Échelle d'espacement (`--space-4`, ...) |
-| `typography.css` | Polices, tailles, interlignage (desktop par défaut, variante mobile en media query) |
+| `typography.css` | Polices, tailles, interlignage (valeurs "Desktop" de Figma uniquement — voir plus bas) |
 | `theme.css` | Tokens sémantiques clair/sombre (boutons, cartes, tags, hero, ...) |
-| `placeholders.css` | Tokens **écrits à la main**, absents de l'export Figma (ex. `--button-danger-*`, construits depuis la vraie échelle "red") — voir le commentaire en tête de fichier |
+
+Toutes les tailles générées (`--space-*`, `--font-size-*`, `--line-height-*`, rayons, paddings dans `theme.css`, ...) sont en **rem**, pas en px — ça respecte le zoom/la taille de police du navigateur. Figma exportait aussi une variante "Phone" pour la typographie, mais ses valeurs ne sont pas une simple réduction proportionnelle des valeurs "Desktop" (le Hero perd 43 % en Phone, le texte Medium seulement 25 %) : plutôt que maintenir deux échelles, seule "Desktop" est gardée, et elle rétrécit déjà automatiquement sur petit écran grâce au `rem` (la taille de police de la racine change elle-même via une media query dans `style.css`).
+
+`theme.css` contient aussi quelques blocs **écrits à la main**, absents de l'export Figma (pas de composant Figma correspondant), mais gardés dans ce même fichier plutôt qu'à part — voir le commentaire au-dessus de chacun :
+- `--button-danger-*` (bouton "Danger", construit depuis la vraie échelle "red")
+- `--select-*` (composant `Select`, pas de composant Figma "Select" du tout — construit depuis les primitives pink-bright/violet)
+- `--alert-danger-*` (encadrés de message d'erreur, construit depuis la vraie échelle "red")
+
+Ces blocs sont automatiquement réinjectés à chaque `npm run tokens:generate`, donc une régénération depuis Figma ne les efface pas.
 
 Pour mettre à jour après un changement dans Figma : exporter les 4 collections dans un dossier `Collections/` à la racine (voir le commentaire en tête de `scripts/generate-design-tokens.cjs` pour le détail), relancer `npm run tokens:generate`, puis supprimer `Collections/`.
 
@@ -160,7 +169,7 @@ const { preference, resolvedTheme, setPreference, toggleTheme } = useTheme()
 
 Par défaut, le thème suit la préférence de l'appareil (`prefers-color-scheme`). Un choix explicite (`setPreference('light' | 'dark' | 'system')`) est mémorisé dans `localStorage` et posé sur `<html data-theme="...">`. Le sélecteur clair/sombre/défaut de la Navbar en est la seule interface pour l'instant.
 
-**3. Composants `Icon` et `Button` — `src/components/ui/`**
+**3. Composants `Icon`, `Button` et `Select` — `src/components/ui/`**
 
 ```vue
 <Icon name="heart-filled" size="large" />
@@ -168,9 +177,15 @@ Par défaut, le thème suit la préférence de l'appareil (`prefers-color-scheme
 <Button color="primary" variant="outlined" size="medium" icon-left="search">
   Rechercher
 </Button>
+
+<Select
+  v-model="theme"
+  :options="[{ value: 'light', label: 'Clair' }, { value: 'dark', label: 'Sombre' }]"
+  size="large"
+/>
 ```
 
-`Icon` inline les SVG exportés de Figma (`src/assets/icons/`, `fill="currentColor"` pour hériter la couleur ambiante). `Button` couvre `color` (`primary` / `secondary` / `info` / `danger`), `variant` (`full` / `outlined` / `ghost`) et `size` (`medium` / `large`) — chaque instance pointe simplement vers les tokens `--button-{color}-{variant}-{state}-*` correspondants, sans règle CSS dédiée par combinaison.
+`Icon` charge à la demande (un chunk par icône, `import.meta.glob(..., { query: '?raw' })`) les SVG exportés de Figma (`src/assets/icons/`, `fill="currentColor"` pour hériter la couleur ambiante) — rien n'est chargé pour les icônes qu'une page n'utilise pas. `Button` couvre `color` (`primary` / `secondary` / `info` / `danger`), `variant` (`full` / `outlined` / `ghost`) et `size` (`medium` / `large`) — chaque instance pointe simplement vers les tokens `--button-{color}-{variant}-{state}-*` correspondants, sans règle CSS dédiée par combinaison. `Select` est un dropdown entièrement personnalisé (pas le `<select>` natif, dont la liste d'options ne peut pas être stylée), accessible au clavier, et calé sur le même `size` que `Button` pour rester à la même hauteur quand ils sont côte à côte (ex. la Navbar).
 
 ---
 
