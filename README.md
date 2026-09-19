@@ -6,16 +6,17 @@ Site web du festival **La Bringue**, organisé par l'association du même nom. U
 
 ## Sommaire
 
-- [Le festival](#le-festival)
-- [Sitemap](#sitemap)
-- [Stack technique](#stack-technique)
-- [Architecture du code](#architecture-du-code)
-- [Design system](#design-system)
-- [Démarrage](#démarrage)
-- [Variables d'environnement](#variables-denvironnement)
-- [Tests](#tests)
-- [Structure du contenu](#structure-du-contenu)
-- [Documentation produit](#documentation-produit)
+- [La Bringue — Festival](#la-bringue--festival)
+  - [Sommaire](#sommaire)
+  - [Le festival](#le-festival)
+  - [Sitemap](#sitemap)
+  - [Stack technique](#stack-technique)
+  - [Architecture du code](#architecture-du-code)
+  - [Design system](#design-system)
+  - [Démarrage](#démarrage)
+  - [Variables d'environnement](#variables-denvironnement)
+  - [Tests](#tests)
+  - [Structure du contenu](#structure-du-contenu)
 
 ---
 
@@ -240,7 +241,3 @@ Le contenu du site (hors authentification et likes) vit dans des fichiers JSON, 
   ├── actualites.json        # actualités (titre, image, résumé, date, contenu)
   └── sponsors.json          # sponsors (nom, logo, lien, niveau)
 ```
-
-## Documentation produit
-
-Le détail des epics, features, user stories et critères d'acceptation vit dans [`backlog-la-bringue.md`](./backlog-la-bringue.md). Ce README ne couvre que le contexte projet et la mise en route technique.

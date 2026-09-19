@@ -1,4 +1,3 @@
-/* AUTO-GENERATED from Collections/Typography/Desktop.tokens.json — do not edit by hand. */
 :root {
   --font-family-body: "Instrument Sans";
   --font-family-hero: "Alumni Sans Collegiate One";
@@ -27,9 +26,6 @@
   --line-height-label: 0.875rem;
   --letter-spacing-positif: 0.03em;
   --letter-spacing-negatif: -0.03em;
-
-  /* Numeric CSS font-weight equivalents of the Figma style names above.
-     --font-weight-black-italic also requires font-style: italic. */
   --font-weight-regular: 400;
   --font-weight-medium: 500;
   --font-weight-semi-bold: 600;

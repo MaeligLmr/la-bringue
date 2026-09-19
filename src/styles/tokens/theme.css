@@ -1,15 +1,3 @@
-/* Semantic, component-level tokens (buttons, cards, tags, hero section...).
-   Light values are the default; dark values apply automatically by OS
-   preference, or by setting data-theme="dark" on <html> (and vice versa
-   for a forced light theme on a dark OS).
-
-   Most of this file is AUTO-GENERATED from
-   Collections/Design tokens/{Clair,Sombre}.tokens.json by
-   scripts/generate-design-tokens.cjs — do not hand-edit those parts.
-   --button-danger-*, --select-* and --alert-danger-* are the exceptions:
-   they're hand-authored (see the comment above each block) and re-added
-   by that same script on every regeneration, so they survive it. */
-
 :root {
   --icon-small-height: 1rem;
   --icon-small-width: 1rem;
@@ -99,9 +87,7 @@
   --button-info-ghost-disabled-background: rgba(240, 247, 250, 0);
   --button-info-ghost-disabled-text: #92C7DD;
   --button-info-ghost-disabled-border: rgba(209, 231, 240, 0);
-  /* --button-danger-* is hand-authored (no Button.Danger group in the
-     Figma export) — built from the real "red" primitive scale using
-     the same idle/hover/disabled formula as --button-info-* above. */
+  
   --button-danger-full-idle-background: var(--color-red-500);
   --button-danger-full-idle-text: var(--color-red-50);
   --button-danger-full-idle-border: var(--color-red-500);
@@ -188,14 +174,7 @@
   --carrousel-gap: 1.875rem;
   --carrousel-padding-x: 1.625rem;
   --carrousel-padding-y: 1.625rem;
-  /* --select-* is hand-authored (no Figma "Select" component was ever
-     exported) — built from the real primitive color scales, not from
-     another component's tokens. The trigger deliberately looks like
-     Button's "primary outlined" variant (transparent background,
-     pink-bright border/text), rebuilt from the pink-bright primitive
-     scale rather than pointed at --button-primary-outlined-*. The
-     listbox background is deliberately lighter than the page's own dark
-     background in dark mode (an overlay needs to read as elevated). */
+  
   --select-trigger-background: transparent;
   --select-trigger-hover-background: color-mix(in srgb, var(--color-pink-bright-100) 50%, transparent);
   --select-trigger-text: var(--color-pink-bright-600);
@@ -206,13 +185,11 @@
   --select-option-text: var(--color-violet-900);
   --select-option-hover-background: color-mix(in srgb, var(--color-pink-bright-500) 12%, transparent);
   --select-option-selected-text: var(--color-pink-bright-600);
-  /* --alert-danger-* is hand-authored (no Figma "Alert" component was
-     ever exported) — built from the real "red" primitive scale. */
+  
   --alert-danger-background: var(--color-red-50);
   --alert-danger-border: var(--color-red-500);
   --alert-danger-text: var(--color-red-700);
 }
-
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme="light"]) {
     --icon-small-height: 1rem;
@@ -303,9 +280,7 @@
     --button-info-ghost-disabled-background: rgba(240, 247, 250, 0);
     --button-info-ghost-disabled-text: #92C7DD;
     --button-info-ghost-disabled-border: rgba(209, 231, 240, 0);
-    /* --button-danger-* is hand-authored (no Button.Danger group in the
-       Figma export) — built from the real "red" primitive scale using
-       the same idle/hover/disabled formula as --button-info-* above. */
+    
     --button-danger-full-idle-background: var(--color-red-500);
     --button-danger-full-idle-text: var(--color-red-50);
     --button-danger-full-idle-border: var(--color-red-500);
@@ -392,15 +367,7 @@
     --carrousel-gap: 1.875rem;
     --carrousel-padding-x: 1.625rem;
     --carrousel-padding-y: 1.625rem;
-    /* --select-* is hand-authored (no Figma "Select" component was ever
-       exported) — built from the real primitive color scales, not from
-       another component's tokens. The trigger deliberately looks like
-       Button's "primary outlined" variant (transparent background,
-       pink-bright border/text), rebuilt from the pink-bright primitive
-       scale rather than pointed at --button-primary-outlined-*. The
-       listbox background is deliberately lighter than the page's own
-       dark background in dark mode (an overlay needs to read as
-       elevated). */
+    
     --select-trigger-hover-background: color-mix(in srgb, var(--color-pink-bright-700) 50%, transparent);
     --select-trigger-text: var(--color-pink-bright-100);
     --select-trigger-border: var(--color-pink-bright-100);
@@ -408,14 +375,12 @@
     --select-listbox-border: var(--color-violet-500);
     --select-option-text: var(--color-violet-50);
     --select-option-selected-text: var(--color-pink-bright-200);
-    /* --alert-danger-* is hand-authored (no Figma "Alert" component was
-       ever exported) — built from the real "red" primitive scale. */
+    
     --alert-danger-background: var(--color-red-900);
     --alert-danger-border: var(--color-red-400);
     --alert-danger-text: var(--color-red-100);
   }
 }
-
 :root[data-theme="dark"] {
   --icon-small-height: 1rem;
   --icon-small-width: 1rem;
@@ -505,9 +470,7 @@
   --button-info-ghost-disabled-background: rgba(240, 247, 250, 0);
   --button-info-ghost-disabled-text: #92C7DD;
   --button-info-ghost-disabled-border: rgba(209, 231, 240, 0);
-  /* --button-danger-* is hand-authored (no Button.Danger group in the
-     Figma export) — built from the real "red" primitive scale using
-     the same idle/hover/disabled formula as --button-info-* above. */
+  
   --button-danger-full-idle-background: var(--color-red-500);
   --button-danger-full-idle-text: var(--color-red-50);
   --button-danger-full-idle-border: var(--color-red-500);
@@ -594,14 +557,7 @@
   --carrousel-gap: 1.875rem;
   --carrousel-padding-x: 1.625rem;
   --carrousel-padding-y: 1.625rem;
-  /* --select-* is hand-authored (no Figma "Select" component was ever
-     exported) — built from the real primitive color scales, not from
-     another component's tokens. The trigger deliberately looks like
-     Button's "primary outlined" variant (transparent background,
-     pink-bright border/text), rebuilt from the pink-bright primitive
-     scale rather than pointed at --button-primary-outlined-*. The
-     listbox background is deliberately lighter than the page's own dark
-     background in dark mode (an overlay needs to read as elevated). */
+  
   --select-trigger-hover-background: color-mix(in srgb, var(--color-pink-bright-700) 50%, transparent);
   --select-trigger-text: var(--color-pink-bright-100);
   --select-trigger-border: var(--color-pink-bright-100);
@@ -609,8 +565,7 @@
   --select-listbox-border: var(--color-violet-500);
   --select-option-text: var(--color-violet-50);
   --select-option-selected-text: var(--color-pink-bright-200);
-  /* --alert-danger-* is hand-authored (no Figma "Alert" component was
-     ever exported) — built from the real "red" primitive scale. */
+  
   --alert-danger-background: var(--color-red-900);
   --alert-danger-border: var(--color-red-400);
   --alert-danger-text: var(--color-red-100);
