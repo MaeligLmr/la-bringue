@@ -99,13 +99,13 @@ src/
 │   │   ├── Button.vue                       # <Button color=... variant=... size=... />
 │   │   └── Select.vue                       # <Select v-model=... :options=... size=... />
 │   ├── layout/
-│   │   └── Navbar.vue
+│   │   ├── Navbar.vue
+│   │   └── Modal.vue                        # <Modal :open=... title=... @close=...> générique, réutilisable
 │   └── auth/
 │       ├── LoginForm.vue
-│       ├── SignUpForm.vue
-│       └── ModaleConnexionInscription.vue  # modale portant les deux formulaires
+│       └── SignUpForm.vue
 ├── composables/
-│   ├── useAuthModal.ts                     # état de la modale (ouverte/fermée, vue active)
+│   ├── useAuthModal.ts                     # état de la modale d'auth (ouverte/fermée, vue active) — utilisé par App.vue
 │   ├── useFocusTrap.ts                     # piège de focus clavier réutilisable
 │   └── useTheme.ts                         # thème clair/sombre/système (voir Design system)
 ├── types/
@@ -120,8 +120,6 @@ src/
 ├── App.vue
 ├── main.ts
 └── style.css                               # importe les tokens, pont vers les variables globales
-scripts/
-└── generate-design-tokens.cjs              # régénère src/styles/tokens/ depuis un export Figma
 ```
 
 Chaque composant/fichier logique a ses tests co-localisés (ex. `LoginForm.test.ts` à côté de `LoginForm.vue`) — voir [Tests](#tests).

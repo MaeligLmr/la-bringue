@@ -1,15 +1,15 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
 import { mount, type VueWrapper } from '@vue/test-utils'
 import { nextTick } from 'vue'
-import ModaleConnexionInscription from './ModaleConnexionInscription.vue'
-import { useAuthModal } from '../../composables/useAuthModal'
+import App from './App.vue'
+import { useAuthModal } from './composables/useAuthModal'
 
 const { signInWithPassword, signUp } = vi.hoisted(() => ({
   signInWithPassword: vi.fn(() => new Promise(() => {})),
   signUp: vi.fn(() => new Promise(() => {})),
 }))
 
-vi.mock('../../supabase.js', () => ({
+vi.mock('./supabase.js', () => ({
   supabase: { auth: { signInWithPassword, signUp } },
 }))
 
@@ -34,7 +34,7 @@ async function pressEscape(selector: string) {
   await nextTick()
 }
 
-describe('ModaleConnexionInscription', () => {
+describe('App (modale d\'authentification)', () => {
   beforeEach(() => {
     signInWithPassword.mockClear()
     signUp.mockClear()
@@ -49,7 +49,7 @@ describe('ModaleConnexionInscription', () => {
   })
 
   it("affiche le formulaire de connexion quand la modale s'ouvre sur 'login'", async () => {
-    wrapper = mount(ModaleConnexionInscription, { attachTo: document.body })
+    wrapper = mount(App, { attachTo: document.body })
     useAuthModal().open('login')
     await nextTick()
 
@@ -58,7 +58,7 @@ describe('ModaleConnexionInscription', () => {
   })
 
   it("affiche le formulaire d'inscription quand la modale s'ouvre sur 'signup'", async () => {
-    wrapper = mount(ModaleConnexionInscription, { attachTo: document.body })
+    wrapper = mount(App, { attachTo: document.body })
     useAuthModal().open('signup')
     await nextTick()
 
@@ -67,57 +67,57 @@ describe('ModaleConnexionInscription', () => {
   })
 
   it('bascule vers le formulaire opposé sans fermer la modale', async () => {
-    wrapper = mount(ModaleConnexionInscription, { attachTo: document.body })
+    wrapper = mount(App, { attachTo: document.body })
     useAuthModal().open('login')
     await nextTick()
 
     await click('.auth-form__switch')
 
-    expect(document.querySelector('.auth-modal__backdrop')).not.toBeNull()
+    expect(document.querySelector('.modal__backdrop')).not.toBeNull()
     expect(document.querySelector('#signup-email')).not.toBeNull()
   })
 
   it('se ferme sur clic du bouton de fermeture, sans appel Supabase', async () => {
-    wrapper = mount(ModaleConnexionInscription, { attachTo: document.body })
+    wrapper = mount(App, { attachTo: document.body })
     useAuthModal().open('login')
     await nextTick()
 
-    await click('.auth-modal__close')
+    await click('.modal__close')
 
-    expect(document.querySelector('.auth-modal__backdrop')).toBeNull()
+    expect(document.querySelector('.modal__backdrop')).toBeNull()
     expect(signInWithPassword).not.toHaveBeenCalled()
     expect(signUp).not.toHaveBeenCalled()
   })
 
   it('se ferme sur clic du backdrop, sans appel Supabase', async () => {
-    wrapper = mount(ModaleConnexionInscription, { attachTo: document.body })
+    wrapper = mount(App, { attachTo: document.body })
     useAuthModal().open('login')
     await nextTick()
 
-    await click('.auth-modal__backdrop')
+    await click('.modal__backdrop')
 
-    expect(document.querySelector('.auth-modal__backdrop')).toBeNull()
+    expect(document.querySelector('.modal__backdrop')).toBeNull()
     expect(signInWithPassword).not.toHaveBeenCalled()
   })
 
   it('se ferme sur Échap, sans appel Supabase', async () => {
-    wrapper = mount(ModaleConnexionInscription, { attachTo: document.body })
+    wrapper = mount(App, { attachTo: document.body })
     useAuthModal().open('login')
     await nextTick()
 
-    await pressEscape('.auth-modal__backdrop')
+    await pressEscape('.modal__backdrop')
 
-    expect(document.querySelector('.auth-modal__backdrop')).toBeNull()
+    expect(document.querySelector('.modal__backdrop')).toBeNull()
     expect(signInWithPassword).not.toHaveBeenCalled()
   })
 
-  it('place le focus sur le premier champ à l\'ouverture et le restitue au déclencheur à la fermeture', async () => {
+  it("place le focus sur le premier champ à l'ouverture et le restitue au déclencheur à la fermeture", async () => {
     const trigger = document.createElement('button')
     trigger.textContent = 'Se connecter'
     document.body.appendChild(trigger)
     trigger.focus()
 
-    wrapper = mount(ModaleConnexionInscription, { attachTo: document.body })
+    wrapper = mount(App, { attachTo: document.body })
     useAuthModal().open('login')
     await nextTick()
     await nextTick()
