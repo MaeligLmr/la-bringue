@@ -1,7 +1,9 @@
 <script setup lang="ts">
-import HelloWorld from './components/HelloWorld.vue'
+import Navbar from './components/layout/Navbar.vue'
+import ModaleConnexionInscription from './components/auth/ModaleConnexionInscription.vue'
 </script>
 
 <template>
-  <HelloWorld />
+  <Navbar />
+  <ModaleConnexionInscription />
 </template>

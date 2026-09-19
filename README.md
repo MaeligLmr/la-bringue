@@ -9,6 +9,7 @@ Site web du festival **La Bringue**, organisé par l'association du même nom. U
 - [Le festival](#le-festival)
 - [Sitemap](#sitemap)
 - [Stack technique](#stack-technique)
+- [Architecture du code](#architecture-du-code)
 - [Démarrage](#démarrage)
 - [Variables d'environnement](#variables-denvironnement)
 - [Tests](#tests)
@@ -80,6 +81,34 @@ Le festival est le prolongement de cette mission à l'échelle d'un événement 
 | Tests | [Vitest](https://vitest.dev/) |
 
 Seules l'authentification et les likes passent par Supabase pour l'instant. Tout le reste du contenu du site est lu depuis des fichiers JSON versionnés dans le projet — voir [Structure du contenu](#structure-du-contenu).
+
+---
+
+## Architecture du code
+
+```
+src/
+├── components/
+│   ├── layout/
+│   │   └── Navbar.vue                      # boutons "Se connecter" / "Créer un compte"
+│   └── auth/
+│       ├── LoginForm.vue
+│       ├── SignUpForm.vue
+│       └── ModaleConnexionInscription.vue  # modale portant les deux formulaires
+├── composables/
+│   ├── useAuthModal.ts                     # état de la modale (ouverte/fermée, vue active)
+│   └── useFocusTrap.ts                     # piège de focus clavier réutilisable
+├── lib/
+│   ├── auth-validation.ts                  # validation des champs email/mot de passe
+│   ├── auth-errors.ts                      # traduction des erreurs Supabase Auth en messages FR
+│   └── with-timeout.ts                     # détection d'un Supabase injoignable/en timeout
+├── supabase.js                             # client Supabase (config lue depuis .env.local)
+├── App.vue
+├── main.ts
+└── style.css
+```
+
+Chaque composant/fichier logique a ses tests co-localisés (ex. `LoginForm.test.ts` à côté de `LoginForm.vue`) — voir [Tests](#tests).
 
 ---
 

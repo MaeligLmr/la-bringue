@@ -11,7 +11,7 @@ export default defineConfig(() => {
   return {
     plugins: [vue()],
     test: {
-      environment: 'node',
+      environment: 'happy-dom',
       env,
     },
   }
