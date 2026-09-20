@@ -28,7 +28,9 @@
   --heading: var(--font-family-headings-root), system-ui, 'Segoe UI', Roboto, sans-serif;
   --mono: ui-monospace, Consolas, monospace;
 
-  font: 18px/145% var(--sans);
+  /* Mobile first : 16px par défaut, remonté à 18px à partir du même seuil
+     desktop que la Navbar (voir src/components/layout/Navbar.vue). */
+  font: 16px/145% var(--sans);
   letter-spacing: 0.18px;
   color-scheme: light dark;
   color: var(--text);
@@ -38,8 +40,8 @@
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 
-  @media (max-width: 1024px) {
-    font-size: 16px;
+  @media (min-width: 1025px) {
+    font-size: 18px;
   }
 }
 

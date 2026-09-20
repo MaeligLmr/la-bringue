@@ -137,7 +137,7 @@ function goToAndCloseMenu(path: string) {
           v-for="link in MENU_LINKS"
           :key="link.path"
           color="primary"
-          variant="outlined"
+          variant="ghost"
           @click="goToAndCloseMenu(link.path)"
         >
           {{ link.label }}
@@ -204,16 +204,19 @@ function goToAndCloseMenu(path: string) {
 }
 
 .navbar__start {
+  grid-column: 1;
   justify-self: start;
   display: none;
 }
 
-.navbar__end {
-  justify-self: end;
+.navbar__logo {
+  grid-column: 2;
+  justify-self: center;
 }
 
-.navbar__logo {
-  justify-self: center;
+.navbar__end {
+  grid-column: 3;
+  justify-self: end;
 }
 
 .navbar__nav-link {
