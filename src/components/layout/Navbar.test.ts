@@ -30,6 +30,10 @@ async function mountNavbar() {
       { path: '/programmation', component: { template: '<div />' } },
       { path: '/billetterie', component: { template: '<div />' } },
       { path: '/mon-programme', component: { template: '<div />' } },
+      { path: '/exposants', component: { template: '<div />' } },
+      { path: '/conferences', component: { template: '<div />' } },
+      { path: '/a-propos', component: { template: '<div />' } },
+      { path: '/infos-pratiques', component: { template: '<div />' } },
     ],
   })
   router.push('/')
@@ -152,6 +156,30 @@ describe('Navbar', () => {
     )
     programmationButton?.click()
     await vi.waitFor(() => expect(router.currentRoute.value.path).toBe('/programmation'))
+    await vi.waitFor(() => expect(document.body.querySelector('.navbar__menu')).toBeNull())
+
+    wrapper.unmount()
+  })
+
+  it('le menu burger propose aussi Exposants, Conférences, À propos et Infos pratiques, et navigue au clic', async () => {
+    mockSupabase(null)
+    const { wrapper, router } = await mountNavbar()
+
+    await wrapper.find('button[aria-label="Ouvrir le menu"]').trigger('click')
+    await wrapper.vm.$nextTick()
+
+    const menu = document.body.querySelector('.navbar__menu') as HTMLElement
+    expect(menu).not.toBeNull()
+    expect(menu.textContent).toContain('Exposants')
+    expect(menu.textContent).toContain('Conférences')
+    expect(menu.textContent).toContain('À propos')
+    expect(menu.textContent).toContain('Infos pratiques')
+
+    const exposantsButton = Array.from(menu.querySelectorAll('button')).find(
+      (button) => button.textContent?.trim() === 'Exposants'
+    )
+    exposantsButton?.click()
+    await vi.waitFor(() => expect(router.currentRoute.value.path).toBe('/exposants'))
     await vi.waitFor(() => expect(document.body.querySelector('.navbar__menu')).toBeNull())
 
     wrapper.unmount()
