@@ -22,9 +22,7 @@
   --shadow:
     rgba(0, 0, 0, 0.1) 0 10px 15px -3px, rgba(0, 0, 0, 0.05) 0 4px 6px -2px;
 
-  /* NOTE: the custom fonts below (Instrument Sans, Bowlby One) are not
-     loaded anywhere yet — add a @font-face or Google Fonts <link> for
-     them to actually render; until then these fall back to system-ui. */
+  /* Chargées via Google Fonts, voir index.html. */
   --sans: var(--font-family-body), system-ui, 'Segoe UI', Roboto, sans-serif;
   --heading: var(--font-family-headings-root), system-ui, 'Segoe UI', Roboto, sans-serif;
   --mono: ui-monospace, Consolas, monospace;
@@ -65,10 +63,46 @@ body {
 }
 
 h1,
-h2 {
+h2,
+h3,
+h4,
+h5,
+h6 {
   font-family: var(--heading);
   font-weight: var(--font-weight-medium);
   color: var(--text-h);
+}
+
+h1 {
+  font-size: var(--font-size-heading-1);
+  line-height: var(--line-height-heading-1);
+}
+
+h2 {
+  font-size: var(--font-size-heading-2);
+  line-height: var(--line-height-heading-2);
+}
+
+h3 {
+  font-size: var(--font-size-heading-3);
+  line-height: var(--line-height-heading-3);
+}
+
+/* Pas de token Figma pour h4-h6 (l'export s'arrête à heading-3) — dérivées
+   de l'échelle de texte courant plutôt que de tailles inventées. */
+h4 {
+  font-size: var(--font-size-large);
+  line-height: var(--line-height-large);
+}
+
+h5 {
+  font-size: var(--font-size-medium);
+  line-height: var(--line-height-medium);
+}
+
+h6 {
+  font-size: var(--font-size-small);
+  line-height: var(--line-height-small);
 }
 
 p {
