@@ -120,3 +120,11 @@
 .justify-between {
   justify-content: space-between;
 }
+
+/* Ombre portée générique (voir Figma "Drop shadow" : X 2, Y 3, Blur 7.2,
+   Spread 3, couleur Card/Shadow-color) — pensée pour être réutilisée sur
+   n'importe quel élément surélevé (cards, tiles, ...), pas seulement
+   CarouselTile. */
+.shadow {
+  box-shadow: 2px 3px 7.2px 3px var(--card-shadow-color);
+}
