@@ -5,7 +5,7 @@ import { useAuthModal } from '../../composables/useAuthModal'
 import { useAuth } from '../../composables/useAuth'
 import { useTheme } from '../../composables/useTheme'
 import Button from '../ui/Button.vue'
-import Modal from './Modal.vue'
+import Drawer from './Drawer.vue'
 import type { IconName } from '../../types/icon'
 import logoLight from '../../assets/logo/Mode=Light.png'
 import logoDark from '../../assets/logo/Mode=Dark.png'
@@ -107,7 +107,7 @@ function goToAndCloseMenu(path: string) {
       />
     </div>
 
-    <Modal :open="isMenuOpen" title="Menu" @close="isMenuOpen = false">
+    <Drawer :open="isMenuOpen" title="Menu" @close="isMenuOpen = false">
       <nav class="navbar__menu">
         <Button color="primary" variant="outlined" @click="goToAndCloseMenu('/programmation')">
           Programmation
@@ -127,7 +127,7 @@ function goToAndCloseMenu(path: string) {
           />
         </div>
       </nav>
-    </Modal>
+    </Drawer>
   </header>
 </template>
 
