@@ -13,6 +13,12 @@ export default defineConfig(() => {
     test: {
       environment: 'happy-dom',
       env,
+      coverage: {
+        provider: 'v8',
+        reporter: ['text', 'html'],
+        include: ['src/**/*.{ts,vue}'],
+        exclude: ['src/**/*.test.ts', 'src/main.ts', 'src/**/*.d.ts'],
+      },
     },
   }
 })
