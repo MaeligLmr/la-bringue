@@ -18,34 +18,48 @@ async function mountFooter() {
 }
 
 describe('Footer', () => {
-  it('affiche le bloc newsletter avec un bouton', async () => {
+  it('affiche le titre newsletter et son bouton', async () => {
     const { wrapper } = await mountFooter()
 
-    expect(wrapper.text()).toContain('Newsletter de La Bringue')
-    expect(wrapper.find('button').text()).toBe("S'inscrire")
+    expect(wrapper.text()).toContain('La newsletter de LA BRINGUE')
+    expect(wrapper.find('button').text()).toBe("S'inscrire à la newsletter")
   })
 
-  it("affiche le bloc d'adresse du festival", async () => {
+  it("affiche le bloc d'adresse du festival avec l'icône map", async () => {
     const { wrapper } = await mountFooter()
 
     expect(wrapper.text()).toContain('Accéder au festival')
     expect(wrapper.find('address').exists()).toBe(true)
+    expect(wrapper.find('address').text()).toContain('Adresse du festival')
   })
 
-  it('les liens À propos et Contact naviguent, Mentions légales est inerte', async () => {
+  it('affiche les 4 liens (À propos, Infos pratiques, Contact naviguent, Mentions légales est inerte)', async () => {
     const { wrapper, router } = await mountFooter()
 
-    expect(wrapper.text()).toContain('À propos')
-    expect(wrapper.text()).toContain('Contact')
-    expect(wrapper.text()).toContain('Mentions légales')
+    const links = wrapper.findAll('.footer__link')
+    expect(links.map((link) => link.text())).toEqual([
+      'À propos',
+      'Infos pratiques',
+      'Contact',
+      'Mentions légales',
+    ])
 
-    const mentionsLegales = wrapper.findAll('.footer__link').find((link) => link.text() === 'Mentions légales')
-    expect(mentionsLegales?.element.tagName).toBe('SPAN')
+    const mentionsLegales = links[3]
+    expect(mentionsLegales.element.tagName).toBe('SPAN')
 
     await wrapper.find('a[href="/a-propos"]').trigger('click')
     await vi.waitFor(() => expect(router.currentRoute.value.path).toBe('/a-propos'))
 
-    await wrapper.find('a[href="/infos-pratiques"]').trigger('click')
+    await wrapper.findAll('a[href="/infos-pratiques"]')[0].trigger('click')
     await vi.waitFor(() => expect(router.currentRoute.value.path).toBe('/infos-pratiques'))
+  })
+
+  it('affiche les icônes des réseaux sociaux', async () => {
+    const { wrapper } = await mountFooter()
+
+    expect(wrapper.find('button[aria-label="Instagram"]').exists()).toBe(true)
+    expect(wrapper.find('button[aria-label="TikTok"]').exists()).toBe(true)
+    expect(wrapper.find('button[aria-label="WhatsApp"]').exists()).toBe(true)
+    expect(wrapper.find('button[aria-label="Facebook"]').exists()).toBe(true)
   })
 })
