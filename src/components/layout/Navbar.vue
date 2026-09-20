@@ -6,8 +6,8 @@ import { useTheme } from '../../composables/useTheme'
 import Button from '../ui/Button.vue'
 import Drawer from './Drawer.vue'
 import type { IconName } from '../../types/icon'
-import logoLight from '../../assets/logo/Mode=Light.png'
-import logoDark from '../../assets/logo/Mode=Dark.png'
+import logoLight from '../../assets/logo/Logo-Light.svg'
+import logoDark from '../../assets/logo/Logo-Dark.svg'
 
 const router = useRouter()
 const { user, isLoggedIn } = useAuth()
