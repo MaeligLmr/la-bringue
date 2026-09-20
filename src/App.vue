@@ -2,6 +2,7 @@
 import { nextTick, ref, watch } from 'vue'
 import { Toaster } from 'vue-sonner'
 import Navbar from './components/layout/Navbar.vue'
+import Footer from './components/layout/Footer.vue'
 import Modal from './components/layout/Modal.vue'
 import LoginForm from './components/auth/LoginForm.vue'
 import SignUpForm from './components/auth/SignUpForm.vue'
@@ -28,6 +29,8 @@ watch(isOpen, async (open) => {
   <div class="app__content">
     <RouterView />
   </div>
+
+  <Footer />
 
   <Modal
     :open="isOpen"
