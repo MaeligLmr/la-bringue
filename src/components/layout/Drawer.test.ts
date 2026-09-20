@@ -37,6 +37,19 @@ describe('Drawer', () => {
     wrapper.unmount()
   })
 
+  it('démarre sous un en-tête via la prop top (0px par défaut)', () => {
+    const wrapper = mount(Drawer, { props: { open: true }, attachTo: document.body })
+    expect((document.querySelector('.drawer__backdrop') as HTMLElement).style.top).toBe('0px')
+    wrapper.unmount()
+
+    const wrapperWithTop = mount(Drawer, {
+      props: { open: true, top: '72px' },
+      attachTo: document.body,
+    })
+    expect((document.querySelector('.drawer__backdrop') as HTMLElement).style.top).toBe('72px')
+    wrapperWithTop.unmount()
+  })
+
   it('émet "close" au clic sur le bouton de fermeture', async () => {
     const wrapper = mount(Drawer, { props: { open: true }, attachTo: document.body })
 

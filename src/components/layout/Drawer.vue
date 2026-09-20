@@ -8,9 +8,12 @@ const props = withDefaults(
     open: boolean
     title?: string
     closeLabel?: string
+    /** Décale le drawer sous un en-tête fixe/sticky (ex. "4rem"). */
+    top?: string
   }>(),
   {
     closeLabel: 'Fermer',
+    top: '0px',
   }
 )
 
@@ -31,7 +34,13 @@ function close() {
 <template>
   <Teleport to="body">
     <Transition name="drawer">
-      <div v-if="open" class="drawer__backdrop" @click.self="close" @keydown.esc="close">
+      <div
+        v-if="open"
+        class="drawer__backdrop"
+        :style="{ top: props.top }"
+        @click.self="close"
+        @keydown.esc="close"
+      >
         <div
           ref="panelEl"
           class="drawer__panel"

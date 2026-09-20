@@ -42,16 +42,20 @@ beforeEach(() => {
 })
 
 describe('Navbar', () => {
-  it('affiche les boutons de connexion quand personne n\'est connecté', async () => {
+  it("affiche une icône profil (pas de badge) menant à /profil quand personne n'est connecté", async () => {
     mockSupabase(null)
-    const { wrapper } = await mountNavbar()
+    const { wrapper, router } = await mountNavbar()
     const { useAuth } = await import('../../composables/useAuth')
     await useAuth().ready
     await wrapper.vm.$nextTick()
 
-    expect(wrapper.text()).toContain('Se connecter')
-    expect(wrapper.text()).toContain('Créer un compte')
     expect(wrapper.find('.navbar__badge').exists()).toBe(false)
+
+    const profileButton = wrapper.find('button[aria-label="Profil"]')
+    expect(profileButton.exists()).toBe(true)
+
+    await profileButton.trigger('click')
+    await vi.waitFor(() => expect(router.currentRoute.value.path).toBe('/profil'))
 
     wrapper.unmount()
   })
@@ -65,7 +69,7 @@ describe('Navbar', () => {
     await useAuth().ready
     await wrapper.vm.$nextTick()
 
-    expect(wrapper.text()).not.toContain('Se connecter')
+    expect(wrapper.find('button[aria-label="Profil"]').exists()).toBe(false)
     expect(wrapper.text()).toContain('alice_m')
     expect(wrapper.text()).not.toContain('alice@example.com')
 
@@ -129,12 +133,12 @@ describe('Navbar', () => {
     mockSupabase(null)
     const { wrapper, router } = await mountNavbar()
 
-    expect(document.body.textContent).not.toContain('Menu')
+    expect(document.body.querySelector('.navbar__menu')).toBeNull()
 
     await wrapper.find('button[aria-label="Ouvrir le menu"]').trigger('click')
     await wrapper.vm.$nextTick()
 
-    // Le contenu de la modale est téléporté dans <body>, hors de l'arbre du
+    // Le contenu du drawer est téléporté dans <body>, hors de l'arbre du
     // wrapper — on interagit donc directement avec le DOM réel.
     const menu = document.body.querySelector('.navbar__menu') as HTMLElement
     expect(menu).not.toBeNull()
@@ -148,7 +152,7 @@ describe('Navbar', () => {
     )
     programmationButton?.click()
     await vi.waitFor(() => expect(router.currentRoute.value.path).toBe('/programmation'))
-    await vi.waitFor(() => expect(document.body.textContent).not.toContain('Menu'))
+    await vi.waitFor(() => expect(document.body.querySelector('.navbar__menu')).toBeNull())
 
     wrapper.unmount()
   })

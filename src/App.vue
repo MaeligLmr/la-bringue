@@ -25,7 +25,9 @@ watch(isOpen, async (open) => {
 
   <Navbar />
 
-  <RouterView />
+  <div class="app__content">
+    <RouterView />
+  </div>
 
   <Modal
     :open="isOpen"
@@ -46,3 +48,12 @@ watch(isOpen, async (open) => {
     />
   </Modal>
 </template>
+
+<style scoped>
+/* La Navbar est en position: fixed (hors du flux) — ce padding compense
+   sa hauteur (mesurée dans Navbar.vue, posée sur :root en --navbar-height)
+   pour que le contenu de page ne démarre pas caché dessous. */
+.app__content {
+  padding-top: var(--navbar-height, 0px);
+}
+</style>

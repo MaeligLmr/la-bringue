@@ -1,7 +1,6 @@
 <script setup lang="ts">
-import { computed, ref } from 'vue'
+import { computed, onMounted, onUnmounted, ref } from 'vue'
 import { useRouter } from 'vue-router'
-import { useAuthModal } from '../../composables/useAuthModal'
 import { useAuth } from '../../composables/useAuth'
 import { useTheme } from '../../composables/useTheme'
 import Button from '../ui/Button.vue'
@@ -11,7 +10,6 @@ import logoLight from '../../assets/logo/Mode=Light.png'
 import logoDark from '../../assets/logo/Mode=Dark.png'
 
 const router = useRouter()
-const { open } = useAuthModal()
 const { user, isLoggedIn } = useAuth()
 const { resolvedTheme } = useTheme()
 
@@ -30,7 +28,39 @@ const SOCIALS: { icon: IconName; label: string }[] = [
   { icon: 'facebook', label: 'Facebook' },
 ]
 
+const MENU_LINKS: { path: string; label: string }[] = [
+  { path: '/exposants', label: 'Exposants' },
+  { path: '/conferences', label: 'Conférences' },
+  { path: '/a-propos', label: 'À propos' },
+  { path: '/infos-pratiques', label: 'Infos pratiques' },
+]
+
 const isMenuOpen = ref(false)
+
+// Mesuré au lieu de figé en dur (la navbar est en position fixed, donc hors
+// du flux : le drawer doit démarrer pile en dessous, et le contenu de page
+// a besoin d'un padding-top équivalent — voir --navbar-height, posée sur
+// :root pour être lisible en dehors du scope de ce composant).
+const navbarEl = ref<HTMLElement | null>(null)
+const navbarHeight = ref(0)
+let navbarResizeObserver: ResizeObserver | null = null
+
+function updateNavbarHeight() {
+  navbarHeight.value = navbarEl.value?.offsetHeight ?? 0
+  document.documentElement.style.setProperty('--navbar-height', `${navbarHeight.value}px`)
+}
+
+onMounted(() => {
+  if (!navbarEl.value) return
+  updateNavbarHeight()
+  if (typeof ResizeObserver === 'undefined') return
+  navbarResizeObserver = new ResizeObserver(updateNavbarHeight)
+  navbarResizeObserver.observe(navbarEl.value)
+})
+
+onUnmounted(() => {
+  navbarResizeObserver?.disconnect()
+})
 
 function goTo(path: string) {
   router.push(path)
@@ -43,14 +73,14 @@ function goToAndCloseMenu(path: string) {
 </script>
 
 <template>
-  <header class="navbar">
+  <header ref="navbarEl" class="navbar">
     <div class="navbar__start">
-      <Button color="primary" variant="outlined" class="navbar__newsletter">Newsletter</Button>
+      <Button color="secondary" variant="outlined" class="navbar__newsletter">Newsletter</Button>
       <div class="navbar__socials">
         <Button
           v-for="social in SOCIALS"
           :key="social.icon"
-          color="primary"
+          color="secondary"
           variant="ghost"
           :icon-only="social.icon"
           :label="social.label"
@@ -72,24 +102,10 @@ function goToAndCloseMenu(path: string) {
 
       <Button color="primary" variant="ghost" icon-only="heart" label="Mon programme" @click="goTo('/mon-programme')" />
 
-      <template v-if="!isLoggedIn">
-        <div class="navbar__auth-buttons">
-          <Button color="primary" size="large" variant="outlined" @click="open('login')">Se connecter</Button>
-          <Button color="primary" size="large" variant="full" @click="open('signup')">Créer un compte</Button>
-        </div>
-        <Button
-          color="primary"
-          variant="ghost"
-          icon-only="user"
-          label="Se connecter"
-          class="navbar__auth-compact"
-          @click="open('login')"
-        />
-      </template>
       <Button
-        v-else
+        v-if="isLoggedIn"
         color="primary"
-        size="large"
+        size="medium"
         variant="ghost"
         icon-right="user"
         class="navbar__badge"
@@ -97,6 +113,14 @@ function goToAndCloseMenu(path: string) {
       >
         {{ displayName }}
       </Button>
+      <Button
+        v-else
+        color="primary"
+        variant="ghost"
+        icon-only="user"
+        label="Profil"
+        @click="goTo('/profil')"
+      />
 
       <Button
         color="primary"
@@ -107,24 +131,39 @@ function goToAndCloseMenu(path: string) {
       />
     </div>
 
-    <Drawer :open="isMenuOpen" title="Menu" @close="isMenuOpen = false">
+    <Drawer :open="isMenuOpen" :top="`${navbarHeight}px`" @close="isMenuOpen = false">
       <nav class="navbar__menu">
-        <Button color="primary" variant="outlined" @click="goToAndCloseMenu('/programmation')">
-          Programmation
+        <Button
+          v-for="link in MENU_LINKS"
+          :key="link.path"
+          color="primary"
+          variant="outlined"
+          @click="goToAndCloseMenu(link.path)"
+        >
+          {{ link.label }}
         </Button>
-        <Button color="primary" variant="full" @click="goToAndCloseMenu('/billetterie')">
-          Billetterie
-        </Button>
-        <Button color="primary" variant="outlined" class="navbar__newsletter">Newsletter</Button>
-        <div class="navbar__socials">
-          <Button
-            v-for="social in SOCIALS"
-            :key="social.icon"
-            color="primary"
-            variant="ghost"
-            :icon-only="social.icon"
-            :label="social.label"
-          />
+
+        <!-- Uniquement en dessous de 1024px : sur desktop, ces liens sont
+             déjà visibles directement dans la barre, pas besoin de les
+             dupliquer ici. -->
+        <div class="navbar__menu-mobile-only">
+          <Button color="primary" variant="outlined" @click="goToAndCloseMenu('/programmation')">
+            Programmation
+          </Button>
+          <Button color="primary" variant="full" @click="goToAndCloseMenu('/billetterie')">
+            Billetterie
+          </Button>
+          <Button color="secondary" variant="outlined" class="navbar__newsletter">Newsletter</Button>
+          <div class="navbar__socials">
+            <Button
+              v-for="social in SOCIALS"
+              :key="social.icon"
+              color="secondary"
+              variant="ghost"
+              :icon-only="social.icon"
+              :label="social.label"
+            />
+          </div>
         </div>
       </nav>
     </Drawer>
@@ -132,17 +171,29 @@ function goToAndCloseMenu(path: string) {
 </template>
 
 <style scoped>
+/* Mobile first : les règles de base ci-dessous décrivent la mise en page
+   mobile ; le bloc @media (min-width: 1025px) plus bas ajoute/étend pour
+   desktop, plutôt que l'inverse. */
 .navbar {
-  position: sticky;
+  position: fixed;
   top: 0;
+  left: 0;
+  right: 0;
   z-index: 10;
-  display: flex;
+  display: grid;
+  /* Colonnes latérales de largeur égale (quel que soit leur contenu),
+     pour que le logo au centre reste visuellement centré plutôt que
+     poussé par le côté le plus large (cf. justify-content: space-between,
+     qui ne garantit pas ça). */
+  grid-template-columns: 1fr auto 1fr;
   align-items: center;
-  justify-content: space-between;
   gap: var(--space-4);
   padding: var(--space-4);
-  background: var(--bg);
-  border-bottom: 1px solid var(--border);
+  /* Pas de fond plein ni de bordure : juste un filtre de flou sur ce qui
+     défile derrière, teinté légèrement par le fond du thème. */
+  background: color-mix(in srgb, var(--bg) 55%, transparent);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
 }
 
 .navbar__start,
@@ -150,6 +201,23 @@ function goToAndCloseMenu(path: string) {
   display: flex;
   align-items: center;
   gap: var(--space-2);
+}
+
+.navbar__start {
+  justify-self: start;
+  display: none;
+}
+
+.navbar__end {
+  justify-self: end;
+}
+
+.navbar__logo {
+  justify-self: center;
+}
+
+.navbar__nav-link {
+  display: none;
 }
 
 .navbar__socials {
@@ -165,17 +233,7 @@ function goToAndCloseMenu(path: string) {
 }
 
 .navbar__badge {
-  max-width: 12rem;
-}
-
-.navbar__auth-buttons {
-  display: flex;
-  align-items: center;
-  gap: var(--space-2);
-}
-
-.navbar__auth-compact {
-  display: none;
+  max-width: 8rem;
 }
 
 .navbar__badge :deep(.button__label) {
@@ -183,7 +241,8 @@ function goToAndCloseMenu(path: string) {
   text-overflow: ellipsis;
 }
 
-.navbar__menu {
+.navbar__menu,
+.navbar__menu-mobile-only {
   display: flex;
   flex-direction: column;
   align-items: stretch;
@@ -194,22 +253,24 @@ function goToAndCloseMenu(path: string) {
   justify-content: center;
 }
 
-/* En dessous de ce seuil (cf. src/style.css), Newsletter/réseaux sociaux et
-   les liens Programmation/Billetterie ne sont plus affichés directement —
-   ils restent accessibles depuis le menu burger. */
-@media (max-width: 1024px) {
-  .navbar__start,
-  .navbar__nav-link,
-  .navbar__auth-buttons {
-    display: none;
+@media (min-width: 1025px) {
+  /* Newsletter/réseaux sociaux et les liens Programmation/Billetterie
+     redeviennent visibles directement dans la barre... */
+  .navbar__start {
+    display: flex;
   }
 
-  .navbar__auth-compact {
+  .navbar__nav-link {
     display: inline-flex;
   }
 
   .navbar__badge {
-    max-width: 8rem;
+    max-width: 12rem;
+  }
+
+  /* ...donc plus besoin de les dupliquer dans le menu burger. */
+  .navbar__menu-mobile-only {
+    display: none;
   }
 }
 </style>
