@@ -188,7 +188,10 @@ function goToAndCloseMenu(path: string) {
   grid-template-columns: 1fr auto 1fr;
   align-items: center;
   gap: var(--space-4);
-  padding: var(--space-4);
+  /* Marges latérales en % plutôt qu'en rem, pour que la respiration de
+     part et d'autre suive la largeur de l'écran (étroite en mobile,
+     généreuse en grand desktop) au lieu de rester une valeur fixe. */
+  padding: var(--space-4) 5%;
   /* Pas de fond plein ni de bordure : juste un filtre de flou sur ce qui
      défile derrière, teinté légèrement par le fond du thème. */
   background: color-mix(in srgb, var(--bg) 55%, transparent);
@@ -201,11 +204,12 @@ function goToAndCloseMenu(path: string) {
   display: flex;
   align-items: center;
   gap: var(--space-2);
+  width: 100%;
 }
 
 .navbar__start {
   grid-column: 1;
-  justify-self: start;
+  justify-content: flex-start;
   display: none;
 }
 
@@ -216,7 +220,7 @@ function goToAndCloseMenu(path: string) {
 
 .navbar__end {
   grid-column: 3;
-  justify-self: end;
+  justify-content: flex-end;
 }
 
 .navbar__nav-link {
