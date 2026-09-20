@@ -1,6 +1,7 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
 import { mount, type VueWrapper } from '@vue/test-utils'
 import { nextTick } from 'vue'
+import { createRouter, createWebHistory } from 'vue-router'
 import App from './App.vue'
 import { useAuthModal } from './composables/useAuthModal'
 
@@ -10,10 +11,31 @@ const { signInWithPassword, signUp } = vi.hoisted(() => ({
 }))
 
 vi.mock('./supabase.js', () => ({
-  supabase: { auth: { signInWithPassword, signUp } },
+  supabase: {
+    auth: {
+      signInWithPassword,
+      signUp,
+      // Used by useAuth.ts, pulled in transitively via Navbar.
+      getSession: vi.fn().mockResolvedValue({ data: { session: null } }),
+      onAuthStateChange: vi.fn(),
+    },
+  },
 }))
 
 let wrapper: VueWrapper | null = null
+
+async function mountApp() {
+  const router = createRouter({
+    history: createWebHistory(),
+    routes: [
+      { path: '/', component: { template: '<div />' } },
+      { path: '/profil', component: { template: '<div />' } },
+    ],
+  })
+  router.push('/')
+  await router.isReady()
+  return mount(App, { attachTo: document.body, global: { plugins: [router] } })
+}
 
 // Le contenu de la modale est téléporté dans <body> via <Teleport>, en dehors
 // de l'arbre DOM du wrapper : wrapper.find() ne peut donc pas le trouver, on
@@ -34,7 +56,7 @@ async function pressEscape(selector: string) {
   await nextTick()
 }
 
-describe('App (modale d\'authentification)', () => {
+describe("App (modale d'authentification)", () => {
   beforeEach(() => {
     signInWithPassword.mockClear()
     signUp.mockClear()
@@ -49,7 +71,7 @@ describe('App (modale d\'authentification)', () => {
   })
 
   it("affiche le formulaire de connexion quand la modale s'ouvre sur 'login'", async () => {
-    wrapper = mount(App, { attachTo: document.body })
+    wrapper = await mountApp()
     useAuthModal().open('login')
     await nextTick()
 
@@ -58,7 +80,7 @@ describe('App (modale d\'authentification)', () => {
   })
 
   it("affiche le formulaire d'inscription quand la modale s'ouvre sur 'signup'", async () => {
-    wrapper = mount(App, { attachTo: document.body })
+    wrapper = await mountApp()
     useAuthModal().open('signup')
     await nextTick()
 
@@ -67,7 +89,7 @@ describe('App (modale d\'authentification)', () => {
   })
 
   it('bascule vers le formulaire opposé sans fermer la modale', async () => {
-    wrapper = mount(App, { attachTo: document.body })
+    wrapper = await mountApp()
     useAuthModal().open('login')
     await nextTick()
 
@@ -78,7 +100,7 @@ describe('App (modale d\'authentification)', () => {
   })
 
   it('se ferme sur clic du bouton de fermeture, sans appel Supabase', async () => {
-    wrapper = mount(App, { attachTo: document.body })
+    wrapper = await mountApp()
     useAuthModal().open('login')
     await nextTick()
 
@@ -90,7 +112,7 @@ describe('App (modale d\'authentification)', () => {
   })
 
   it('se ferme sur clic du backdrop, sans appel Supabase', async () => {
-    wrapper = mount(App, { attachTo: document.body })
+    wrapper = await mountApp()
     useAuthModal().open('login')
     await nextTick()
 
@@ -101,7 +123,7 @@ describe('App (modale d\'authentification)', () => {
   })
 
   it('se ferme sur Échap, sans appel Supabase', async () => {
-    wrapper = mount(App, { attachTo: document.body })
+    wrapper = await mountApp()
     useAuthModal().open('login')
     await nextTick()
 
@@ -117,7 +139,7 @@ describe('App (modale d\'authentification)', () => {
     document.body.appendChild(trigger)
     trigger.focus()
 
-    wrapper = mount(App, { attachTo: document.body })
+    wrapper = await mountApp()
     useAuthModal().open('login')
     await nextTick()
     await nextTick()

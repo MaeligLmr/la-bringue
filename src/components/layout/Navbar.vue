@@ -1,21 +1,20 @@
 <script setup lang="ts">
+import { computed } from 'vue'
+import { useRouter } from 'vue-router'
 import { useAuthModal } from '../../composables/useAuthModal'
-import { useTheme } from '../../composables/useTheme'
-import type { ThemePreference } from '../../composables/useTheme'
+import { useAuth } from '../../composables/useAuth'
 import Button from '../ui/Button.vue'
-import Select from '../ui/Select.vue'
 
+const router = useRouter()
 const { open } = useAuthModal()
-const { preference, setPreference } = useTheme()
+const { user, isLoggedIn } = useAuth()
 
-const THEME_OPTIONS: { value: ThemePreference; label: string }[] = [
-  { value: 'system', label: 'Par défaut' },
-  { value: 'light', label: 'Clair' },
-  { value: 'dark', label: 'Sombre' },
-]
+// Falls back to the email for accounts created before the username field
+// existed, or if it's ever missing for any other reason.
+const displayName = computed(() => user.value?.user_metadata?.username ?? user.value?.email ?? '')
 
-function onThemeChange(value: string) {
-  setPreference(value as ThemePreference)
+function goToProfile() {
+  router.push('/profil')
 }
 </script>
 
@@ -23,15 +22,21 @@ function onThemeChange(value: string) {
   <header class="navbar">
     <span class="navbar__brand">La Bringue</span>
     <nav class="navbar__actions">
-      <Select
-        aria-label="Thème"
+      <template v-if="!isLoggedIn">
+        <Button color="primary" size="large" variant="outlined" @click="open('login')">Se connecter</Button>
+        <Button color="primary" size="large" variant="full" @click="open('signup')">Créer un compte</Button>
+      </template>
+      <Button
+        v-else
+        color="primary"
         size="large"
-        :model-value="preference"
-        :options="THEME_OPTIONS"
-        @update:model-value="onThemeChange"
-      />
-      <Button color="primary" size="large" variant="outlined" @click="open('login')">Se connecter</Button>
-      <Button color="primary" size="large" variant="full" @click="open('signup')">Créer un compte</Button>
+        variant="ghost"
+        icon-right="user"
+        class="navbar__badge"
+        @click="goToProfile"
+      >
+        {{ displayName }}
+      </Button>
     </nav>
   </header>
 </template>
@@ -41,7 +46,7 @@ function onThemeChange(value: string) {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 1rem;
+  padding: var(--space-4);
   border-bottom: 1px solid var(--border);
 }
 
@@ -53,6 +58,15 @@ function onThemeChange(value: string) {
 .navbar__actions {
   display: flex;
   align-items: center;
-  gap: 0.5rem;
+  gap: var(--space-2);
+}
+
+.navbar__badge {
+  max-width: 12rem;
+}
+
+.navbar__badge :deep(.button__label) {
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 </style>

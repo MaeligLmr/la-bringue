@@ -1,12 +1,15 @@
 <script setup lang="ts">
 import { nextTick, ref, watch } from 'vue'
+import { Toaster } from 'vue-sonner'
 import Navbar from './components/layout/Navbar.vue'
 import Modal from './components/layout/Modal.vue'
 import LoginForm from './components/auth/LoginForm.vue'
 import SignUpForm from './components/auth/SignUpForm.vue'
 import { useAuthModal } from './composables/useAuthModal'
+import { useTheme } from './composables/useTheme'
 
 const { isOpen, activeView, close, switchTo } = useAuthModal()
+const { resolvedTheme } = useTheme()
 
 const formRef = ref<{ focusFirstField: () => void } | null>(null)
 
@@ -18,7 +21,11 @@ watch(isOpen, async (open) => {
 </script>
 
 <template>
+  <Toaster rich-colors position="top-right" :theme="resolvedTheme" />
+
   <Navbar />
+
+  <RouterView />
 
   <Modal
     :open="isOpen"
