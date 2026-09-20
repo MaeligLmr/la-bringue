@@ -186,6 +186,9 @@
   --alert-danger-background: var(--color-red-50);
   --alert-danger-border: var(--color-red-500);
   --alert-danger-text: var(--color-red-700);
+  --alert-success-background: var(--color-blue-50);
+  --alert-success-border: var(--color-blue-500);
+  --alert-success-text: var(--color-blue-700);
 }
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme="light"]) {
@@ -373,6 +376,9 @@
     --alert-danger-background: var(--color-red-900);
     --alert-danger-border: var(--color-red-400);
     --alert-danger-text: var(--color-red-100);
+    --alert-success-background: var(--color-blue-900);
+    --alert-success-border: var(--color-blue-400);
+    --alert-success-text: var(--color-blue-100);
   }
 }
 :root[data-theme="dark"] {
@@ -476,7 +482,7 @@
   --button-danger-outlined-idle-background: rgba(253, 236, 242, 0);
   --button-danger-outlined-idle-text: var(--color-red-600);
   --button-danger-outlined-idle-border: var(--color-red-500);
-  --button-danger-outlined-hover-background: rgba(251, 196, 216, 0.5);
+  --button-danger-outlined-hover-background: var(--color-red-900);
   --button-danger-outlined-hover-text: var(--color-red-600);
   --button-danger-outlined-hover-border: var(--color-red-500);
   --button-danger-outlined-disabled-background: rgba(253, 236, 242, 0);
@@ -485,7 +491,7 @@
   --button-danger-ghost-idle-background: rgba(253, 236, 242, 0);
   --button-danger-ghost-idle-text: var(--color-red-600);
   --button-danger-ghost-idle-border: rgba(248, 27, 108, 0);
-  --button-danger-ghost-hover-background: rgba(251, 196, 216, 0.5);
+  --button-danger-ghost-hover-background: var(--color-red-900);
   --button-danger-ghost-hover-text: var(--color-red-600);
   --button-danger-ghost-hover-border: rgba(248, 27, 108, 0);
   --button-danger-ghost-disabled-background: rgba(253, 236, 242, 0);
@@ -560,4 +566,7 @@
   --alert-danger-background: var(--color-red-900);
   --alert-danger-border: var(--color-red-400);
   --alert-danger-text: var(--color-red-100);
+  --alert-success-background: var(--color-blue-900);
+  --alert-success-border: var(--color-blue-400);
+  --alert-success-text: var(--color-blue-100);
 }

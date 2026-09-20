@@ -349,19 +349,26 @@ const SELECT_TOKEN_LINES = {
   ],
 };
 
-// No Figma "Alert"/error-message component was ever exported either —
-// hand-authored from the real "red" primitive scale. Used for form error
-// messages (see LoginForm.vue, SignUpForm.vue).
+// No Figma "Alert"/message component was ever exported either —
+// hand-authored from the real primitive scales (red for danger, blue for
+// success — no green primitive exists in this palette). Used for form
+// error/success messages (see LoginForm.vue, SignUpForm.vue, ProfileView.vue).
 const ALERT_TOKEN_LINES = {
   light: [
     "--alert-danger-background: var(--color-red-50);",
     "--alert-danger-border: var(--color-red-500);",
     "--alert-danger-text: var(--color-red-700);",
+    "--alert-success-background: var(--color-blue-50);",
+    "--alert-success-border: var(--color-blue-500);",
+    "--alert-success-text: var(--color-blue-700);",
   ],
   dark: [
     "--alert-danger-background: var(--color-red-900);",
     "--alert-danger-border: var(--color-red-400);",
     "--alert-danger-text: var(--color-red-100);",
+    "--alert-success-background: var(--color-blue-900);",
+    "--alert-success-border: var(--color-blue-400);",
+    "--alert-success-text: var(--color-blue-100);",
   ],
 };
 

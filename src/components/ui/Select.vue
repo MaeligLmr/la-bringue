@@ -159,7 +159,8 @@ onBeforeUnmount(() => document.removeEventListener('click', onClickOutside))
 <style scoped>
 .select {
   position: relative;
-  display: inline-block;
+  display: block;
+  width: 100%;
 }
 
 .select__trigger {
@@ -167,10 +168,11 @@ onBeforeUnmount(() => document.removeEventListener('click', onClickOutside))
      font-size, line-height, border width) so a Select sits at the same
      height as a Button next to it — e.g. the theme switcher and the auth
      buttons in the Navbar. --select-* set by sizeStyle in the script. */
-  display: inline-flex;
+  display: flex;
   align-items: center;
   gap: var(--select-gap);
-  min-width: 9rem;
+  width: 100%;
+  box-sizing: border-box;
   padding: var(--select-padding-y) var(--select-padding-x);
   border: 1px solid var(--select-trigger-border);
   border-radius: var(--radius-medium);
@@ -234,11 +236,11 @@ onBeforeUnmount(() => document.removeEventListener('click', onClickOutside))
 .select__listbox {
   position: absolute;
   z-index: 20;
-  top: calc(100% + 0.25rem);
+  top: calc(100% + var(--space-1));
   left: 0;
   min-width: 100%;
   margin: 0;
-  padding: 0.25rem;
+  padding: var(--space-1);
   list-style: none;
   border: 1px solid var(--select-listbox-border);
   border-radius: var(--radius-medium);
@@ -247,8 +249,8 @@ onBeforeUnmount(() => document.removeEventListener('click', onClickOutside))
 }
 
 .select__option {
-  padding: 0.5rem 0.75rem;
-  border-radius: calc(var(--radius-medium) - 0.25rem);
+  padding: var(--space-2) var(--space-3);
+  border-radius: calc(var(--radius-medium) - var(--space-1));
   color: var(--select-option-text);
   white-space: nowrap;
   cursor: pointer;

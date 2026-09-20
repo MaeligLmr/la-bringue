@@ -70,20 +70,20 @@ function close() {
   width: min(90vw, 400px);
   max-height: 90vh;
   overflow-y: auto;
-  padding: 2rem 1.5rem 1.5rem;
+  padding: var(--space-8) var(--space-6) var(--space-6);
   background: var(--bg);
   color: var(--text-h);
   border: 1px solid var(--border);
-  border-radius: 8px;
+  border-radius: var(--radius-medium);
 }
 
 .modal__dialog h2 {
-  margin: 0 0 1rem;
+  margin: 0 0 var(--space-4);
 }
 
 .modal__close {
   position: absolute;
-  top: 0.5rem;
-  right: 0.5rem;
+  top: var(--space-2);
+  right: var(--space-2);
 }
 </style>
