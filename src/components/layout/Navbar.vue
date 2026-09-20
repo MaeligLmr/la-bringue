@@ -186,33 +186,26 @@ function goToAndCloseMenu(path: string) {
 }
 
 .navbar__inner {
+  /* Contexte de positionnement pour le logo, centré en absolute ci-dessous
+     — sa position ne dépend alors plus de la largeur (différente) du
+     contenu de chaque côté, contrairement à un partage flex-grow égal qui
+     ne centre vraiment que si les deux côtés font la même largeur. */
+  position: relative;
   gap: var(--space-4);
 }
 
 .navbar__start,
 .navbar__end {
   gap: var(--space-2);
-  /* flex-grow: 1 des deux côtés pour que le logo reste centré quand il y a
-     de la place (desktop). */
-  flex-grow: 1;
 }
 
 .navbar__start {
-  /* flex-basis: 0 + min-width: 0 : ce côté peut se réduire jusqu'à rien,
-     puisque son contenu (Newsletter + réseaux sociaux) est de toute façon
-     masqué (visibility, pas display: none, pour continuer à réserver sa
-     part de flex-grow sur desktop). */
-  flex-basis: 0%;
-  min-width: 0;
-  visibility: hidden;
+  display: none;
 }
 
 .navbar__end {
-  /* flex-basis: auto (par défaut) + flex-shrink: 0 : ce côté, lui bien
-     visible, ne descend jamais sous la taille de son propre contenu — sur
-     petit écran, on préfère un logo légèrement décentré à des icônes qui
-     débordent par-dessus lui. */
-  flex-shrink: 0;
+  /* Toujours collé à droite, que navbar__start soit affiché ou non. */
+  margin-left: auto;
 }
 
 .navbar__nav-link {
@@ -223,6 +216,13 @@ function goToAndCloseMenu(path: string) {
   display: flex;
   align-items: center;
   gap: var(--space-1);
+}
+
+.navbar__logo {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
 }
 
 .navbar__logo img {
@@ -256,7 +256,7 @@ function goToAndCloseMenu(path: string) {
   /* Newsletter/réseaux sociaux et les liens Programmation/Billetterie
      redeviennent visibles directement dans la barre... */
   .navbar__start {
-    visibility: visible;
+    display: flex;
   }
 
   .navbar__nav-link {
