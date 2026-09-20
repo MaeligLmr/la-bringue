@@ -2,6 +2,9 @@ import { createRouter, createWebHistory } from 'vue-router'
 import { useAuth } from '../composables/useAuth'
 import HomeView from '../views/HomeView.vue'
 import ProfileView from '../views/ProfileView.vue'
+import ProgrammationView from '../views/ProgrammationView.vue'
+import BilletterieView from '../views/BilletterieView.vue'
+import MonProgrammeView from '../views/MonProgrammeView.vue'
 
 declare module 'vue-router' {
   interface RouteMeta {
@@ -14,6 +17,9 @@ export const router = createRouter({
   routes: [
     { path: '/', name: 'home', component: HomeView },
     { path: '/profil', name: 'profil', component: ProfileView, meta: { requiresAuth: true } },
+    { path: '/programmation', name: 'programmation', component: ProgrammationView },
+    { path: '/billetterie', name: 'billetterie', component: BilletterieView },
+    { path: '/mon-programme', name: 'mon-programme', component: MonProgrammeView },
   ],
 })
 

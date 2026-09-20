@@ -27,6 +27,9 @@ async function mountNavbar() {
     routes: [
       { path: '/', component: { template: '<div />' } },
       { path: '/profil', component: { template: '<div />' } },
+      { path: '/programmation', component: { template: '<div />' } },
+      { path: '/billetterie', component: { template: '<div />' } },
+      { path: '/mon-programme', component: { template: '<div />' } },
     ],
   })
   router.push('/')
@@ -83,6 +86,69 @@ describe('Navbar', () => {
     await wrapper.vm.$nextTick()
 
     expect(wrapper.text()).toContain('alice@example.com')
+
+    wrapper.unmount()
+  })
+
+  it('le clic sur le logo ramène à l\'accueil', async () => {
+    mockSupabase(null)
+    const { wrapper, router } = await mountNavbar()
+    await router.push('/profil')
+
+    await wrapper.find('.navbar__logo').trigger('click')
+    await vi.waitFor(() => expect(router.currentRoute.value.path).toBe('/'))
+
+    wrapper.unmount()
+  })
+
+  it('les liens Programmation et Billetterie de la barre naviguent vers les bonnes pages', async () => {
+    mockSupabase(null)
+    const { wrapper, router } = await mountNavbar()
+
+    const [billetterie, programmation] = wrapper.findAll('.navbar__nav-link')
+    expect(billetterie.text()).toBe('Billetterie')
+    expect(programmation.text()).toBe('Programmation')
+
+    await billetterie.trigger('click')
+    await vi.waitFor(() => expect(router.currentRoute.value.path).toBe('/billetterie'))
+
+    wrapper.unmount()
+  })
+
+  it('le cœur "Mon programme" navigue vers /mon-programme', async () => {
+    mockSupabase(null)
+    const { wrapper, router } = await mountNavbar()
+
+    await wrapper.find('button[aria-label="Mon programme"]').trigger('click')
+    await vi.waitFor(() => expect(router.currentRoute.value.path).toBe('/mon-programme'))
+
+    wrapper.unmount()
+  })
+
+  it('le menu burger contient Programmation, Billetterie, Newsletter et les réseaux sociaux, et navigue au clic', async () => {
+    mockSupabase(null)
+    const { wrapper, router } = await mountNavbar()
+
+    expect(document.body.textContent).not.toContain('Menu')
+
+    await wrapper.find('button[aria-label="Ouvrir le menu"]').trigger('click')
+    await wrapper.vm.$nextTick()
+
+    // Le contenu de la modale est téléporté dans <body>, hors de l'arbre du
+    // wrapper — on interagit donc directement avec le DOM réel.
+    const menu = document.body.querySelector('.navbar__menu') as HTMLElement
+    expect(menu).not.toBeNull()
+    expect(menu.textContent).toContain('Programmation')
+    expect(menu.textContent).toContain('Billetterie')
+    expect(menu.textContent).toContain('Newsletter')
+    expect(menu.querySelectorAll('[aria-label="Instagram"]').length).toBe(1)
+
+    const programmationButton = Array.from(menu.querySelectorAll('button')).find(
+      (button) => button.textContent?.trim() === 'Programmation'
+    )
+    programmationButton?.click()
+    await vi.waitFor(() => expect(router.currentRoute.value.path).toBe('/programmation'))
+    await vi.waitFor(() => expect(document.body.textContent).not.toContain('Menu'))
 
     wrapper.unmount()
   })
