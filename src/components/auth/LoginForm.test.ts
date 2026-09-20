@@ -4,10 +4,13 @@ import { AuthApiError } from '@supabase/supabase-js'
 import LoginForm from './LoginForm.vue'
 
 const { signInWithPassword } = vi.hoisted(() => ({ signInWithPassword: vi.fn() }))
+const { toast } = vi.hoisted(() => ({ toast: { success: vi.fn(), error: vi.fn() } }))
 
 vi.mock('../../supabase.js', () => ({
   supabase: { auth: { signInWithPassword } },
 }))
+
+vi.mock('vue-sonner', () => ({ toast }))
 
 function deferred<T>() {
   let resolve!: (value: T) => void
@@ -22,6 +25,8 @@ function deferred<T>() {
 describe('LoginForm', () => {
   beforeEach(() => {
     signInWithPassword.mockReset()
+    toast.success.mockClear()
+    toast.error.mockClear()
   })
 
   it('affiche les erreurs de validation et ne contacte pas Supabase si les champs sont vides', async () => {
@@ -47,7 +52,7 @@ describe('LoginForm', () => {
     await wrapper.find('#login-email').setValue('alice@example.com')
     await wrapper.find('#login-password').setValue('password123')
     await wrapper.find('form').trigger('submit')
-    await vi.waitFor(() => expect(wrapper.text()).toContain('Email ou mot de passe incorrect'))
+    await vi.waitFor(() => expect(toast.error).toHaveBeenCalledWith('Email ou mot de passe incorrect.'))
 
     expect(document.activeElement).toBe(wrapper.find('#login-email').element)
 
@@ -64,9 +69,9 @@ describe('LoginForm', () => {
     await wrapper.find('#login-email').setValue('alice@example.com')
     await wrapper.find('#login-password').setValue('password123')
     await wrapper.find('form').trigger('submit')
-    await vi.waitFor(() => expect(wrapper.text()).toContain("n'a pas encore été confirmé"))
+    await vi.waitFor(() => expect(toast.error).toHaveBeenCalledWith(expect.stringContaining("n'a pas encore été confirmé")))
 
-    expect(wrapper.text()).not.toContain('Email ou mot de passe incorrect')
+    expect(toast.error).not.toHaveBeenCalledWith('Email ou mot de passe incorrect.')
     expect(document.activeElement).toBe(wrapper.find('#login-email').element)
 
     wrapper.unmount()
@@ -100,7 +105,7 @@ describe('LoginForm', () => {
     await wrapper.find('form').trigger('submit')
 
     await vi.waitFor(
-      () => expect(wrapper.text()).toContain('Impossible de joindre le serveur'),
+      () => expect(toast.error).toHaveBeenCalledWith(expect.stringContaining('Impossible de joindre le serveur')),
       { timeout: 11000 }
     )
 
@@ -109,7 +114,7 @@ describe('LoginForm', () => {
 
   it('émet "switch" au clic sur le lien de bascule', async () => {
     const wrapper = mount(LoginForm)
-    await wrapper.find('button[type="button"]').trigger('click')
+    await wrapper.find('.auth-form__switch').trigger('click')
     expect(wrapper.emitted('switch')).toBeTruthy()
   })
 
