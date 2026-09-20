@@ -61,6 +61,7 @@ const heroBackgroundStyle = {
   display: flex;
   flex-direction: column;
   align-items: center;
+  justify-content: center;
   gap: var(--hero-section-gap);
   padding: var(--space-8) 5% var(--hero-section-padding-bottom);
   text-align: center;
@@ -70,30 +71,69 @@ const heroBackgroundStyle = {
 }
 
 .hero--home {
+  /* Occupe tout le viewport restant sous la navbar (fixed, donc hors du
+     flux — voir --navbar-height, mesurée dans Navbar.vue). */
+  min-height: calc(100vh - var(--navbar-height));
   padding-top: var(--space-10);
   padding-bottom: calc(var(--hero-section-padding-bottom) + var(--space-4));
+  box-sizing: border-box;
 }
 
 .hero__title {
+  position: relative;
   display: flex;
   align-items: center;
-  gap: var(--space-2);
+  justify-content: center;
 }
 
 .hero h1 {
+  position: relative;
+  /* Au-dessus des étoiles, qui chevauchent largement le texte. */
+  z-index: 1;
   margin: 0;
   font-family: var(--hero-font);
   color: var(--hero-section-h1);
+  /* Mobile first : --font-size-hero (9.375rem) est bien trop grand pour un
+     écran de téléphone — "LA BRINGUE" passerait sur deux lignes et
+     casserait la composition avec les étoiles (voir @media plus bas). */
+  font-size: var(--font-size-heading-1);
+  line-height: var(--line-height-heading-1);
 }
 
 .hero__star {
-  width: 3.5rem;
-  height: 3.5rem;
+  position: relative;
+  width: 6rem;
+  height: 3.3rem;
   flex-shrink: 0;
 }
 
+.hero__star--left {
+  margin-right: -1.75rem;
+}
+
 .hero__star--right {
+  margin-left: -1.75rem;
   transform: scaleX(-1);
+}
+
+@media (min-width: 1025px) {
+  .hero h1 {
+    font-size: var(--font-size-hero);
+    line-height: var(--line-height-hero);
+  }
+
+  .hero__star {
+    width: 12rem;
+    height: 6.6rem;
+  }
+
+  .hero__star--left {
+    margin-right: -4rem;
+  }
+
+  .hero__star--right {
+    margin-left: -4rem;
+  }
 }
 
 .hero__star-shape {
@@ -107,6 +147,7 @@ const heroBackgroundStyle = {
 }
 
 .hero__dates {
+  position: relative;
   margin: 0;
   color: var(--hero-section-text);
 }
