@@ -50,9 +50,9 @@ const heroBackgroundStyle = {
       </svg>
     </div>
 
-    <p class="hero__dates"><strong>LE FESTIVAL</strong> du 28 au 30 août</p>
+    <h3 class="hero__dates">LE FESTIVAL<br />du 28 au 30 août</h3>
 
-    <Button v-if="homePage" color="primary" variant="full" @click="goToAbout">En savoir plus</Button>
+    <Button v-if="homePage" color="secondary" variant="full" @click="goToAbout">En savoir plus</Button>
   </section>
 </template>
 
