@@ -3,6 +3,7 @@ import { reactive, ref, watchEffect } from 'vue'
 import { useRouter } from 'vue-router'
 import { toast } from 'vue-sonner'
 import { useAuth } from '../composables/useAuth'
+import { useAuthModal } from '../composables/useAuthModal'
 import { useTheme } from '../composables/useTheme'
 import type { ThemePreference } from '../composables/useTheme'
 import { validateProfileFields, type FieldErrors } from '../lib/auth-validation'
@@ -14,7 +15,8 @@ import Select from '../components/ui/Select.vue'
 import Icon from '../components/ui/Icon.vue'
 
 const router = useRouter()
-const { user, signOut } = useAuth()
+const { user, isLoggedIn, signOut } = useAuth()
+const { open } = useAuthModal()
 const { preference, setPreference } = useTheme()
 
 const THEME_OPTIONS: { value: ThemePreference; label: string }[] = [
@@ -97,7 +99,15 @@ async function handleSignOut() {
       <h1>Mon profil</h1>
     </div>
 
-    <form class="profile__form" novalidate @submit.prevent="handleSave">
+    <div v-if="!isLoggedIn" class="profile__guest">
+      <p>Connecte-toi ou crée un compte pour accéder à ton profil.</p>
+      <div class="profile__guest-actions">
+        <Button color="primary" variant="outlined" @click="open('login')">Se connecter</Button>
+        <Button color="primary" variant="full" @click="open('signup')">Créer un compte</Button>
+      </div>
+    </div>
+
+    <form v-else class="profile__form" novalidate @submit.prevent="handleSave">
       <div class="profile__field">
         <label for="profile-first-name">Prénom <span class="profile__required" aria-hidden="true">*</span></label>
         <input
@@ -162,7 +172,13 @@ async function handleSignOut() {
       />
     </div>
 
-    <Button color="danger" variant="outlined" class="profile__sign-out" @click="handleSignOut">
+    <Button
+      v-if="isLoggedIn"
+      color="danger"
+      variant="outlined"
+      class="profile__sign-out"
+      @click="handleSignOut"
+    >
       Se déconnecter
     </Button>
   </main>
@@ -187,6 +203,18 @@ async function handleSignOut() {
 
 .profile__header h1 {
   margin: 0;
+}
+
+.profile__guest {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+
+.profile__guest-actions {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
 }
 
 .profile__form {
