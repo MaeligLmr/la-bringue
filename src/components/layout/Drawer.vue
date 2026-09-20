@@ -81,7 +81,10 @@ function close() {
   height: 100%;
   overflow-y: auto;
   box-sizing: border-box;
-  padding: var(--space-8) var(--space-6) var(--space-6);
+  /* padding-top dégagé pour ne jamais passer sous le bouton de fermeture
+     (position: absolute, donc pas pris en compte par le flux normal),
+     avec ou sans titre. */
+  padding: calc(var(--space-8) + var(--space-4)) var(--space-6) var(--space-6);
   background: var(--bg);
   color: var(--text-h);
   border-left: 1px solid var(--border);
