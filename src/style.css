@@ -25,7 +25,15 @@
   /* Chargées via Google Fonts, voir index.html. */
   --sans: var(--font-family-body), system-ui, 'Segoe UI', Roboto, sans-serif;
   --heading: var(--font-family-headings-root), system-ui, 'Segoe UI', Roboto, sans-serif;
+  --hero-font: var(--font-family-hero), var(--heading);
   --mono: ui-monospace, Consolas, monospace;
+
+  /* Valeur par défaut avant que Navbar.vue ne mesure sa vraie hauteur (voir
+     son ResizeObserver) — sans ça, .app__content n'a aucun padding-top au
+     tout premier rendu (la variable n'existe pas encore) et le contenu
+     démarre un instant sous la navbar fixed, avant de sauter à sa place.
+     Proche de la hauteur réelle pour que ce réglage soit imperceptible. */
+  --navbar-height: 5rem;
 
   /* Mobile first : 16px par défaut, remonté à 18px à partir du même seuil
      desktop que la Navbar (voir src/components/layout/Navbar.vue). */
