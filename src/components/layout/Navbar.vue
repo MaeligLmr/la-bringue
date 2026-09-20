@@ -218,13 +218,9 @@ function goToAndCloseMenu(path: string) {
   gap: var(--space-1);
 }
 
-.navbar__logo {
-  position: absolute;
-  left: 50%;
-  top: 50%;
-  transform: translate(-50%, -50%);
-}
-
+/* Mobile : le logo reste dans le flux normal (navbar__start est masqué,
+   donc il se retrouve naturellement premier de la ligne, à gauche) — voir
+   le bloc @media plus bas pour le centrage en absolute sur desktop. */
 .navbar__logo img {
   display: block;
   height: 1.75rem;
@@ -270,6 +266,15 @@ function goToAndCloseMenu(path: string) {
   /* ...donc plus besoin de les dupliquer dans le menu burger. */
   .navbar__menu-mobile-only {
     display: none;
+  }
+
+  /* Desktop : centré, indépendamment de la largeur (différente) de
+     chaque côté — voir navbar__inner (position: relative) plus haut. */
+  .navbar__logo {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
   }
 }
 </style>
