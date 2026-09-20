@@ -64,9 +64,13 @@ const patternStyle = {
 .carousel-tile {
   position: relative;
   overflow: hidden;
-  /* Largeur fixe : la tile garde sa taille de carte dans un carrousel
-     plutôt que de s'étirer à la largeur de son conteneur. */
+  /* Largeur ET hauteur fixes : toutes les tiles doivent faire la même
+     taille, y compris en colonne mobile (voir Carousel.vue) où le stretch
+     flex d'une rangée ne s'applique pas — un height: 100% ne suffisait
+     donc qu'en desktop (rangée). Généreux pour limiter le risque de
+     contenu tronqué (overflow: hidden) avec une description plus longue. */
   width: 16rem;
+  height: 20rem;
   box-sizing: border-box;
   border-radius: var(--carrousel-tile-radius);
   padding: var(--carrousel-tile-padding-y) var(--carrousel-tile-padding-x);
@@ -97,6 +101,7 @@ const patternStyle = {
 
 .carousel-tile__content {
   position: relative;
+  height: 100%;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -112,6 +117,10 @@ const patternStyle = {
 }
 
 .carousel-tile__cta {
-  margin-top: var(--space-2);
+  /* auto (et non une valeur fixe) : pousse le CTA en bas quelle que soit
+     la hauteur de la tile (voir height: 100% ci-dessus) — sinon, à hauteur
+     égale, le bouton flotterait à des positions différentes selon la
+     longueur de chaque description. */
+  margin-top: auto;
 }
 </style>
