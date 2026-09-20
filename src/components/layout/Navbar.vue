@@ -74,61 +74,63 @@ function goToAndCloseMenu(path: string) {
 
 <template>
   <header ref="navbarEl" class="navbar">
-    <div class="navbar__start">
-      <Button color="secondary" variant="outlined" class="navbar__newsletter">Newsletter</Button>
-      <div class="navbar__socials">
+    <div class="navbar__inner w-full flex items-center">
+      <div class="navbar__start flex items-center justify-start">
+        <Button color="secondary" variant="outlined" class="navbar__newsletter">Newsletter</Button>
+        <div class="navbar__socials">
+          <Button
+            v-for="social in SOCIALS"
+            :key="social.icon"
+            color="secondary"
+            variant="ghost"
+            :icon-only="social.icon"
+            :label="social.label"
+          />
+        </div>
+      </div>
+
+      <RouterLink to="/" class="navbar__logo" aria-label="Aller à l'accueil">
+        <img :src="logoSrc" alt="La Bringue" />
+      </RouterLink>
+
+      <div class="navbar__end flex items-center justify-end">
+        <Button color="primary" variant="full" class="navbar__nav-link" @click="goTo('/billetterie')">
+          Billetterie
+        </Button>
+        <Button color="primary" variant="outlined" class="navbar__nav-link" @click="goTo('/programmation')">
+          Programmation
+        </Button>
+
+        <Button color="primary" variant="ghost" icon-only="heart" label="Mon programme" @click="goTo('/mon-programme')" />
+
         <Button
-          v-for="social in SOCIALS"
-          :key="social.icon"
-          color="secondary"
+          v-if="isLoggedIn"
+          color="primary"
+          size="medium"
           variant="ghost"
-          :icon-only="social.icon"
-          :label="social.label"
+          icon-right="user"
+          class="navbar__badge"
+          @click="goTo('/profil')"
+        >
+          {{ displayName }}
+        </Button>
+        <Button
+          v-else
+          color="primary"
+          variant="ghost"
+          icon-only="user"
+          label="Profil"
+          @click="goTo('/profil')"
+        />
+
+        <Button
+          color="primary"
+          variant="ghost"
+          icon-only="menu"
+          label="Ouvrir le menu"
+          @click="isMenuOpen = true"
         />
       </div>
-    </div>
-
-    <RouterLink to="/" class="navbar__logo" aria-label="Aller à l'accueil">
-      <img :src="logoSrc" alt="La Bringue" />
-    </RouterLink>
-
-    <div class="navbar__end">
-      <Button color="primary" variant="full" class="navbar__nav-link" @click="goTo('/billetterie')">
-        Billetterie
-      </Button>
-      <Button color="primary" variant="outlined" class="navbar__nav-link" @click="goTo('/programmation')">
-        Programmation
-      </Button>
-
-      <Button color="primary" variant="ghost" icon-only="heart" label="Mon programme" @click="goTo('/mon-programme')" />
-
-      <Button
-        v-if="isLoggedIn"
-        color="primary"
-        size="medium"
-        variant="ghost"
-        icon-right="user"
-        class="navbar__badge"
-        @click="goTo('/profil')"
-      >
-        {{ displayName }}
-      </Button>
-      <Button
-        v-else
-        color="primary"
-        variant="ghost"
-        icon-only="user"
-        label="Profil"
-        @click="goTo('/profil')"
-      />
-
-      <Button
-        color="primary"
-        variant="ghost"
-        icon-only="menu"
-        label="Ouvrir le menu"
-        @click="isMenuOpen = true"
-      />
     </div>
 
     <Drawer :open="isMenuOpen" :top="`${navbarHeight}px`" @close="isMenuOpen = false">
@@ -171,56 +173,46 @@ function goToAndCloseMenu(path: string) {
 </template>
 
 <style scoped>
-/* Mobile first : les règles de base ci-dessous décrivent la mise en page
-   mobile ; le bloc @media (min-width: 1025px) plus bas ajoute/étend pour
-   desktop, plutôt que l'inverse. */
 .navbar {
   position: fixed;
   top: 0;
   left: 0;
   right: 0;
   z-index: 10;
-  display: grid;
-  /* Colonnes latérales de largeur égale (quel que soit leur contenu),
-     pour que le logo au centre reste visuellement centré plutôt que
-     poussé par le côté le plus large (cf. justify-content: space-between,
-     qui ne garantit pas ça). */
-  grid-template-columns: 1fr auto 1fr;
-  align-items: center;
-  gap: var(--space-4);
-  /* Marges latérales en % plutôt qu'en rem, pour que la respiration de
-     part et d'autre suive la largeur de l'écran (étroite en mobile,
-     généreuse en grand desktop) au lieu de rester une valeur fixe. */
-  padding: var(--space-4) 5%;
-  /* Pas de fond plein ni de bordure : juste un filtre de flou sur ce qui
-     défile derrière, teinté légèrement par le fond du thème. */
+  padding: var(--space-4);
   background: color-mix(in srgb, var(--bg) 55%, transparent);
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
 }
 
+.navbar__inner {
+  gap: var(--space-4);
+}
+
 .navbar__start,
 .navbar__end {
-  display: flex;
-  align-items: center;
   gap: var(--space-2);
-  width: 100%;
+  /* flex-grow: 1 des deux côtés pour que le logo reste centré quand il y a
+     de la place (desktop). */
+  flex-grow: 1;
 }
 
 .navbar__start {
-  grid-column: 1;
-  justify-content: flex-start;
-  display: none;
-}
-
-.navbar__logo {
-  grid-column: 2;
-  justify-self: center;
+  /* flex-basis: 0 + min-width: 0 : ce côté peut se réduire jusqu'à rien,
+     puisque son contenu (Newsletter + réseaux sociaux) est de toute façon
+     masqué (visibility, pas display: none, pour continuer à réserver sa
+     part de flex-grow sur desktop). */
+  flex-basis: 0%;
+  min-width: 0;
+  visibility: hidden;
 }
 
 .navbar__end {
-  grid-column: 3;
-  justify-content: flex-end;
+  /* flex-basis: auto (par défaut) + flex-shrink: 0 : ce côté, lui bien
+     visible, ne descend jamais sous la taille de son propre contenu — sur
+     petit écran, on préfère un logo légèrement décentré à des icônes qui
+     débordent par-dessus lui. */
+  flex-shrink: 0;
 }
 
 .navbar__nav-link {
@@ -264,7 +256,7 @@ function goToAndCloseMenu(path: string) {
   /* Newsletter/réseaux sociaux et les liens Programmation/Billetterie
      redeviennent visibles directement dans la barre... */
   .navbar__start {
-    display: flex;
+    visibility: visible;
   }
 
   .navbar__nav-link {
