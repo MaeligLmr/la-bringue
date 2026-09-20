@@ -174,13 +174,22 @@ function goToAndCloseMenu(path: string) {
 
 <style scoped>
 .navbar {
+  /* fixed : reste collée en haut pendant tout le scroll, et flotte
+     par-dessus le contenu (transparente/floutée) au lieu de réserver sa
+     propre place — le Hero peut ainsi occuper tout le viewport (100vh) en
+     s'étendant derrière elle. Son contenu (texte/étoiles), lui, reçoit son
+     propre padding-top pour rester lisible sous la nav (voir Hero.vue),
+     comme chaque page qui n'a pas de Hero (ex. ProfileView). */
   position: fixed;
   top: 0;
   left: 0;
   right: 0;
   z-index: 10;
   padding: var(--space-4);
-  background: color-mix(in srgb, var(--bg) 55%, transparent);
+  /* Un vrai flou, pas un filtre blanchi : opacité de la teinte très basse
+     pour laisser transparaître les couleurs derrière (flouées), plutôt
+     qu'un aplat clair qui les délave. */
+  background: color-mix(in srgb, var(--bg) 20%, transparent);
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
 }

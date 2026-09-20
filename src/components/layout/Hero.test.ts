@@ -25,17 +25,19 @@ describe('Hero', () => {
     expect(wrapper.text()).toContain('du 28 au 30 août')
   })
 
-  it("variante par défaut : une seule étoile, pas de bouton \"En savoir plus\"", async () => {
+  it('variante par défaut : une seule étoile, pas de bouton "En savoir plus"', async () => {
     const { wrapper } = await mountHero()
 
-    expect(wrapper.findAll('.hero__star')).toHaveLength(1)
+    expect(wrapper.find('.hero__star--left').exists()).toBe(true)
+    expect(wrapper.find('.hero__star--right').exists()).toBe(false)
     expect(wrapper.find('button').exists()).toBe(false)
   })
 
   it('variante home-page : deux étoiles, bouton "En savoir plus" qui navigue vers /a-propos', async () => {
     const { wrapper, router } = await mountHero({ homePage: true })
 
-    expect(wrapper.findAll('.hero__star')).toHaveLength(2)
+    expect(wrapper.find('.hero__star--left').exists()).toBe(true)
+    expect(wrapper.find('.hero__star--right').exists()).toBe(true)
 
     const button = wrapper.find('button')
     expect(button.exists()).toBe(true)

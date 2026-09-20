@@ -94,10 +94,7 @@ async function handleSignOut() {
 
 <template>
   <main class="profile">
-    <div class="profile__header">
-      <Icon name="user" size="large" />
-      <h1>Mon profil</h1>
-    </div>
+    
 
     <div v-if="!isLoggedIn" class="profile__guest">
       <p>Connecte-toi ou crée un compte pour accéder à ton profil.</p>
@@ -188,18 +185,17 @@ async function handleSignOut() {
 .profile {
   max-width: 24rem;
   margin: 0 auto;
-  padding: var(--space-8) var(--space-4);
+  /* Seule page sans Hero : la navbar est en position: absolute (flotte
+     par-dessus la première section de chaque page, voir Navbar.vue) et
+     ne réserve donc plus sa place — il faut compenser ici explicitement. */
+  padding: calc(var(--navbar-height) + var(--space-8)) var(--space-4) var(--space-8);
+  box-sizing: border-box;
   display: flex;
   flex-direction: column;
   align-items: flex-start;
   gap: var(--space-6);
 }
 
-.profile__header {
-  display: flex;
-  align-items: center;
-  gap: var(--space-3);
-}
 
 .profile__header h1 {
   margin: 0;

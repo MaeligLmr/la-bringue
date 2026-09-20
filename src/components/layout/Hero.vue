@@ -2,6 +2,7 @@
 import { useRouter } from 'vue-router'
 import Button from '../ui/Button.vue'
 import heroBg from '../../assets/hero/hero-bg.png'
+import starIcon from '../../assets/hero/étoile top.svg'
 
 withDefaults(defineProps<{ homePage?: boolean }>(), { homePage: false })
 
@@ -24,131 +25,160 @@ const heroBackgroundStyle = {
 
 <template>
   <section class="hero" :class="{ 'hero--home': homePage }" :style="heroBackgroundStyle">
+    <!-- Étoiles en position: absolute (voir <style>) : purement
+         décoratives, retirées du flux, elles ne participent plus à la
+         largeur de .hero__title — le titre reste centré sur lui-même quel
+         que soit leur nombre (1 en générique, 2 sur home). -->
     <div class="hero__title">
-      <svg class="hero__star hero__star--left" viewBox="20 75 300 165" fill="none" aria-hidden="true">
-        <path
-          class="hero__star-shape"
-          d="M70.705 101.361C71.7456 91.8866 83.1988 87.7181 90.0862 94.307L108.806 112.217C111.977 115.25 117.103 115.512 120.954 113.056C134.359 104.509 165.721 88.5772 216.6 85.668C254.754 83.4864 284.967 91.0117 306.032 99.3999C308.675 100.452 310.548 101.998 311.593 103.825C312.645 105.668 312.797 107.707 312.129 109.545C310.787 113.24 306.439 115.6 300.835 114.847C287.13 113.007 271.413 111.3 256.479 110.599C241.52 109.898 227.449 110.212 216.989 112.369C172.533 121.537 153.98 145.08 148.114 154.62C146.818 156.728 146.921 159.402 148.242 161.716L163.163 187.841C167.891 196.117 161.074 206.222 151.629 204.94L122.131 200.934C119.359 200.557 116.578 201.569 114.697 203.639L94.6734 225.67C88.2625 232.723 76.5468 229.364 74.8478 219.985L69.5411 190.691C69.0423 187.939 67.2213 185.607 64.671 184.458L37.5323 172.223C28.8429 168.305 28.4173 156.125 36.8122 151.611L63.0312 137.512C65.4951 136.187 67.1499 133.734 67.4554 130.953L70.705 101.361Z"
-        />
-        <path
-          class="hero__star-shape hero__star-shape--inner"
-          d="M73.6874 101.135C74.4566 94.1318 82.9225 91.0504 88.0132 95.9206L106.732 113.83C111.028 117.94 117.705 118.132 122.567 115.031C135.597 106.723 166.47 90.985 216.771 88.1089C254.429 85.9556 284.204 93.3843 304.921 101.634C307.093 102.499 308.356 103.655 308.987 104.759C309.61 105.848 309.672 106.97 309.31 107.966C308.592 109.942 305.902 111.947 301.234 111.32C287.481 109.474 271.672 107.755 256.62 107.049C241.594 106.344 227.22 106.641 216.383 108.876C170.978 118.239 151.777 142.379 145.559 152.495C143.592 155.693 143.869 159.554 145.637 162.649L160.558 188.774C164.052 194.892 159.015 202.36 152.034 201.413L122.534 197.407C118.783 196.898 115.022 198.267 112.476 201.068L92.4539 223.098C87.7154 228.311 79.0557 225.828 77.7999 218.896L72.4935 189.603C71.8188 185.879 69.3542 182.724 65.9037 181.169L38.7649 168.933C32.3424 166.038 32.0282 157.035 38.2332 153.698L64.4522 139.599C67.7858 137.807 70.0243 134.489 70.4375 130.726L73.6874 101.135Z"
-        />
-      </svg>
+      <img class="hero__star hero__star--left" :src="starIcon" alt="" aria-hidden="true" />
 
       <h1>LA BRINGUE</h1>
 
-      <svg v-if="homePage" class="hero__star hero__star--right" viewBox="20 75 300 165" fill="none" aria-hidden="true">
-        <path
-          class="hero__star-shape"
-          d="M70.705 101.361C71.7456 91.8866 83.1988 87.7181 90.0862 94.307L108.806 112.217C111.977 115.25 117.103 115.512 120.954 113.056C134.359 104.509 165.721 88.5772 216.6 85.668C254.754 83.4864 284.967 91.0117 306.032 99.3999C308.675 100.452 310.548 101.998 311.593 103.825C312.645 105.668 312.797 107.707 312.129 109.545C310.787 113.24 306.439 115.6 300.835 114.847C287.13 113.007 271.413 111.3 256.479 110.599C241.52 109.898 227.449 110.212 216.989 112.369C172.533 121.537 153.98 145.08 148.114 154.62C146.818 156.728 146.921 159.402 148.242 161.716L163.163 187.841C167.891 196.117 161.074 206.222 151.629 204.94L122.131 200.934C119.359 200.557 116.578 201.569 114.697 203.639L94.6734 225.67C88.2625 232.723 76.5468 229.364 74.8478 219.985L69.5411 190.691C69.0423 187.939 67.2213 185.607 64.671 184.458L37.5323 172.223C28.8429 168.305 28.4173 156.125 36.8122 151.611L63.0312 137.512C65.4951 136.187 67.1499 133.734 67.4554 130.953L70.705 101.361Z"
-        />
-        <path
-          class="hero__star-shape hero__star-shape--inner"
-          d="M73.6874 101.135C74.4566 94.1318 82.9225 91.0504 88.0132 95.9206L106.732 113.83C111.028 117.94 117.705 118.132 122.567 115.031C135.597 106.723 166.47 90.985 216.771 88.1089C254.429 85.9556 284.204 93.3843 304.921 101.634C307.093 102.499 308.356 103.655 308.987 104.759C309.61 105.848 309.672 106.97 309.31 107.966C308.592 109.942 305.902 111.947 301.234 111.32C287.481 109.474 271.672 107.755 256.62 107.049C241.594 106.344 227.22 106.641 216.383 108.876C170.978 118.239 151.777 142.379 145.559 152.495C143.592 155.693 143.869 159.554 145.637 162.649L160.558 188.774C164.052 194.892 159.015 202.36 152.034 201.413L122.534 197.407C118.783 196.898 115.022 198.267 112.476 201.068L92.4539 223.098C87.7154 228.311 79.0557 225.828 77.7999 218.896L72.4935 189.603C71.8188 185.879 69.3542 182.724 65.9037 181.169L38.7649 168.933C32.3424 166.038 32.0282 157.035 38.2332 153.698L64.4522 139.599C67.7858 137.807 70.0243 134.489 70.4375 130.726L73.6874 101.135Z"
-        />
-      </svg>
+      <img v-if="homePage" class="hero__star hero__star--right" :src="starIcon" alt="" aria-hidden="true" />
+
+      <!-- En absolute par rapport à .hero__title (voir <style>) : le texte
+           et le bouton se placent sous "LA BRINGUE" sans influer sur son
+           propre centrage dans la section. -->
+      <div class="hero__below">
+        <h3 class="hero__dates">LE FESTIVAL<br />du 28 au 30 août</h3>
+
+        <Button v-if="homePage" color="secondary" variant="full" size="large" @click="goToAbout">En savoir plus</Button>
+      </div>
     </div>
-
-    <h3 class="hero__dates">LE FESTIVAL<br />du 28 au 30 août</h3>
-
-    <Button v-if="homePage" color="secondary" variant="full" @click="goToAbout">En savoir plus</Button>
   </section>
 </template>
 
 <style scoped>
 .hero {
+  /* Flex + align/justify: center centre .hero__title (seul enfant en flux
+     normal) au milieu de la section, sans calcul manuel de position — voir
+     .hero__title. */
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: var(--hero-section-gap);
-  padding: var(--space-8) 5% var(--hero-section-padding-bottom);
+  /* padding-top inclut la hauteur de la navbar (fixed, donc flottant
+     par-dessus le Hero — voir Navbar.vue) : le FOND du Hero s'étend bien
+     jusqu'en haut, derrière elle, mais son CONTENU (texte/étoiles) doit
+     rester dégagé pour ne pas passer dessous. */
+  padding: calc(var(--navbar-height) + var(--space-8)) 5% var(--hero-section-padding-bottom);
+  /* .hero__below (texte + bouton) est en position: absolute par rapport à
+     .hero__title et ne contribue donc plus à la hauteur par le flux normal
+     — il faut une hauteur minimale explicite pour la variante générique
+     (la home a déjà min-height: 100vh via .hero--home) pour ne pas le
+     laisser déborder sous la section. */
+  min-height: 20rem;
   text-align: center;
   background-color: var(--main-image-mask);
   background-size: cover;
   background-position: center;
+  box-sizing: border-box;
+  /* Les étoiles débordent volontairement de .hero__title (voir
+     .hero__star) ; on les clippe au bord de la section pour ne jamais
+     provoquer de scroll horizontal ni déborder sur les sections voisines. */
+  overflow: hidden;
 }
 
 .hero--home {
-  /* Occupe tout le viewport restant sous la navbar (fixed, donc hors du
-     flux — voir --navbar-height, mesurée dans Navbar.vue). */
-  min-height: calc(100vh - var(--navbar-height));
-  padding-top: var(--space-10);
+  /* Plein viewport : la navbar flotte par-dessus (fixed) au lieu de
+     réserver sa propre place, donc pas de calc(100vh - hauteur nav) ici. */
+  min-height: 100vh;
+  padding-top: calc(var(--navbar-height) + var(--space-10));
   padding-bottom: calc(var(--hero-section-padding-bottom) + var(--space-4));
-  box-sizing: border-box;
 }
 
 .hero__title {
+  /* Contexte de positionnement pour les étoiles et .hero__below (voir plus
+     bas), qui ne doivent pas influer sur le centrage de "LA BRINGUE" —
+     géré par .hero (flex + align/justify: center) plutôt que par un calcul
+     manuel de position ici. */
   position: relative;
+  display: inline-block;
+}
+
+.hero__below {
+  /* Sous "LA BRINGUE", ancré à .hero__title (et non à .hero) pour rester
+     collé au titre quelle que soit sa hauteur (fluide, voir h1 plus bas). */
+  position: absolute;
+  top: 90%;
+  left: 50%;
+  transform: translateX(-50%);
   display: flex;
+  flex-direction: column;
   align-items: center;
-  justify-content: center;
+  gap: var(--hero-section-gap);
+  white-space: nowrap;
+}
+.hero--home .hero__below {
+  top: 110%;
+  margin-top: clamp(var(--space-8), 1rem + 4vw, var(--space-20));
 }
 
 .hero h1 {
   position: relative;
-  /* Au-dessus des étoiles, qui chevauchent largement le texte. */
+  /* Au-dessus des étoiles (voir .hero__star) : sans ça, l'étoile ajoutée
+     après le h1 dans le DOM (hero__star--right) passerait devant lui. */
   z-index: 1;
   margin: 0;
   font-family: var(--hero-font);
   color: var(--hero-section-h1);
-  /* Mobile first : --font-size-hero (9.375rem) est bien trop grand pour un
-     écran de téléphone — "LA BRINGUE" passerait sur deux lignes et
-     casserait la composition avec les étoiles (voir @media plus bas). */
-  font-size: var(--font-size-heading-1);
-  line-height: var(--line-height-heading-1);
+  /* Taille proportionnelle au viewport (fluide) plutôt que deux valeurs
+     figées par breakpoint : interpolation linéaire entre 5.25rem/375px de
+     large (plancher, borné pour rester lisible et tenir sur une seule
+     ligne dès les petits téléphones) et 9.375rem/1025px (--font-size-hero,
+     plafond desktop). */
+  font-size: clamp(5.25rem, 2.87rem + 10.15vw, var(--font-size-hero));
+  line-height: 1.1;
 }
 
 .hero__star {
-  position: relative;
-  width: 6rem;
-  height: 3.3rem;
-  flex-shrink: 0;
+  position: absolute;
+  top: 50%;
+  /* height: auto (et non une hauteur figée) pour respecter le ratio naturel
+     du fichier source (348x250) : une hauteur fixe différente de ce ratio
+     écrasait visuellement l'étoile. */
+  /* Même logique fluide que le h1 : 8rem/375px -> 12rem/1025px. */
+  width: clamp(8rem, 5.69rem + 9.85vw, 12rem);
+  height: auto;
 }
 
 .hero__star--left {
-  margin-right: -1.75rem;
+  left: 0;
+  transform: translate(-35%, -85%) rotate(-10deg) ;
 }
 
 .hero__star--right {
-  margin-left: -1.75rem;
-  transform: scaleX(-1);
+  right: 0;
+  transform: translate(30%, -17%) rotate(180deg);
 }
 
-@media (min-width: 1025px) {
-  .hero h1 {
-    font-size: var(--font-size-hero);
-    line-height: var(--line-height-hero);
-  }
-
-  .hero__star {
-    width: 12rem;
-    height: 6.6rem;
-  }
-
-  .hero__star--left {
-    margin-right: -4rem;
-  }
-
-  .hero__star--right {
-    margin-left: -4rem;
-  }
-}
-
-.hero__star-shape {
-  fill: var(--hero-section-star);
-  stroke: var(--hero-section-star);
-  stroke-width: 3;
-}
-
-.hero__star-shape--inner {
-  stroke: var(--hero-section-star-stroke);
+/* Sur la home, le Hero occupe tout le viewport (100vh) : les étoiles y
+   gagnent en présence, contrairement à la variante générique plus compacte.
+   Même logique fluide : 13rem/375px -> 26rem/1025px. */
+.hero--home .hero__star {
+  width: clamp(13rem, 5.5rem + 32vw, 26rem);
 }
 
 .hero__dates {
   position: relative;
   margin: 0;
   color: var(--hero-section-text);
+  /* --font-size-hero-dates n'existe dans aucun fichier de tokens (référence
+     morte) : ça retombait sur --font-size-heading-3 (1.5rem) hérité du
+     h3 global, bien trop petit à côté du h1. Taille fixe (pas de clamp
+     fluide ici, contrairement au h1) : elle ne doit pas varier avec le
+     viewport. */
+  font-size: 1.5em;
+  line-height: 1.3;
+}
+
+@media (min-width: 1025px) {
+  .hero__star--left {
+  transform: translate(-45%, -75%) ;
+}
+
+.hero__star--right {
+  transform: translate(55%, -40%) rotate(170deg);
+}
 }
 </style>
