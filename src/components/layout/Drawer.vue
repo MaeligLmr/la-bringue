@@ -48,16 +48,18 @@ function close() {
           aria-modal="true"
           :aria-labelledby="title ? titleId : undefined"
         >
-          <Button
-            type="button"
-            color="secondary"
-            variant="ghost"
-            icon-only="close"
-            :label="closeLabel"
-            class="drawer__close"
-            @click="close"
-          />
-          <h2 v-if="title" :id="titleId">{{ title }}</h2>
+          <div class="drawer__header">
+            <h2 v-if="title" :id="titleId">{{ title }}</h2>
+            <Button
+              type="button"
+              color="primary"
+              variant="ghost"
+              icon-only="close"
+              :label="closeLabel"
+              class="drawer__close"
+              @click="close"
+            />
+          </div>
           <slot />
         </div>
       </div>
@@ -81,23 +83,23 @@ function close() {
   height: 100%;
   overflow-y: auto;
   box-sizing: border-box;
-  /* padding-top dégagé pour ne jamais passer sous le bouton de fermeture
-     (position: absolute, donc pas pris en compte par le flux normal),
-     avec ou sans titre. */
-  padding: calc(var(--space-8) + var(--space-4)) var(--space-6) var(--space-6);
+  padding: var(--space-6);
   background: var(--bg);
   color: var(--text-h);
   border-left: 1px solid var(--border);
 }
 
-.drawer__panel h2 {
-  margin: 0 0 var(--space-4);
+.drawer__header {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: var(--space-4);
+  margin-bottom: var(--space-4);
 }
 
-.drawer__close {
-  position: absolute;
-  top: var(--space-2);
-  right: var(--space-2);
+.drawer__header h2 {
+  margin: 0;
+  margin-right: auto;
 }
 
 .drawer-enter-active,
