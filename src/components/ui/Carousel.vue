@@ -112,6 +112,11 @@ onUnmounted(() => {
   .carousel__track {
     flex-direction: row;
     align-items: stretch;
+    /* Centre les tiles quand elles tiennent déjà dans le viewport (cas
+       courant : 3 tiles par section) plutôt que les coller à gauche —
+       reste sans effet une fois le contenu scrollable (overflow-x: auto
+       ci-dessous prime alors sur le centrage). */
+    justify-content: center;
     /* Doit refléter le padding-inline ci-dessus : sans ça, le point
        d'ancrage du scroll-snap ignore le padding du conteneur et certains
        navigateurs "reposent" la position initiale sur scrollLeft ≈ padding

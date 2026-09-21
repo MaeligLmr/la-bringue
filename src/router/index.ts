@@ -8,6 +8,7 @@ import ExposantsView from '../views/ExposantsView.vue'
 import ConferencesView from '../views/ConferencesView.vue'
 import AProposView from '../views/AProposView.vue'
 import InfosPratiquesView from '../views/InfosPratiquesView.vue'
+import ActualitesView from '../views/ActualitesView.vue'
 
 export const router = createRouter({
   history: createWebHistory(),
@@ -24,5 +25,6 @@ export const router = createRouter({
     { path: '/conferences', name: 'conferences', component: ConferencesView },
     { path: '/a-propos', name: 'a-propos', component: AProposView },
     { path: '/infos-pratiques', name: 'infos-pratiques', component: InfosPratiquesView },
+    { path: '/actualites', name: 'actualites', component: ActualitesView },
   ],
 })

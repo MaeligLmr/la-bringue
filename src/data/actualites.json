@@ -1,0 +1,20 @@
+[
+  {
+    "id": "line-up-complete",
+    "titre": "La Line Up complète !",
+    "description": "Line Up complète annoncée",
+    "date": "2026-06-01"
+  },
+  {
+    "id": "billetterie-camping-ouverte",
+    "titre": "Billetterie camping ouverte",
+    "description": "La billetterie des deux campings est ouverte",
+    "date": "2026-05-15"
+  },
+  {
+    "id": "nouveau-parking",
+    "titre": "Nouveau parking",
+    "description": "Un troisième parking sera mis à disposition",
+    "date": "2026-05-10"
+  }
+]

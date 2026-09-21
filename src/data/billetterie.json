@@ -1,0 +1,17 @@
+[
+  {
+    "id": "pass-1-jour",
+    "titre": "Pass 1 jour",
+    "description": "Pass 1 jour au choix (Camping non inclus)"
+  },
+  {
+    "id": "pass-2-jours",
+    "titre": "Pass 2 jours",
+    "description": "Pass 2 jours au choix (Camping non inclus)"
+  },
+  {
+    "id": "pass-3-jours",
+    "titre": "Pass 3 jours",
+    "description": "Accède aux trois jours du festival (Camping non inclus)"
+  }
+]

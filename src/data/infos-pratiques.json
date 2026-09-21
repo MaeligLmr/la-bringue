@@ -1,0 +1,17 @@
+[
+  {
+    "id": "dormir",
+    "titre": "Dormir",
+    "description": "2 campings autour du festival"
+  },
+  {
+    "id": "cashless",
+    "titre": "Cashless",
+    "description": "Recharge directement depuis l'application ou sur les bornes sur site"
+  },
+  {
+    "id": "parking",
+    "titre": "Parking",
+    "description": "2 parkings autour du festival"
+  }
+]
