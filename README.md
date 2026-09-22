@@ -100,7 +100,8 @@ src/
 │   │   ├── Select.vue                       # <Select v-model=... :options=... size=... />
 │   │   ├── Tag.vue                          # <Tag label=... variant=... />
 │   │   ├── Like.vue                         # <Like v-model=... label=... />
-│   │   └── ContentCard.vue                  # <ContentCard nom=... photo=... likable v-model:is-liked=... @click=... />
+│   │   ├── ContentCard.vue                  # <ContentCard nom=... photo=... likable v-model:is-liked=... @click=... />
+│   │   └── FilterableList.vue               # <FilterableList :items=... :filters=... v-model:selected=...> + slot #item
 │   ├── layout/
 │   │   ├── Navbar.vue
 │   │   └── Modal.vue                        # <Modal :open=... title=... @close=...> générique, réutilisable
@@ -112,7 +113,7 @@ src/
 │   ├── useFocusTrap.ts                     # piège de focus clavier réutilisable
 │   └── useTheme.ts                         # thème clair/sombre/système (voir Design system)
 ├── types/
-│   ├── icon.ts, button.ts, select.ts, tag.ts  # noms/props valides des composants ui/ (IconName, ButtonColor, TagVariant, ...)
+│   ├── icon.ts, button.ts, select.ts, tag.ts, filterable-list.ts  # noms/props valides des composants ui/ (IconName, ButtonColor, TagVariant, FilterConfig, ...)
 ├── styles/
 │   └── tokens/                             # design tokens générés depuis Figma (voir Design system)
 ├── lib/
@@ -171,7 +172,7 @@ const { preference, resolvedTheme, setPreference, toggleTheme } = useTheme()
 
 Par défaut, le thème suit la préférence de l'appareil (`prefers-color-scheme`). Un choix explicite (`setPreference('light' | 'dark' | 'system')`) est mémorisé dans `localStorage` et posé sur `<html data-theme="...">`. Le sélecteur clair/sombre/défaut de la Navbar en est la seule interface pour l'instant.
 
-**3. Composants `Icon`, `Button`, `Select`, `Tag`, `Like` et `ContentCard` — `src/components/ui/`**
+**3. Composants `Icon`, `Button`, `Select`, `Tag`, `Like`, `ContentCard` et `FilterableList` — `src/components/ui/`**
 
 ```vue
 <Icon name="heart-filled" size="large" />
@@ -198,9 +199,15 @@ Par défaut, le thème suit la préférence de l'appareil (`prefers-color-scheme
   v-model:is-liked="isLiked"
   @click="goToFiche"
 />
+
+<FilterableList :items="artistes" :filters="filtres" v-model:selected="filtresActifs">
+  <template #item="{ item }">
+    <ContentCard :nom="item.nom" :photo="item.photo" likable />
+  </template>
+</FilterableList>
 ```
 
-`Icon` charge à la demande (un chunk par icône, `import.meta.glob(..., { query: '?raw' })`) les SVG exportés de Figma (`src/assets/icons/`, `fill="currentColor"` pour hériter la couleur ambiante) — rien n'est chargé pour les icônes qu'une page n'utilise pas. `Button` couvre `color` (`primary` / `secondary` / `info` / `danger`), `variant` (`full` / `outlined` / `ghost`) et `size` (`medium` / `large`) — chaque instance pointe simplement vers les tokens `--button-{color}-{variant}-{state}-*` correspondants, sans règle CSS dédiée par combinaison. `Select` est un dropdown entièrement personnalisé (pas le `<select>` natif, dont la liste d'options ne peut pas être stylée), accessible au clavier, et calé sur le même `size` que `Button` pour rester à la même hauteur quand ils sont côte à côte (ex. la Navbar). `Tag` affiche un libellé court (scène, catégorie d'exposant, thème de conférence) ; sa `variant` (`pink` par défaut / `pink-bright` / `violet` / `blue`) ne change que la couleur, via les tokens `--tag-{variant}-*`. `ContentCard` est la carte partagée des listes Programmation, Exposants et Conférences (voir Figma "card listing") : `nom` et `photo` sont obligatoires, `date`, `scene` et `categorie` (rendue en `Tag`) ne s'affichent que si elles sont renseignées — la carte n'a pas de variante par scène. `likable` (`false` par défaut, donc pour les exposants) affiche le bouton `Like` ; un clic like, un second clic retire le like, sans jamais déclencher le `onClick` de la carte (exécuté au clic ou à Entrée sur le reste de la carte). Le like n'appelle pas Supabase (seule l'authentification passe par la base) : c'est un état `isLiked` que la page lit/fixe via `v-model:is-liked`.
+`Icon` charge à la demande (un chunk par icône, `import.meta.glob(..., { query: '?raw' })`) les SVG exportés de Figma (`src/assets/icons/`, `fill="currentColor"` pour hériter la couleur ambiante) — rien n'est chargé pour les icônes qu'une page n'utilise pas. `Button` couvre `color` (`primary` / `secondary` / `info` / `danger`), `variant` (`full` / `outlined` / `ghost`) et `size` (`medium` / `large`) — chaque instance pointe simplement vers les tokens `--button-{color}-{variant}-{state}-*` correspondants, sans règle CSS dédiée par combinaison. `Select` est un dropdown entièrement personnalisé (pas le `<select>` natif, dont la liste d'options ne peut pas être stylée), accessible au clavier, et calé sur le même `size` que `Button` pour rester à la même hauteur quand ils sont côte à côte (ex. la Navbar). `Tag` affiche un libellé court (scène, catégorie d'exposant, thème de conférence) ; sa `variant` (`pink` par défaut / `pink-bright` / `violet` / `blue`) ne change que la couleur, via les tokens `--tag-{variant}-*`. `ContentCard` est la carte partagée des listes Programmation, Exposants et Conférences (voir Figma "card listing") : `nom` et `photo` sont obligatoires, `date`, `scene` et `categorie` (rendue en `Tag`) ne s'affichent que si elles sont renseignées — la carte n'a pas de variante par scène. `likable` (`false` par défaut, donc pour les exposants) affiche le bouton `Like` ; un clic like, un second clic retire le like, sans jamais déclencher le `onClick` de la carte (exécuté au clic ou à Entrée sur le reste de la carte). Le like n'appelle pas Supabase (seule l'authentification passe par la base) : c'est un état `isLiked` que la page lit/fixe via `v-model:is-liked`. `FilterableList` est la liste partagée par ces trois pages : une recherche par nom en temps réel (insensible à la casse et aux accents), une rangée de `Button` par filtre passé dans `filters` (`{ key, label, allLabel, options }` — l'option active en `primary`, les autres en `secondary`, précédées du bouton `allLabel` qui retire le filtre, ex. "Tous les jours" ; `key` est le champ comparé sur chaque élément), sous la recherche, le tout combiné en logique ET, un bouton "Réinitialiser les filtres" et un message quand rien ne correspond. Les éléments doivent avoir au moins un `id` et un `nom` ; leur rendu est laissé à la page via le slot `#item`, et les filtres actifs sont exposés en `v-model:selected` (pour pré-appliquer un jour ou une scène depuis l'accueil).
 
 ---
 
