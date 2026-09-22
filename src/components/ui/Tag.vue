@@ -22,9 +22,9 @@ withDefaults(
   align-items: center;
   padding: var(--tag-padding-y) var(--tag-padding-x);
   border-radius: var(--tag-radius);
-  font-size: var(--font-size-small);
-  font-weight: var(--font-weight-medium);
-  line-height: 1;
+  font-size: var(--font-size-label);
+  font-weight: var(--font-weight-semi-bold);
+  line-height: var(--line-height-label);
   white-space: nowrap;
 }
 
