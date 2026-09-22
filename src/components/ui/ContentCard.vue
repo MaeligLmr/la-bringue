@@ -1,14 +1,24 @@
 <script setup lang="ts">
 import Tag from './Tag.vue'
+import Like from './Like.vue'
 import cardBg from '../../assets/card/card-bg.png'
 
-defineProps<{
-  nom: string
-  photo: string
-  date?: string
-  scene?: string
-  categorie?: string
-}>()
+const props = withDefaults(
+  defineProps<{
+    nom: string
+    photo: string
+    date?: string
+    scene?: string
+    categorie?: string
+    likable?: boolean
+    onClick?: () => void
+  }>(),
+  {
+    likable: false,
+  }
+)
+
+const isLiked = defineModel<boolean>('isLiked', { default: false })
 
 const patternStyle = {
   backgroundImage: `url(${cardBg})`,
@@ -16,7 +26,13 @@ const patternStyle = {
 </script>
 
 <template>
-  <article class="content-card shadow">
+  <article
+    class="content-card shadow"
+    :class="{ 'content-card--clickable': !!onClick }"
+    :tabindex="onClick ? 0 : undefined"
+    @click="props.onClick?.()"
+    @keydown.enter.self="props.onClick?.()"
+  >
     <div class="content-card__pattern" :style="patternStyle" aria-hidden="true" />
 
     <div class="content-card__informations">
@@ -28,7 +44,15 @@ const patternStyle = {
         </div>
       </div>
 
-      <Tag v-if="categorie" :label="categorie" variant="pink-bright" class="content-card__categorie" />
+      <div v-if="categorie || likable" class="content-card__actions">
+        <Tag v-if="categorie" :label="categorie" variant="pink-bright" />
+        <Like
+          v-if="likable"
+          v-model="isLiked"
+          :label="`Ajouter ${nom} à Mon programme`"
+          @click.stop
+        />
+      </div>
     </div>
 
     <img :src="photo" alt="" class="content-card__photo" />
@@ -92,7 +116,15 @@ const patternStyle = {
   line-height: var(--line-height-medium);
 }
 
-.content-card__categorie {
+.content-card--clickable {
+  cursor: pointer;
+}
+
+.content-card__actions {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: var(--space-2);
   flex-shrink: 0;
 }
 
