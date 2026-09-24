@@ -105,6 +105,7 @@ const patternStyle = {
   font-size: var(--font-size-heading-2);
   line-height: var(--line-height-heading-2);
   color: inherit;
+  min-height: 108px;
 }
 
 .content-card__meta {
