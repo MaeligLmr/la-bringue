@@ -14,7 +14,7 @@ const LINEUP: DayLineup = {
 }
 
 const mountDay = (lineup: DayLineup = LINEUP) =>
-  mount(ProgrammationDay, { props: { label: 'Dimanche 30 août', lineup } })
+  mount(ProgrammationDay, { props: { label: 'Dimanche 30 août', date: '2026-08-30', lineup } })
 
 describe('ProgrammationDay', () => {
   it('affiche le jour puis la tête d’affiche', () => {

@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { ref } from 'vue'
+import { useRoute } from 'vue-router'
 import Hero from '../components/layout/Hero.vue'
 import FilterableList from '../components/ui/FilterableList.vue'
 import ContentCard from '../components/ui/ContentCard.vue'
@@ -16,7 +17,8 @@ const filters: FilterConfig[] = [
   { key: 'scene', label: 'Scène', allLabel: 'Toutes les scènes', options: SCENES },
 ]
 
-const selected = ref<FilterValues>({})
+const { date, scene } = useRoute().query
+const selected = ref<FilterValues>({ date: String(date ?? ''), scene: String(scene ?? '') })
 
 function labelOf(options: typeof JOURS, value: string) {
   return options.find((option) => option.value === value)?.label ?? value

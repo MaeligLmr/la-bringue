@@ -4,12 +4,12 @@ import { createRouter, createWebHistory } from 'vue-router'
 import ProgrammationView from './ProgrammationView.vue'
 import programmationData from '../data/programmation.json'
 
-async function mountProgrammation() {
+async function mountProgrammation(url = '/') {
   const router = createRouter({
     history: createWebHistory(),
     routes: [{ path: '/', component: ProgrammationView }],
   })
-  router.push('/')
+  router.push(url)
   await router.isReady()
   return mount(ProgrammationView, { global: { plugins: [router] }, attachTo: document.body })
 }
@@ -89,6 +89,14 @@ describe('ProgrammationView', () => {
       'Soft',
       'Soft',
     ])
+
+    wrapper.unmount()
+  })
+
+  it('pré-applique le jour passé dans l’URL (lien depuis l’accueil)', async () => {
+    const wrapper = await mountProgrammation('/?date=2026-08-29')
+
+    expect(filterButton(wrapper, 'Samedi 29 août').attributes('aria-pressed')).toBe('true')
 
     wrapper.unmount()
   })

@@ -4,13 +4,14 @@ import type { DayLineup } from '../../lib/programmation'
 
 defineProps<{
   label: string
+  date: string
   lineup: DayLineup
 }>()
 </script>
 
 <template>
   <div class="programmation-day">
-    <p class="programmation-day__jour">{{ label }}</p>
+    <RouterLink :to="`/programmation?date=${date}`" class="programmation-day__jour">{{ label }}</RouterLink>
 
     <p v-if="lineup.headliner" class="programmation-day__headliner">{{ lineup.headliner.nom }}</p>
 
