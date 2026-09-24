@@ -24,7 +24,7 @@ function goToProgrammation() {
 <template>
   <section class="programmation-section">
     <div class="programmation-section__jours">
-      <ProgrammationDay v-for="jour in jours" :key="jour.value" :label="jour.label" :lineup="jour.lineup" />
+      <ProgrammationDay v-for="jour in jours" :key="jour.value" :label="jour.label" :date="jour.value" :lineup="jour.lineup" />
     </div>
 
     <Button color="primary" variant="outlined" size="large" @click="goToProgrammation">
