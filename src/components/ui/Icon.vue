@@ -54,6 +54,7 @@ const FILENAME_BY_ICON: Record<IconName, string> = {
   // Reuses "plus" rotated 45° below — plus.svg is a symmetric cross, so
   // the rotation produces a perfect X with no separate SVG needed.
   close: 'plus.svg',
+  'star-separation': 'star-separation.svg',
 }
 
 const ROTATE_45: ReadonlySet<IconName> = new Set(['close'])

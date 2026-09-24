@@ -34,6 +34,7 @@ export const ICON_NAMES = [
   // hand-drawn SVG — see Icon.vue.
   'chevron-down',
   'close',
+  'star-separation',
 ] as const
 
 export type IconName = (typeof ICON_NAMES)[number]

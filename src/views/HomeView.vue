@@ -1,7 +1,9 @@
 <script setup lang="ts">
 import Hero from '../components/layout/Hero.vue'
 import Carousel from '../components/ui/Carousel.vue'
+import ProgrammationSection from '../components/home/ProgrammationSection.vue'
 import type { CarouselTileData, CarouselTileVariant } from '../types/carousel-tile'
+import programmationData from '../data/programmation.json'
 import billetterieData from '../data/billetterie.json'
 import infosPratiquesData from '../data/infos-pratiques.json'
 import actualitesData from '../data/actualites.json'
@@ -50,6 +52,11 @@ const actualitesTiles = toTiles(actualitesData, 'En savoir plus', '/actualites',
 <template>
   <main class="home">
     <Hero home-page />
+
+    <section class="home__section">
+      <h2>Programmation</h2>
+      <ProgrammationSection :artistes="programmationData" />
+    </section>
 
     <section class="home__section">
       <h2>Billetterie</h2>
