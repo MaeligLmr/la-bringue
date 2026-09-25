@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { computed } from 'vue'
 import Tag from './Tag.vue'
 import Like from './Like.vue'
 import cardBg from '../../assets/card/card-bg.png'
@@ -23,6 +24,11 @@ const isLiked = defineModel<boolean>('isLiked', { default: false })
 const patternStyle = {
   backgroundImage: `url(${cardBg})`,
 }
+
+// `photo` est un chemin absolu (ex: "/programmation/placeholder.svg") vers
+// public/ : il faut le préfixer par BASE_URL pour rester valide une fois
+// l'app déployée sous un sous-chemin (voir vite.config.ts `base`).
+const photoSrc = computed(() => import.meta.env.BASE_URL + props.photo.replace(/^\//, ''))
 </script>
 
 <template>
@@ -55,7 +61,7 @@ const patternStyle = {
       </div>
     </div>
 
-    <img :src="photo" alt="" class="content-card__photo" />
+    <img :src="photoSrc" alt="" class="content-card__photo" />
   </article>
 </template>
 
