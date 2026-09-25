@@ -1,443 +1,218 @@
 [
   {
-    "id": "nick-cave-the-bad-seeds",
-    "nom": "Nick Cave & The Bad Seeds",
-    "photo": "/programmation/placeholder.svg",
+    "id": "aya-nakamura",
+    "nom": "Aya Nakamura",
+    "photo": "/programmation/aya-nakamura.jpg",
     "date": "2026-08-28",
     "heure": "22h15",
     "scene": "chrome",
-    "categorie": "Rock"
+    "categorie": "Afro-pop"
   },
   {
-    "id": "the-black-keys",
-    "nom": "The Black Keys",
-    "photo": "/programmation/placeholder.svg",
+    "id": "zaho",
+    "nom": "Zaho",
+    "photo": "/programmation/zaho.jpg",
     "date": "2026-08-28",
     "heure": "19h55",
     "scene": "chrome",
-    "categorie": "Blues rock"
+    "categorie": "R&B"
   },
   {
-    "id": "franz-ferdinand",
-    "nom": "Franz Ferdinand",
-    "photo": "/programmation/placeholder.svg",
-    "date": "2026-08-28",
-    "heure": "21h05",
-    "scene": "soft",
-    "categorie": "Indie rock"
-  },
-  {
-    "id": "wet-leg",
-    "nom": "Wet Leg",
-    "photo": "/programmation/placeholder.svg",
+    "id": "meryl",
+    "nom": "Meryl",
+    "photo": "/programmation/meryl.jpg",
     "date": "2026-08-28",
     "heure": "17h55",
     "scene": "chrome",
-    "categorie": "Indie rock"
+    "categorie": "Rap"
   },
   {
-    "id": "biffy-clyro",
-    "nom": "Biffy Clyro",
-    "photo": "/programmation/placeholder.svg",
+    "id": "little-simz",
+    "nom": "Little Simz",
+    "photo": "/programmation/little-simz.png",
     "date": "2026-08-28",
-    "heure": "17h05",
+    "heure": "21h05",
     "scene": "soft",
-    "categorie": "Rock"
+    "categorie": "Rap"
   },
   {
-    "id": "kurt-vile-the-violators",
-    "nom": "Kurt Vile & The Violators",
-    "photo": "/programmation/placeholder.svg",
+    "id": "bamby",
+    "nom": "Bamby",
+    "photo": "/programmation/bamby.jpg",
     "date": "2026-08-28",
     "heure": "18h55",
-    "scene": "2000",
-    "categorie": "Indie rock"
+    "scene": "soft",
+    "categorie": "Dancehall"
   },
   {
-    "id": "wilco",
-    "nom": "Wilco",
-    "photo": "/programmation/placeholder.svg",
+    "id": "charlotte-de-witte",
+    "nom": "Charlotte de Witte",
+    "photo": "/programmation/charlotte-de-witte.jpg",
     "date": "2026-08-28",
     "heure": "21h05",
     "scene": "2000",
-    "categorie": "Rock"
+    "categorie": "Techno"
   },
   {
-    "id": "ttssfu",
-    "nom": "TTSSFU",
-    "photo": "/programmation/placeholder.svg",
-    "date": "2026-08-28",
-    "heure": "22h10",
-    "scene": "summer",
-    "categorie": "Shoegaze"
-  },
-  {
-    "id": "gabriel-kroger",
-    "nom": "Gabriel Kröger",
-    "photo": "/programmation/placeholder.svg",
-    "date": "2026-08-28",
-    "heure": "16h20",
-    "scene": "summer",
-    "categorie": "Rock"
-  },
-  {
-    "id": "tyler-ballgame",
-    "nom": "Tyler Ballgame",
-    "photo": "/programmation/placeholder.svg",
-    "date": "2026-08-28",
-    "heure": "18h00",
-    "scene": "summer",
-    "categorie": "Rock"
-  },
-  {
-    "id": "peaches",
-    "nom": "Peaches",
-    "photo": "/programmation/placeholder.svg",
-    "date": "2026-08-28",
-    "heure": "23h15",
-    "scene": "2000",
-    "categorie": "Électro"
-  },
-  {
-    "id": "sparks",
-    "nom": "Sparks",
-    "photo": "/programmation/placeholder.svg",
-    "date": "2026-08-28",
-    "heure": "18h55",
-    "scene": "soft",
-    "categorie": "Pop"
-  },
-  {
-    "id": "kingfishr",
-    "nom": "Kingfishr",
-    "photo": "/programmation/placeholder.svg",
-    "date": "2026-08-28",
-    "heure": "16h20",
-    "scene": "chrome",
-    "categorie": "Folk"
-  },
-  {
-    "id": "billie",
-    "nom": "Billie",
-    "photo": "/programmation/placeholder.svg",
-    "date": "2026-08-28",
-    "heure": "15h40",
-    "scene": "2000",
-    "categorie": "Rock"
-  },
-  {
-    "id": "la-flemme",
-    "nom": "La Flemme",
-    "photo": "/programmation/placeholder.svg",
-    "date": "2026-08-28",
-    "heure": "20h10",
-    "scene": "summer",
-    "categorie": "Garage rock"
-  },
-  {
-    "id": "sarab",
-    "nom": "Sarãb",
-    "photo": "/programmation/placeholder.svg",
+    "id": "miki",
+    "nom": "Miki",
+    "photo": "/programmation/miki.jpg",
     "date": "2026-08-28",
     "heure": "17h05",
     "scene": "2000",
-    "categorie": "Jazz"
+    "categorie": "Pop"
   },
   {
-    "id": "deftones",
-    "nom": "Deftones",
-    "photo": "/programmation/placeholder.svg",
+    "id": "naika",
+    "nom": "Naïka",
+    "photo": "/programmation/naika.jpg",
+    "date": "2026-08-28",
+    "heure": "18h00",
+    "scene": "summer",
+    "categorie": "R&B"
+  },
+  {
+    "id": "iliona",
+    "nom": "Iliona",
+    "photo": "/programmation/iliona.jpg",
+    "date": "2026-08-28",
+    "heure": "16h20",
+    "scene": "summer",
+    "categorie": "Pop"
+  },
+  {
+    "id": "addison-rae",
+    "nom": "Addison Rae",
+    "photo": "/programmation/addison-rae.jpg",
     "date": "2026-08-29",
     "heure": "22h55",
     "scene": "chrome",
-    "categorie": "Metal"
+    "categorie": "Pop"
   },
   {
-    "id": "turnstile",
-    "nom": "Turnstile",
-    "photo": "/programmation/placeholder.svg",
-    "date": "2026-08-29",
-    "heure": "21h45",
-    "scene": "soft",
-    "categorie": "Hardcore"
-  },
-  {
-    "id": "amyl-the-sniffers",
-    "nom": "Amyl & The Sniffers",
-    "photo": "/programmation/placeholder.svg",
+    "id": "marina",
+    "nom": "Marina",
+    "photo": "/programmation/marina.jpg",
     "date": "2026-08-29",
     "heure": "20h45",
     "scene": "chrome",
-    "categorie": "Punk"
+    "categorie": "Pop"
   },
   {
-    "id": "landmvrks",
-    "nom": "Landmvrks",
-    "photo": "/programmation/placeholder.svg",
+    "id": "oklou",
+    "nom": "Oklou",
+    "photo": "/programmation/oklou.jpg",
     "date": "2026-08-29",
     "heure": "18h45",
     "scene": "chrome",
-    "categorie": "Metal"
+    "categorie": "Électro"
   },
   {
-    "id": "lambrini-girls",
-    "nom": "Lambrini Girls",
-    "photo": "/programmation/placeholder.svg",
+    "id": "hayley-williams",
+    "nom": "Hayley Williams",
+    "photo": "/programmation/hayley-williams.jpg",
     "date": "2026-08-29",
-    "heure": "17h00",
-    "scene": "chrome",
-    "categorie": "Punk"
+    "heure": "21h45",
+    "scene": "soft",
+    "categorie": "Rock"
   },
   {
-    "id": "fcukers",
-    "nom": "Fcukers",
-    "photo": "/programmation/placeholder.svg",
+    "id": "sudan-archives",
+    "nom": "Sudan Archives",
+    "photo": "/programmation/sudan-archives.jpg",
+    "date": "2026-08-29",
+    "heure": "19h45",
+    "scene": "soft",
+    "categorie": "R&B"
+  },
+  {
+    "id": "ninajirachi",
+    "nom": "Ninajirachi",
+    "photo": "/programmation/ninajirachi.png",
     "date": "2026-08-29",
     "heure": "23h30",
     "scene": "2000",
     "categorie": "Électro"
   },
   {
-    "id": "clipse",
-    "nom": "Clipse",
-    "photo": "/programmation/placeholder.svg",
-    "date": "2026-08-29",
-    "heure": "19h45",
-    "scene": "soft",
-    "categorie": "Hip-hop"
-  },
-  {
-    "id": "afi",
-    "nom": "AFI",
-    "photo": "/programmation/placeholder.svg",
-    "date": "2026-08-29",
-    "heure": "17h45",
-    "scene": "soft",
-    "categorie": "Punk"
-  },
-  {
-    "id": "mannequin-pussy",
-    "nom": "Mannequin Pussy",
-    "photo": "/programmation/placeholder.svg",
-    "date": "2026-08-29",
-    "heure": "15h40",
-    "scene": "chrome",
-    "categorie": "Punk"
-  },
-  {
-    "id": "jessica93",
-    "nom": "Jessica93",
-    "photo": "/programmation/placeholder.svg",
-    "date": "2026-08-29",
-    "heure": "22h50",
-    "scene": "summer",
-    "categorie": "Post-punk"
-  },
-  {
-    "id": "grandma-s-ashes",
-    "nom": "Grandma's Ashes",
-    "photo": "/programmation/placeholder.svg",
-    "date": "2026-08-29",
-    "heure": "20h50",
-    "scene": "summer",
-    "categorie": "Rock"
-  },
-  {
-    "id": "dynamite-shakers",
-    "nom": "Dynamite Shakers",
-    "photo": "/programmation/placeholder.svg",
+    "id": "erin-lecount",
+    "nom": "Erin LeCount",
+    "photo": "/programmation/erin-lecount.jpg",
     "date": "2026-08-29",
     "heure": "17h55",
     "scene": "2000",
-    "categorie": "Garage rock"
+    "categorie": "Pop"
   },
   {
-    "id": "high-vis",
-    "nom": "High Vis",
-    "photo": "/programmation/placeholder.svg",
-    "date": "2026-08-29",
-    "heure": "19h45",
-    "scene": "2000",
-    "categorie": "Post-punk"
-  },
-  {
-    "id": "novelists",
-    "nom": "Novelists",
-    "photo": "/programmation/placeholder.svg",
-    "date": "2026-08-29",
-    "heure": "16h20",
-    "scene": "soft",
-    "categorie": "Metal"
-  },
-  {
-    "id": "gwendoline-futur-compose",
-    "nom": "Gwendoline & Futur Composé",
-    "photo": "/programmation/placeholder.svg",
-    "date": "2026-08-29",
-    "heure": "21h50",
-    "scene": "2000",
-    "categorie": "Cold wave"
-  },
-  {
-    "id": "mottomoda",
-    "nom": "Mottomoda",
-    "photo": "/programmation/placeholder.svg",
-    "date": "2026-08-29",
-    "heure": "17h00",
-    "scene": "summer",
-    "categorie": "Rock"
-  },
-  {
-    "id": "maddy-street",
-    "nom": "Maddy Street",
-    "photo": "/programmation/placeholder.svg",
-    "date": "2026-08-29",
-    "heure": "16h20",
-    "scene": "2000",
-    "categorie": "Rock"
-  },
-  {
-    "id": "the-cure",
-    "nom": "The Cure",
-    "photo": "/programmation/placeholder.svg",
+    "id": "theodora",
+    "nom": "Theodora",
+    "photo": "/programmation/theodora.jpg",
     "date": "2026-08-30",
     "heure": "20h55",
     "scene": "chrome",
-    "categorie": "Cold wave"
+    "categorie": "Rap"
   },
   {
-    "id": "interpol",
-    "nom": "Interpol",
-    "photo": "/programmation/placeholder.svg",
+    "id": "charlotte-cardin",
+    "nom": "Charlotte Cardin",
+    "photo": "/programmation/charlotte-cardin.jpg",
     "date": "2026-08-30",
     "heure": "18h30",
     "scene": "chrome",
-    "categorie": "Post-punk"
+    "categorie": "Pop"
   },
   {
-    "id": "slowdive",
-    "nom": "Slowdive",
-    "photo": "/programmation/placeholder.svg",
+    "id": "luvcat",
+    "nom": "Luvcat",
+    "photo": "/programmation/luvcat.jpg",
     "date": "2026-08-30",
     "heure": "16h25",
     "scene": "chrome",
-    "categorie": "Shoegaze"
+    "categorie": "Indie rock"
   },
   {
-    "id": "dry-cleaning",
-    "nom": "Dry Cleaning",
-    "photo": "/programmation/placeholder.svg",
+    "id": "ethel-cain",
+    "nom": "Ethel Cain",
+    "photo": "/programmation/ethel-cain.png",
     "date": "2026-08-30",
-    "heure": "15h45",
-    "scene": "soft",
-    "categorie": "Post-punk"
-  },
-  {
-    "id": "bertrand-belin",
-    "nom": "Bertrand Belin",
-    "photo": "/programmation/placeholder.svg",
-    "date": "2026-08-30",
-    "heure": "15h00",
-    "scene": "chrome",
-    "categorie": "Chanson"
-  },
-  {
-    "id": "kudeta",
-    "nom": "Küdeta",
-    "photo": "/programmation/placeholder.svg",
-    "date": "2026-08-30",
-    "heure": "15h00",
-    "scene": "summer",
-    "categorie": "Rock"
-  },
-  {
-    "id": "love-spells",
-    "nom": "Love Spells",
-    "photo": "/programmation/placeholder.svg",
-    "date": "2026-08-30",
-    "heure": "15h45",
-    "scene": "2000",
-    "categorie": "Rock"
-  },
-  {
-    "id": "black-country-new-road",
-    "nom": "Black Country, New Road",
-    "photo": "/programmation/placeholder.svg",
-    "date": "2026-08-30",
-    "heure": "19h35",
-    "scene": "2000",
-    "categorie": "Art rock"
-  },
-  {
-    "id": "hudson-freeman",
-    "nom": "Hudson Freeman",
-    "photo": "/programmation/placeholder.svg",
-    "date": "2026-08-30",
-    "heure": "18h30",
-    "scene": "summer",
-    "categorie": "Rock"
-  },
-  {
-    "id": "ditter",
-    "nom": "Ditter",
-    "photo": "/programmation/placeholder.svg",
-    "date": "2026-08-30",
-    "heure": "21h15",
-    "scene": "summer",
-    "categorie": "Rock"
-  },
-  {
-    "id": "anna-von-hausswolff",
-    "nom": "Anna von Hausswolff",
-    "photo": "/programmation/placeholder.svg",
-    "date": "2026-08-30",
-    "heure": "17h25",
-    "scene": "2000",
-    "categorie": "Expérimental"
-  },
-  {
-    "id": "wolf-alice",
-    "nom": "Wolf Alice",
-    "photo": "/programmation/placeholder.svg",
-    "date": "2026-08-30",
-    "heure": "17h25",
+    "heure": "19h40",
     "scene": "soft",
     "categorie": "Indie rock"
   },
   {
-    "id": "mogwai",
-    "nom": "Mogwai",
-    "photo": "/programmation/placeholder.svg",
+    "id": "marguerite",
+    "nom": "Marguerite",
+    "photo": "/programmation/marguerite.jpg",
     "date": "2026-08-30",
-    "heure": "19h40",
+    "heure": "17h25",
     "scene": "soft",
-    "categorie": "Post-rock"
+    "categorie": "Pop"
   },
   {
-    "id": "ecca-vandal",
-    "nom": "Ecca Vandal",
-    "photo": "/programmation/placeholder.svg",
+    "id": "yasmine-hamdan",
+    "nom": "Yasmine Hamdan",
+    "photo": "/programmation/yasmine-hamdan.jpg",
     "date": "2026-08-30",
-    "heure": "14h20",
-    "scene": "soft",
-    "categorie": "Punk"
-  },
-  {
-    "id": "ile-de-garde",
-    "nom": "Ile de Garde",
-    "photo": "/programmation/placeholder.svg",
-    "date": "2026-08-30",
-    "heure": "16h30",
-    "scene": "summer",
-    "categorie": "Rock"
-  },
-  {
-    "id": "arthur-fu-bandini",
-    "nom": "Arthur Fu Bandini",
-    "photo": "/programmation/placeholder.svg",
-    "date": "2026-08-30",
-    "heure": "14h20",
+    "heure": "19h35",
     "scene": "2000",
-    "categorie": "Rock"
+    "categorie": "Électro"
+  },
+  {
+    "id": "alewya",
+    "nom": "Alewya",
+    "photo": "/programmation/alewya.jpg",
+    "date": "2026-08-30",
+    "heure": "17h25",
+    "scene": "2000",
+    "categorie": "Électro"
+  },
+  {
+    "id": "yoa",
+    "nom": "Yoa",
+    "photo": "/programmation/yoa.jpg",
+    "date": "2026-08-30",
+    "heure": "18h30",
+    "scene": "summer",
+    "categorie": "Pop"
   }
 ]
