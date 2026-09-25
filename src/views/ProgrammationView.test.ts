@@ -37,8 +37,8 @@ describe('ProgrammationView', () => {
     const wrapper = await mountProgrammation()
 
     const names = displayedNames(wrapper)
-    expect(names[0]).toBe('Billie')
-    expect(names[names.length - 1]).toBe('Ditter')
+    expect(names[0]).toBe('Iliona')
+    expect(names[names.length - 1]).toBe('Theodora')
 
     wrapper.unmount()
   })
@@ -46,10 +46,10 @@ describe('ProgrammationView', () => {
   it('affiche la scène, le jour/heure et la catégorie sur chaque carte', async () => {
     const wrapper = await mountProgrammation()
 
-    const card = wrapper.findAll('.content-card').find((node) => node.text().includes('The Cure'))
+    const card = wrapper.findAll('.content-card').find((node) => node.text().includes('Theodora'))
     expect(card?.find('.content-card__scene').text()).toBe('Chrome')
     expect(card?.find('.content-card__date').text()).toBe('Dimanche 30 août - 20h55')
-    expect(card?.find('.tag').text()).toBe('Cold wave')
+    expect(card?.find('.tag').text()).toBe('Rap')
 
     wrapper.unmount()
   })
@@ -82,10 +82,8 @@ describe('ProgrammationView', () => {
     await filterButton(wrapper, 'Dimanche 30 août').trigger('click')
     await filterButton(wrapper, 'Soft').trigger('click')
 
-    expect(displayedNames(wrapper)).toEqual(['Ecca Vandal', 'Dry Cleaning', 'Wolf Alice', 'Mogwai'])
+    expect(displayedNames(wrapper)).toEqual(['Marguerite', 'Ethel Cain'])
     expect(wrapper.findAll('.content-card__scene').map((node) => node.text())).toEqual([
-      'Soft',
-      'Soft',
       'Soft',
       'Soft',
     ])
