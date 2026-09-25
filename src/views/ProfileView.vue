@@ -12,7 +12,6 @@ import { withTimeout } from '../lib/with-timeout'
 import { supabase } from '../supabase.js'
 import Button from '../components/ui/Button.vue'
 import Select from '../components/ui/Select.vue'
-import Icon from '../components/ui/Icon.vue'
 
 const router = useRouter()
 const { user, isLoggedIn, signOut } = useAuth()
