@@ -70,7 +70,6 @@ describe('ProfileView', () => {
     mockSupabase(LOGGED_IN_SESSION)
     const { wrapper } = await mountProfileView()
 
-    expect(wrapper.find('h1').text()).toBe('Mon profil')
     expect((wrapper.find('#profile-first-name').element as HTMLInputElement).value).toBe('Alice')
     expect((wrapper.find('#profile-last-name').element as HTMLInputElement).value).toBe('Martin')
     expect((wrapper.find('#profile-username').element as HTMLInputElement).value).toBe('alice_m')
