@@ -72,6 +72,7 @@ const patternStyle = {
   padding: var(--card-padding-y) var(--card-padding-x);
   background-color: var(--card-background);
   color: var(--card-text);
+  max-width: 288px;
 }
 
 .content-card__pattern {
@@ -87,7 +88,7 @@ const patternStyle = {
 .content-card__informations {
   position: relative;
   display: flex;
-  align-items: flex-start;
+  align-items: flex-end;
   justify-content: space-between;
   gap: var(--space-2);
 }
@@ -95,9 +96,8 @@ const patternStyle = {
 .content-card__details {
   display: flex;
   flex-direction: column;
-  gap: var(--space-2);
+  gap: var(--space-4);
   min-width: 0;
-  word-break: break-word;
 }
 
 .content-card__nom {
