@@ -102,6 +102,7 @@ describe('SignUpForm', () => {
       password: 'password123',
       options: {
         data: { first_name: 'Alice', last_name: 'Martin', username: 'alice_m' },
+        emailRedirectTo: window.location.origin + import.meta.env.BASE_URL,
       },
     })
   })

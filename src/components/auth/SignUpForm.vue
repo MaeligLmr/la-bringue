@@ -88,6 +88,11 @@ async function handleSubmit() {
             last_name: lastName.value,
             username: username.value,
           },
+          // Sans ça, Supabase renvoie vers le "Site URL" configuré dans le
+          // dashboard, qui ne connaît pas le sous-chemin /la-bringue/ (voir
+          // `base` dans vite.config.ts) : le lien de confirmation atterrit
+          // alors sur une 404 en prod.
+          emailRedirectTo: window.location.origin + import.meta.env.BASE_URL,
         },
       })
     )
