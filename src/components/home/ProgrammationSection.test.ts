@@ -33,7 +33,7 @@ describe('ProgrammationSection', () => {
     const { wrapper } = await mountSection()
 
     const headliners = wrapper.findAll('.programmation-day__headliner').map((node) => node.text())
-    expect(headliners).toEqual(['Nick Cave & The Bad Seeds', 'Deftones', 'The Cure'])
+    expect(headliners).toEqual(['Aya Nakamura', 'Addison Rae', 'Theodora'])
   })
 
   it('liste ensuite 4 autres artistes du jour, du plus tardif au plus tôt', async () => {
@@ -41,10 +41,10 @@ describe('ProgrammationSection', () => {
 
     const [vendredi] = wrapper.findAll('.programmation-day__others')
     expect(vendredi.findAll('li').map((node) => node.text())).toEqual([
-      'Peaches',
-      'TTSSFU',
-      'Franz Ferdinand',
-      'Wilco…',
+      'Little Simz',
+      'Charlotte de Witte',
+      'Zaho',
+      'Bamby…',
     ])
   })
 
