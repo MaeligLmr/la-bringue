@@ -37,6 +37,7 @@ function labelOf(options: typeof JOURS, value: string) {
             :scene="labelOf(SCENES, item.scene)"
             :date="`${labelOf(JOURS, item.date)} - ${item.heure}`"
             :categorie="item.categorie"
+            likable
           />
         </template>
       </FilterableList>
