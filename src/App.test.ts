@@ -24,15 +24,15 @@ vi.mock('./supabase.js', () => ({
 
 let wrapper: VueWrapper | null = null
 
-async function mountApp() {
+async function mountApp(url = '/') {
   const router = createRouter({
     history: createWebHistory(),
     routes: [
       { path: '/', component: { template: '<div />' } },
-      { path: '/profil', component: { template: '<div />' } },
+      { path: '/profil', component: { template: '<div />' }, meta: { hideSupport: true } },
     ],
   })
-  router.push('/')
+  router.push(url)
   await router.isReady()
   return mount(App, { attachTo: document.body, global: { plugins: [router] } })
 }
@@ -152,5 +152,28 @@ describe("App (modale d'authentification)", () => {
     expect(document.activeElement).toBe(trigger)
 
     trigger.remove()
+  })
+})
+
+describe('App (section Support)', () => {
+  afterEach(() => {
+    wrapper?.unmount()
+    wrapper = null
+    document.body.innerHTML = ''
+  })
+
+  it('affiche les sponsors juste au-dessus du footer', async () => {
+    wrapper = await mountApp('/')
+
+    const support = wrapper.find('.support')
+    expect(support.exists()).toBe(true)
+    expect(support.element.nextElementSibling?.tagName).toBe('FOOTER')
+  })
+
+  it('masque les sponsors sur la page profil', async () => {
+    wrapper = await mountApp('/profil')
+
+    expect(wrapper.find('.support').exists()).toBe(false)
+    expect(wrapper.find('footer').exists()).toBe(true)
   })
 })

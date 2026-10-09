@@ -1,4 +1,11 @@
 import { createRouter, createWebHistory } from 'vue-router'
+
+declare module 'vue-router' {
+  interface RouteMeta {
+    // Masque la section Support (SupportSection, au-dessus du footer).
+    hideSupport?: boolean
+  }
+}
 import HomeView from '../views/HomeView.vue'
 import ProfileView from '../views/ProfileView.vue'
 import ProgrammationView from '../views/ProgrammationView.vue'
@@ -17,7 +24,8 @@ export const router = createRouter({
     // Pas de garde de navigation : accessible déconnecté, ProfileView
     // affiche alors les boutons connexion/inscription à la place du
     // formulaire de profil.
-    { path: '/profil', name: 'profil', component: ProfileView },
+    // hideSupport : pas de section « Ils nous soutiennent » sur le profil.
+    { path: '/profil', name: 'profil', component: ProfileView, meta: { hideSupport: true } },
     { path: '/programmation', name: 'programmation', component: ProgrammationView },
     { path: '/billetterie', name: 'billetterie', component: BilletterieView },
     { path: '/mon-programme', name: 'mon-programme', component: MonProgrammeView },
