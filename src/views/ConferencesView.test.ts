@@ -29,7 +29,7 @@ function conference(
       created_at: '',
       id_conferenciere: idConference * 10 + index,
       id_conference: idConference,
-      Conferenciere: { id_conferenciere: idConference * 10 + index, created_at: '', nom, description: null },
+      Conferenciere: { id_conferenciere: idConference * 10 + index, created_at: '', nom, description: null, photo: null },
     })),
   }
 }

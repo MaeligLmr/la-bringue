@@ -53,6 +53,53 @@ function reset() {
   search.value = ''
   selected.value = {}
 }
+
+// Défilement des rangées de filtres à la souris (le doigt et le trackpad
+// défilent nativement) : la molette verticale fait défiler horizontalement
+// tant que la rangée peut encore avancer — arrivée au bout, c'est la page
+// qui défile — et on peut aussi la faire glisser en cliquant-tirant.
+function onFilterWheel(event: WheelEvent) {
+  const row = event.currentTarget as HTMLElement
+  if (Math.abs(event.deltaX) >= Math.abs(event.deltaY)) return
+  const max = row.scrollWidth - row.clientWidth
+  const delta = event.deltaMode === WheelEvent.DOM_DELTA_LINE ? event.deltaY * 16 : event.deltaY
+  if (max <= 0 || (delta < 0 && row.scrollLeft <= 0) || (delta > 0 && row.scrollLeft >= max - 1)) return
+  event.preventDefault()
+  row.scrollLeft += delta
+}
+
+// Au-delà de ce déplacement (px), le clic devient un glissement et ne
+// sélectionne pas le filtre sous le curseur.
+const DRAG_THRESHOLD = 5
+let drag: { row: HTMLElement; startX: number; startScroll: number; moved: boolean } | null = null
+
+function onFilterPointerDown(event: PointerEvent) {
+  if (event.pointerType !== 'mouse' || event.button !== 0) return
+  const row = event.currentTarget as HTMLElement
+  drag = { row, startX: event.clientX, startScroll: row.scrollLeft, moved: false }
+}
+
+function onFilterPointerMove(event: PointerEvent) {
+  if (!drag) return
+  const dx = event.clientX - drag.startX
+  if (!drag.moved && Math.abs(dx) < DRAG_THRESHOLD) return
+  if (!drag.moved) {
+    drag.moved = true
+    // Capturé seulement une fois le glissement lancé (sinon le clic
+    // n'atteindrait plus le bouton) : le glissement continue hors de la rangée.
+    drag.row.setPointerCapture(event.pointerId)
+  }
+  drag.row.scrollLeft = drag.startScroll - dx
+}
+
+function onFilterPointerUp() {
+  // Remis à zéro après le clic qui suit le relâchement (voir onFilterClick).
+  setTimeout(() => (drag = null))
+}
+
+function onFilterClick(event: MouseEvent) {
+  if (drag?.moved) event.stopPropagation()
+}
 </script>
 
 <template>
@@ -86,6 +133,12 @@ function reset() {
       class="filterable-list__filter"
       role="group"
       :aria-label="filter.label"
+      @wheel="onFilterWheel"
+      @pointerdown="onFilterPointerDown"
+      @pointermove="onFilterPointerMove"
+      @pointerup="onFilterPointerUp"
+      @pointercancel="onFilterPointerUp"
+      @click.capture="onFilterClick"
     >
       <Button
         :color="!selected[filter.key] ? 'primary' : 'secondary'"

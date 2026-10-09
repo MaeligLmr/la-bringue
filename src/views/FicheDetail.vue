@@ -3,6 +3,7 @@ import { ref, watch } from 'vue'
 import { useRouter } from 'vue-router'
 import Hero from '../components/layout/Hero.vue'
 import FichePresentation from '../components/fiche/FichePresentation.vue'
+import IntervenanteProfil from '../components/fiche/IntervenanteProfil.vue'
 import ContentCard from '../components/ui/ContentCard.vue'
 import Loader from '../components/ui/Loader.vue'
 import { loadFiche } from '../lib/fiche'
@@ -57,10 +58,11 @@ watch(
 
         <section v-if="data.intervenantes.length" class="fiche-detail__intervenantes">
           <h2 class="fiche-detail__titre">Intervenantes</h2>
-          <article v-for="intervenante in data.intervenantes" :key="intervenante.id" class="fiche-detail__intervenante">
-            <h3>{{ intervenante.nom }}</h3>
-            <p v-if="intervenante.description">{{ intervenante.description }}</p>
-          </article>
+          <IntervenanteProfil
+            v-for="intervenante in data.intervenantes"
+            :key="intervenante.id"
+            :intervenante="intervenante"
+          />
         </section>
 
         <section v-if="data.suggestions.length" class="fiche-detail__suggestions">
@@ -109,18 +111,14 @@ watch(
 .fiche-detail__intervenantes {
   display: flex;
   flex-direction: column;
-  gap: var(--space-6);
+  gap: var(--space-10);
 }
 
-.fiche-detail__intervenante h3 {
-  margin: 0 0 var(--space-2);
-  font-size: var(--font-size-medium);
-  color: var(--text-h);
-}
-
-.fiche-detail__intervenante p {
-  margin: 0;
-  white-space: pre-line;
+/* Une conférencière sur deux : photo à droite (voir maquette). */
+@media (min-width: 640px) {
+  .fiche-detail__intervenantes :deep(.intervenante-profil:nth-of-type(even)) {
+    flex-direction: row-reverse;
+  }
 }
 
 .fiche-detail__suggestions {
@@ -129,10 +127,17 @@ watch(
   gap: var(--space-6);
 }
 
-/* Même grille que les pages liste. */
+.fiche-detail__suggestions .fiche-detail__titre {
+  text-align: center;
+}
+
+/* Rangée centrée (et non une grille) : une ou deux suggestions restent au
+   milieu au lieu de se caler dans les premières colonnes. Les cartes
+   gardent la largeur max de ContentCard. */
 .fiche-detail__suggestions-list {
-  display: grid;
-  grid-template-columns: 1fr;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
   gap: var(--space-10) var(--space-8);
   margin: 0;
   padding: 0;
@@ -141,26 +146,16 @@ watch(
 
 .fiche-detail__suggestions-list > li {
   display: flex;
-  justify-content: center;
+  flex: 0 1 18rem;
 }
 
 .fiche-detail__suggestions :deep(.content-card) {
   width: 100%;
 }
 
-@media (min-width: 640px) {
-  .fiche-detail__suggestions-list {
-    grid-template-columns: repeat(2, 1fr);
-  }
-}
-
 @media (min-width: 1025px) {
   .fiche-detail__content {
     padding: var(--space-20);
-  }
-
-  .fiche-detail__suggestions-list {
-    grid-template-columns: repeat(3, 1fr);
   }
 }
 </style>
