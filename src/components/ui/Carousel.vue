@@ -2,7 +2,7 @@
 import { onMounted, onUnmounted, ref } from 'vue'
 import Button from './Button.vue'
 import CarouselTile from './CarouselTile.vue'
-import type { CarouselTileData } from '../../types/carousel-tile'
+import type { CarouselTileData } from '../../types/ui/carousel-tile.ts'
 
 defineProps<{
   tiles: CarouselTileData[]

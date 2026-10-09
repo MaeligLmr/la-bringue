@@ -1,7 +1,7 @@
 import { describe, it, expect } from 'vitest'
 import { mount } from '@vue/test-utils'
 import ProgrammationDay from './ProgrammationDay.vue'
-import type { Artiste } from '../../types/programmation'
+import type { Artiste } from '../../types/ui/programmation.ts'
 import type { DayLineup } from '../../lib/programmation'
 
 function artiste(nom: string, heure: string, scene: string): Artiste {

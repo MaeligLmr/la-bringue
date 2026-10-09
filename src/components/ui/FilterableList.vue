@@ -2,7 +2,7 @@
 import { computed, ref } from 'vue'
 import Button from './Button.vue'
 import Icon from './Icon.vue'
-import type { FilterConfig, FilterValues, FilterableItem } from '../../types/filterable-list'
+import type { FilterConfig, FilterValues, FilterableItem } from '../../types/ui/filterable-list.ts'
 
 const props = withDefaults(
   defineProps<{

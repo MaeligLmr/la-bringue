@@ -1,4 +1,4 @@
-import type { Artiste } from '../types/programmation'
+import type { Artiste } from '../types/ui/programmation'
 
 export interface DayLineup {
   headliner?: Artiste

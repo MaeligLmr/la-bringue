@@ -1,7 +1,7 @@
 import { describe, it, expect } from 'vitest'
 import { mount } from '@vue/test-utils'
 import Tag from './Tag.vue'
-import { TAG_VARIANTS } from '../../types/tag'
+import { TAG_VARIANTS } from '../../types/ui/tag.ts'
 
 describe('Tag', () => {
   it('affiche le libellé fourni', () => {

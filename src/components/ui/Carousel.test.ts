@@ -2,7 +2,7 @@ import { describe, it, expect, vi, afterEach } from 'vitest'
 import { mount } from '@vue/test-utils'
 import { createRouter, createWebHistory } from 'vue-router'
 import Carousel from './Carousel.vue'
-import type { CarouselTileData } from '../../types/carousel-tile'
+import type { CarouselTileData } from '../../types/ui/carousel-tile.ts'
 
 const TILES: CarouselTileData[] = [
   { title: 'Pass 1 jour', content: 'Pass 1 jour au choix' },

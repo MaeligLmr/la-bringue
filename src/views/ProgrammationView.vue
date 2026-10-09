@@ -4,8 +4,8 @@ import { useRoute, useRouter } from 'vue-router'
 import Hero from '../components/layout/Hero.vue'
 import FilterableList from '../components/ui/FilterableList.vue'
 import ContentCard from '../components/ui/ContentCard.vue'
-import type { FilterConfig, FilterValues } from '../types/filterable-list'
-import { JOURS, SCENES, type Artiste } from '../types/programmation'
+import type { FilterConfig, FilterValues } from '../types/ui/filterable-list.ts'
+import { JOURS, SCENES, type Artiste } from '../types/ui/programmation.ts'
 import programmationData from '../data/programmation.json'
 
 const artistes: Artiste[] = [...programmationData].sort((a, b) =>

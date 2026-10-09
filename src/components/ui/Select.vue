@@ -1,11 +1,11 @@
 <script setup lang="ts">
 import { computed, onBeforeUnmount, onMounted, ref } from 'vue'
 import Icon from './Icon.vue'
-import type { SelectOption } from '../../types/select'
+import type { SelectOption } from '../../types/ui/select.ts'
 // Reusing Button's size type/tokens on purpose: a Select must line up at
 // the same height as a Button of the same size wherever they sit next to
 // each other (e.g. the Navbar), so they share one size vocabulary.
-import type { ButtonSize } from '../../types/button'
+import type { ButtonSize } from '../../types/ui/button.ts'
 
 const props = withDefaults(
   defineProps<{
