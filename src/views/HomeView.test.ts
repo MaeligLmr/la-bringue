@@ -1,7 +1,12 @@
-import { describe, it, expect } from 'vitest'
+import { describe, it, expect, vi } from 'vitest'
 import { mount } from '@vue/test-utils'
 import { createRouter, createWebHistory } from 'vue-router'
 import HomeView from './HomeView.vue'
+
+// Le lineup vient de Supabase : on le simule pour ne faire aucun appel réseau.
+vi.mock('../handlers/concert', () => ({
+  concertHandler: { getDayLineup: vi.fn().mockResolvedValue({ others: [] }) },
+}))
 
 async function mountHome() {
   const router = createRouter({
