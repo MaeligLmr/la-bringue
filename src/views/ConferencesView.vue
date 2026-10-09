@@ -93,7 +93,7 @@ watch(selected, ({ date, theme }) => {
 /* 2 colonnes dès la tablette, y compris en desktop. */
 @media (min-width: 640px) {
   .conferences :deep(.filterable-list__items) {
-    grid-template-columns: repeat(2, 1fr);
+    grid-template-columns: repeat(2, minmax(0, 1fr));
     padding-bottom: var(--space-20);
   }
 

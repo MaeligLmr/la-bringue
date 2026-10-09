@@ -128,6 +128,11 @@ const photoSrc = computed(() => (!props.photo || photoFailed.value ? null : phot
   line-height: var(--line-height-heading-2);
   color: inherit;
   min-height: 108px;
+  /* Un mot plus large que la carte (titre de conférence en police titre)
+     passe à la ligne, avec un tiret (césure française, voir lang="fr" dans
+     index.html), au lieu d'élargir la carte et la page. */
+  overflow-wrap: anywhere;
+  hyphens: auto;
 }
 
 .content-card__meta {

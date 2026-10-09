@@ -71,6 +71,24 @@ describe('FicheDetail', () => {
     wrapper.unmount()
   })
 
+  it('affiche les conférencières (photo, nom et bio), sans lien vers une page individuelle', async () => {
+    vi.mocked(loadFiche).mockResolvedValue({
+      ...data('La parité sur scène'),
+      intervenantes: [
+        { id: 1, nom: 'Inès Moreau', photo: '/conferencieres/ines.jpg', description: 'Programmatrice de festivals' },
+      ],
+    })
+
+    const { wrapper } = await mountFiche('/conference/fiche/1')
+
+    const intervenante = wrapper.find('.intervenante-profil')
+    expect(intervenante.find('img').attributes('src')).toBe('/conferencieres/ines.jpg')
+    expect(intervenante.find('h3').text()).toBe('Inès Moreau')
+    expect(intervenante.find('p').text()).toBe('Programmatrice de festivals')
+    expect(intervenante.find('a').exists()).toBe(false)
+    wrapper.unmount()
+  })
+
   it('masque la section suggestions quand il n’y en a pas', async () => {
     vi.mocked(loadFiche).mockResolvedValue(data('Encre Noire'))
 

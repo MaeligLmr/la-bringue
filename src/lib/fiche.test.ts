@@ -130,6 +130,16 @@ describe('loadFiche — artiste', () => {
 })
 
 describe('loadFiche — conférence', () => {
+  it('affiche l’heure de fin dans le bloc commun quand elle est connue', async () => {
+    vi.mocked(conferenceHandler.getDetailById).mockResolvedValue({
+      ...conference(1, 'La fête au féminin', 'Feminisme'),
+      heure_fin: '15:30:00',
+    })
+    vi.mocked(conferenceHandler.getByTheme).mockResolvedValue([])
+
+    expect((await loadFiche('conference', 1))?.fiche.heure).toBe('14h30 – 15h30')
+  })
+
   it('suggère les autres conférences du même thème', async () => {
     vi.mocked(conferenceHandler.getDetailById).mockResolvedValue(conference(1, 'La fête au féminin', 'Feminisme'))
     vi.mocked(conferenceHandler.getByTheme).mockResolvedValue([

@@ -176,8 +176,9 @@ const isLiked = ref(false)
 
 .fiche-presentation__actions {
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
-  gap: var(--space-2);
+  gap: var(--space-2) var(--space-4);
 }
 
 /* Marge pour les stickers qui débordent des coins de la photo. */
