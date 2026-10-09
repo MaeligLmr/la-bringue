@@ -1,7 +1,9 @@
 <script setup lang="ts">
 import { nextTick, ref, watch } from 'vue'
+import { useRoute } from 'vue-router'
 import { Toaster } from 'vue-sonner'
 import Navbar from './components/layout/Navbar.vue'
+import SupportSection from './components/layout/SupportSection.vue'
 import Footer from './components/layout/Footer.vue'
 import Modal from './components/layout/Modal.vue'
 import LoginForm from './components/auth/LoginForm.vue'
@@ -11,6 +13,7 @@ import { useTheme } from './composables/useTheme'
 
 const { isOpen, activeView, close, switchTo } = useAuthModal()
 const { resolvedTheme } = useTheme()
+const route = useRoute()
 
 const formRef = ref<{ focusFirstField: () => void } | null>(null)
 
@@ -27,6 +30,8 @@ watch(isOpen, async (open) => {
   <Navbar />
 
   <RouterView />
+
+  <SupportSection v-if="!route.meta.hideSupport" />
 
   <Footer />
 
