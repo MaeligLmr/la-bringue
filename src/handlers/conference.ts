@@ -38,6 +38,12 @@ export const conferenceHandler = {
     )
   },
 
+  // Valeurs de l'enum `themes_conferences`, via la fonction SQL
+  // supabase/get_themes_conferences.sql (PostgREST n'expose pas les enums).
+  async getThemes(): Promise<string[]> {
+    return unwrap<string[]>(TABLE, await supabase.rpc('get_themes_conferences'))
+  },
+
   async getByTheme(theme: string): Promise<Conference[]> {
     return unwrap<Conference[]>(
       TABLE,

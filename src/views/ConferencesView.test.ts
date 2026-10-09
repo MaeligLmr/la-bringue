@@ -36,14 +36,20 @@ function conference(
 
 // Supabase renvoie les conférences déjà triées par jour puis par heure.
 const CONFERENCES = [
-  conference('2026-08-28', '14:00:00', 'La fête au féminin', 'Société', ['Alice Martin']),
-  conference('2026-08-29', '15:30:00', 'Produire sa musique', 'Musique', ['Léa Dubois', 'Nora Petit']),
+  conference('2026-08-28', '14:00:00', 'La fête au féminin', 'Feminisme', ['Alice Martin']),
+  conference('2026-08-29', '15:30:00', 'Produire sa musique', 'Tolérance', ['Léa Dubois', 'Nora Petit']),
   conference('2026-08-29', '17:00:00', 'Festivals durables', 'Écologie', []),
-  conference('2026-08-30', '14:30:00', 'Rap et engagement', 'Musique', ['Inès Moreau']),
+  conference('2026-08-30', '14:30:00', 'Rap et engagement', 'Feminisme', ['Inès Moreau']),
 ]
 
+// Valeurs de l'enum `themes_conferences` renvoyées par la fonction RPC.
+const THEMES = ['Feminisme', 'Écologie', 'Tolérance', 'Sante']
+
 vi.mock('../handlers/conference', () => ({
-  conferenceHandler: { getAllDetailed: vi.fn(async () => CONFERENCES) },
+  conferenceHandler: {
+    getAllDetailed: vi.fn(async () => CONFERENCES),
+    getThemes: vi.fn(async () => THEMES),
+  },
 }))
 
 async function mountConferences(url = '/') {
@@ -88,17 +94,41 @@ describe('ConferencesView', () => {
     const card = wrapper.findAll('.content-card').find((node) => node.text().includes('Produire sa musique'))
     expect(card?.find('.content-card__scene').text()).toBe('Léa Dubois, Nora Petit')
     expect(card?.find('.content-card__date').text()).toBe('Samedi 29 août - 15h30')
-    expect(card?.find('.tag').text()).toBe('Musique')
+    expect(card?.find('.tag').text()).toBe('Tolérance')
 
     wrapper.unmount()
   })
 
-  it('propose uniquement le filtre jour', async () => {
+  it('propose les filtres jour et thème, avec les thèmes de l’enum de la base', async () => {
     const wrapper = await mountConferences()
 
     const groups = wrapper.findAll('[role="group"]').map((group) => group.attributes('aria-label'))
-    expect(groups).toEqual(['Jour'])
+    expect(groups).toEqual(['Jour', 'Thème'])
     expect(filterButton(wrapper, 'Tous les jours').attributes('aria-pressed')).toBe('true')
+    expect(filterButton(wrapper, 'Tous les thèmes').attributes('aria-pressed')).toBe('true')
+    const themeLabels = wrapper.findAll('[aria-label="Thème"] button').map((node) => node.text())
+    expect(themeLabels).toEqual(['Tous les thèmes', ...THEMES])
+
+    wrapper.unmount()
+  })
+
+  it('ne garde que les conférences du thème sélectionné', async () => {
+    const wrapper = await mountConferences()
+
+    await filterButton(wrapper, 'Feminisme').trigger('click')
+
+    expect(displayedNames(wrapper)).toEqual(['La fête au féminin', 'Rap et engagement'])
+
+    wrapper.unmount()
+  })
+
+  it('combine jour et thème', async () => {
+    const wrapper = await mountConferences()
+
+    await filterButton(wrapper, 'Samedi 29 août').trigger('click')
+    await filterButton(wrapper, 'Écologie').trigger('click')
+
+    expect(displayedNames(wrapper)).toEqual(['Festivals durables'])
 
     wrapper.unmount()
   })
