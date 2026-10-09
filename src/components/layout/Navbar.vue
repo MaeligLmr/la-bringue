@@ -101,7 +101,14 @@ function goToAndCloseMenu(path: string) {
           Programmation
         </Button>
 
-        <Button color="primary" variant="ghost" icon-only="heart" label="Mon programme" @click="goTo('/mon-programme')" />
+        <Button
+          v-if="isLoggedIn"
+          color="primary"
+          variant="ghost"
+          icon-only="heart"
+          label="Mon programme"
+          @click="goTo('/mon-programme')"
+        />
 
         <Button
           v-if="isLoggedIn"

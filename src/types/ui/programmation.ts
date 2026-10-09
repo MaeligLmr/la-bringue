@@ -17,6 +17,7 @@ export const SCENES: SelectOption[] = [
 // `date` et `scene` reprennent les `value` de JOURS et SCENES pour les filtres.
 export interface ArtisteCard {
   id: string
+  idArtiste: number
   nom: string
   photo: string | null
   date: string

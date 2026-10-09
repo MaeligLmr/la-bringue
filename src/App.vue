@@ -11,7 +11,7 @@ import SignUpForm from './components/auth/SignUpForm.vue'
 import { useAuthModal } from './composables/useAuthModal'
 import { useTheme } from './composables/useTheme'
 
-const { isOpen, activeView, close, switchTo } = useAuthModal()
+const { isOpen, activeView, close, complete, switchTo } = useAuthModal()
 const { resolvedTheme } = useTheme()
 const route = useRoute()
 
@@ -44,13 +44,13 @@ watch(isOpen, async (open) => {
       v-if="activeView === 'login'"
       ref="formRef"
       @switch="switchTo('signup')"
-      @success="close"
+      @success="complete"
     />
     <SignUpForm
       v-else
       ref="formRef"
       @switch="switchTo('login')"
-      @success="close"
+      @success="complete"
     />
   </Modal>
 </template>

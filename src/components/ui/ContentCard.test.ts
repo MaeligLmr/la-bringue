@@ -1,8 +1,15 @@
 import { describe, it, expect, vi } from 'vitest'
-import { mount } from '@vue/test-utils'
+import { flushPromises, mount } from '@vue/test-utils'
+import { computed } from 'vue'
 import ContentCard from './ContentCard.vue'
 import Tag from './Tag.vue'
 import Like from './Like.vue'
+import { useAuthModal } from '../../composables/useAuthModal'
+
+const { loggedIn } = vi.hoisted(() => ({ loggedIn: { value: true } }))
+vi.mock('../../composables/useAuth', () => ({
+  useAuth: () => ({ isLoggedIn: computed(() => loggedIn.value), ready: Promise.resolve() }),
+}))
 
 describe('ContentCard', () => {
   it("s'affiche avec nom et photo uniquement, sans date, catégorie ni scène", () => {
@@ -99,14 +106,32 @@ describe('ContentCard', () => {
     expect(like.attributes('aria-label')).toBe('Ajouter Aya Nakamura à Mon programme')
 
     await like.trigger('click')
+    await flushPromises()
     expect(wrapper.emitted('update:isLiked')?.[0]).toEqual([true])
     expect(like.attributes('aria-pressed')).toBe('true')
 
     await like.trigger('click')
+    await flushPromises()
     expect(wrapper.emitted('update:isLiked')?.[1]).toEqual([false])
     expect(like.attributes('aria-pressed')).toBe('false')
 
     await like.trigger('keydown', { key: 'Enter' })
     expect(onClick).not.toHaveBeenCalled()
+  })
+  it('transmet le contenu liké à la modale de connexion si personne n’est connecté', async () => {
+    loggedIn.value = false
+    const wrapper = mount(ContentCard, {
+      props: { nom: 'Aya Nakamura', likable: true, target: { id: 7, type: 'artiste' } },
+    })
+
+    await wrapper.findComponent(Like).trigger('click')
+    await flushPromises()
+
+    expect(useAuthModal().isOpen.value).toBe(true)
+    expect(useAuthModal().pendingLike.value).toEqual({ id: 7, type: 'artiste' })
+    expect(wrapper.emitted('update:isLiked')).toBeUndefined()
+
+    loggedIn.value = true
+    useAuthModal().close()
   })
 })
