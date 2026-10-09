@@ -1,16 +1,16 @@
 import { describe, it, expect } from 'vitest'
 import { mount } from '@vue/test-utils'
 import ProgrammationDay from './ProgrammationDay.vue'
-import type { Artiste } from '../../types/ui/programmation.ts'
-import type { DayLineup } from '../../lib/programmation'
+import type { Artiste } from '../../types/database/artiste'
+import type { DayLineup } from '../../handlers/concert'
 
-function artiste(nom: string, heure: string, scene: string): Artiste {
-  return { id: nom, nom, photo: '', date: '2026-08-30', heure, scene, categorie: 'Rock' }
+function artiste(id_artiste: number, nom: string): Artiste {
+  return { id_artiste, nom, created_at: '', photo: null, description: null, categorie: 'Rock' }
 }
 
 const LINEUP: DayLineup = {
-  headliner: artiste('The Cure', '20h55', 'chrome'),
-  others: [artiste('Ditter', '21h15', 'summer'), artiste('Mogwai', '19h40', 'soft')],
+  headliner: artiste(1, 'The Cure'),
+  others: [artiste(2, 'Ditter'), artiste(3, 'Mogwai')],
 }
 
 const mountDay = (lineup: DayLineup = LINEUP) =>

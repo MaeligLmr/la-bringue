@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import Icon from '../ui/Icon.vue'
-import type { DayLineup } from '../../lib/programmation'
+import type { DayLineup } from '../../handlers/concert'
 
 defineProps<{
   label: string
@@ -16,7 +16,7 @@ defineProps<{
     <p v-if="lineup.headliner" class="programmation-day__headliner">{{ lineup.headliner.nom }}</p>
 
     <ul v-if="lineup.others.length" class="programmation-day__others">
-      <li v-for="(artiste, index) in lineup.others" :key="artiste.id" class="programmation-day__artiste">
+      <li v-for="(artiste, index) in lineup.others" :key="artiste.id_artiste" class="programmation-day__artiste">
         <Icon v-if="index > 0" name="star-separation" size="small" class="programmation-day__separator" />
         {{ artiste.nom }}<template v-if="index === lineup.others.length - 1">…</template>
       </li>
