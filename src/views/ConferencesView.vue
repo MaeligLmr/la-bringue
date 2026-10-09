@@ -87,6 +87,7 @@ function labelOf(value: string) {
             :date="`${labelOf(item.date)} - ${item.heure}`"
             :categorie="item.theme"
             likable
+            :on-click="() => router.push({ name: 'fiche', params: { type: 'conference', id: item.id } })"
           />
         </template>
       </FilterableList>

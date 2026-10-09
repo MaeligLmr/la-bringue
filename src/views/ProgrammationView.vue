@@ -27,6 +27,7 @@ function toCards(concerts: ConcertDetail[]): ArtisteCard[] {
         : [
             {
               id: `${concert.id_concert}-${artiste.id_artiste}`,
+              idArtiste: artiste.id_artiste,
               nom: artiste.nom ?? '',
               photo: artiste.photo,
               date: concert.jour ?? '',
@@ -81,6 +82,7 @@ function labelOf(options: typeof JOURS, value: string) {
             :date="`${labelOf(JOURS, item.date)} - ${item.heure}`"
             :categorie="item.categorie"
             likable
+            :on-click="() => router.push({ name: 'fiche', params: { type: 'artiste', id: item.idArtiste } })"
           />
         </template>
       </FilterableList>
