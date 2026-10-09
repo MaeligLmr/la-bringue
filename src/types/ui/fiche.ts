@@ -21,7 +21,7 @@ export interface Fiche {
   description: string | null
   // Format ISO "YYYY-MM-DD".
   jour?: string
-  // Format "18h00".
+  // Format "18h00", ou "18h00 – 19h30" quand l'heure de fin est connue.
   heure?: string
   // `value` de SCENES : choisit les stickers autour de la photo.
   scene?: string
@@ -36,6 +36,7 @@ export interface Fiche {
 export interface FicheIntervenante {
   id: number
   nom: string
+  photo: string | null
   description: string | null
 }
 

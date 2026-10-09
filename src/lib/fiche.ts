@@ -15,6 +15,11 @@ function ficheRoute(type: FicheType, id: number) {
   return { name: 'fiche', params: { type, id } }
 }
 
+// "22h15 – 23h30", ou "22h15" sans heure de fin.
+function horaire(debut: string | null, fin: string | null) {
+  return [formatHeure(debut), formatHeure(fin)].filter(Boolean).join(' – ')
+}
+
 function jourTag(page: string, jour: string): FicheTag[] {
   return jour ? [{ label: labelOf(JOURS, jour), to: { name: page, query: { date: jour } } }] : []
 }
@@ -97,7 +102,7 @@ async function loadArtiste(id: number): Promise<FicheData | null> {
       photo: artiste.photo,
       description: artiste.description,
       jour: jour || undefined,
-      heure: formatHeure(concert?.heure_debut ?? null) || undefined,
+      heure: horaire(concert?.heure_debut ?? null, concert?.heure_fin ?? null) || undefined,
       scene: scene || undefined,
       categorie: artiste.categorie ? { label: artiste.categorie } : undefined,
       tags: [
@@ -128,7 +133,7 @@ async function loadConference(id: number): Promise<FicheData | null> {
       photo: conference.photo,
       description: conference.description,
       jour: conference.jour ?? undefined,
-      heure: formatHeure(conference.heure_debut) || undefined,
+      heure: horaire(conference.heure_debut, conference.heure_fin) || undefined,
       categorie: conference.theme
         ? { label: conference.theme, to: { name: 'conferences', query: { theme: conference.theme } } }
         : undefined,
@@ -137,7 +142,15 @@ async function loadConference(id: number): Promise<FicheData | null> {
     },
     intervenantes: conference.Participation.flatMap(({ Conferenciere }) =>
       Conferenciere
-        ? [{ id: Conferenciere.id_conferenciere, nom: Conferenciere.nom ?? '', description: Conferenciere.description }]
+        ? [
+            {
+              id: Conferenciere.id_conferenciere,
+              nom: Conferenciere.nom ?? '',
+              // `?? null` : absente tant que la colonne n'est pas créée en base.
+              photo: Conferenciere.photo ?? null,
+              description: Conferenciere.description,
+            },
+          ]
         : []
     ),
     suggestions,

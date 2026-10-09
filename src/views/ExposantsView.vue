@@ -80,7 +80,7 @@ watch(selected, ({ categorie }) => {
 
 @media (min-width: 640px) {
   .exposants :deep(.filterable-list__items) {
-    grid-template-columns: repeat(2, 1fr);
+    grid-template-columns: repeat(2, minmax(0, 1fr));
     padding-bottom: var(--space-20);
   }
 }
@@ -97,7 +97,7 @@ watch(selected, ({ categorie }) => {
   }
 
   .exposants :deep(.filterable-list__items) {
-    grid-template-columns: repeat(3, 1fr);
+    grid-template-columns: repeat(3, minmax(0, 1fr));
   }
 }
 
