@@ -111,6 +111,17 @@ describe("App (modale d'authentification)", () => {
     expect(signUp).not.toHaveBeenCalled()
   })
 
+  it('abandonne le like demandé quand on ferme la modale sans se connecter', async () => {
+    wrapper = await mountApp()
+    useAuthModal().open('login', { id: 42, type: 'artiste' })
+    await nextTick()
+
+    await click('.modal__close')
+
+    expect(document.querySelector('.modal__backdrop')).toBeNull()
+    expect(useAuthModal().pendingLike.value).toBeNull()
+  })
+
   it('se ferme sur clic du backdrop, sans appel Supabase', async () => {
     wrapper = await mountApp()
     useAuthModal().open('login')

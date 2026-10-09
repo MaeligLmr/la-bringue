@@ -83,6 +83,7 @@ function labelOf(options: typeof JOURS, value: string) {
             :categorie="item.categorie"
             likable
             :on-click="() => router.push({ name: 'fiche', params: { type: 'artiste', id: item.idArtiste } })"
+            :target="{ id: item.idArtiste, type: 'artiste' }"
           />
         </template>
       </FilterableList>
