@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { ref, watchEffect } from 'vue'
-import type { IconName, IconSize } from '../../types/icon'
+import type { IconName, IconSize } from '../../types/ui/icon'
 
 const props = withDefaults(defineProps<{ name: IconName; size?: IconSize }>(), {
   size: 'medium',

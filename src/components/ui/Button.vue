@@ -1,8 +1,8 @@
 <script setup lang="ts">
 import { computed, ref } from 'vue'
 import Icon from './Icon.vue'
-import type { IconName, IconSize } from '../../types/icon'
-import type { ButtonColor, ButtonVariant, ButtonSize } from '../../types/button'
+import type { IconName, IconSize } from '../../types/ui/icon.ts'
+import type { ButtonColor, ButtonVariant, ButtonSize } from '../../types/ui/button.ts'
 
 const props = withDefaults(
   defineProps<{

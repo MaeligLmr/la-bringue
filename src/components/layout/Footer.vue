@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import Button from '../ui/Button.vue'
 import Icon from '../ui/Icon.vue'
-import type { IconName } from '../../types/icon'
+import type { IconName } from '../../types/ui/icon.ts'
 import footerBg from '../../assets/footer/footer-bg.png'
 
 // Le motif est carrelé en repeat et teinté par --footer-image-mask à ~35%

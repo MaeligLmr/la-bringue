@@ -3,7 +3,7 @@ import { computed } from 'vue'
 import { useRouter } from 'vue-router'
 import Button from '../ui/Button.vue'
 import ProgrammationDay from './ProgrammationDay.vue'
-import { JOURS, type Artiste } from '../../types/programmation'
+import { JOURS, type Artiste } from '../../types/ui/programmation.ts'
 import { getDayLineup } from '../../lib/programmation'
 
 const props = defineProps<{

@@ -1,7 +1,7 @@
 import { describe, it, expect } from 'vitest'
 import { mount } from '@vue/test-utils'
 import FilterableList from './FilterableList.vue'
-import type { FilterConfig } from '../../types/filterable-list'
+import type { FilterConfig } from '../../types/ui/filterable-list.ts'
 
 const ITEMS = [
   { id: 1, nom: 'Beyoncé', jour: 'samedi', scene: 'chrome' },

@@ -5,7 +5,7 @@ import { useAuth } from '../../composables/useAuth'
 import { useTheme } from '../../composables/useTheme'
 import Button from '../ui/Button.vue'
 import Drawer from './Drawer.vue'
-import type { IconName } from '../../types/icon'
+import type { IconName } from '../../types/ui/icon.ts'
 import logoLight from '../../assets/logo/Logo-Light.svg'
 import logoDark from '../../assets/logo/Logo-Dark.svg'
 

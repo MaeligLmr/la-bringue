@@ -1,8 +1,8 @@
 <script setup lang="ts">
 import { useRouter } from 'vue-router'
 import Button from './Button.vue'
-import type { IconName } from '../../types/icon'
-import type { CarouselTileVariant } from '../../types/carousel-tile'
+import type { IconName } from '../../types/ui/icon.ts'
+import type { CarouselTileVariant } from '../../types/ui/carousel-tile.ts'
 import carrouselTileBg from '../../assets/carrousel-tile/carrousel-tile-bg.png'
 
 const props = withDefaults(

@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import type { TagVariant } from '../../types/tag'
+import type { TagVariant } from '../../types/ui/tag'
 
 withDefaults(
   defineProps<{

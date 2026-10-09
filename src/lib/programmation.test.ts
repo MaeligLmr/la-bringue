@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest'
 import { getDayLineup } from './programmation'
-import type { Artiste } from '../types/programmation'
+import type { Artiste } from '../types/ui/programmation'
 
 function artiste(nom: string, date: string, heure: string, scene: string): Artiste {
   return { id: nom, nom, photo: '', date, heure, scene, categorie: 'Rock' }

@@ -2,7 +2,7 @@
 import Hero from '../components/layout/Hero.vue'
 import Carousel from '../components/ui/Carousel.vue'
 import ProgrammationSection from '../components/home/ProgrammationSection.vue'
-import type { CarouselTileData, CarouselTileVariant } from '../types/carousel-tile'
+import type { CarouselTileData, CarouselTileVariant } from '../types/ui/carousel-tile.ts'
 import programmationData from '../data/programmation.json'
 import billetterieData from '../data/billetterie.json'
 import infosPratiquesData from '../data/infos-pratiques.json'
