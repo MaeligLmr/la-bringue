@@ -1,13 +1,17 @@
 <script setup lang="ts">
-import { computed } from 'vue'
+import { computed, ref, watch } from 'vue'
 import Tag from './Tag.vue'
 import Like from './Like.vue'
 import cardBg from '../../assets/card/card-bg.png'
+// Importé en texte brut puis injecté via v-html (fichier statique du dépôt,
+// jamais de contenu utilisateur) : contrairement à un <img>, le SVG en ligne
+// hérite de `color` (fill="currentColor"), donc suit le thème clair/sombre.
+import placeholderSvg from '../../assets/card/placeholder.svg?raw'
 
 const props = withDefaults(
   defineProps<{
     nom: string
-    photo: string
+    photo?: string | null
     date?: string
     scene?: string
     categorie?: string
@@ -25,10 +29,19 @@ const patternStyle = {
   backgroundImage: `url(${cardBg})`,
 }
 
-// `photo` est un chemin absolu (ex: "/programmation/placeholder.svg") vers
+// `photo` est un chemin absolu (ex: "/programmation/aya-nakamura.jpg") vers
 // public/ : il faut le préfixer par BASE_URL pour rester valide une fois
-// l'app déployée sous un sous-chemin (voir vite.config.ts `base`).
-const photoSrc = computed(() => import.meta.env.BASE_URL + props.photo.replace(/^\//, ''))
+// l'app déployée sous un sous-chemin (voir vite.config.ts `base`). Une URL
+// complète (ex: Supabase Storage) est utilisée telle quelle. Sans photo en
+// base, ou si le fichier est introuvable, `photoSrc` est null et la carte
+// affiche le placeholder.
+const photoFailed = ref(false)
+watch(() => props.photo, () => (photoFailed.value = false))
+
+const photoSrc = computed(() => {
+  if (!props.photo || photoFailed.value) return null
+  return /^https?:\/\//.test(props.photo) ? props.photo : import.meta.env.BASE_URL + props.photo.replace(/^\//, '')
+})
 </script>
 
 <template>
@@ -61,7 +74,13 @@ const photoSrc = computed(() => import.meta.env.BASE_URL + props.photo.replace(/
       </div>
     </div>
 
-    <img :src="photoSrc" alt="" class="content-card__photo" />
+    <div
+      v-if="!photoSrc"
+      class="content-card__photo content-card__placeholder"
+      aria-hidden="true"
+      v-html="placeholderSvg"
+    />
+    <img v-else :src="photoSrc" alt="" class="content-card__photo" @error="photoFailed = true" />
   </article>
 </template>
 
@@ -141,5 +160,18 @@ const photoSrc = computed(() => import.meta.env.BASE_URL + props.photo.replace(/
   width: 100%;
   height: 10rem;
   object-fit: cover;
+}
+
+.content-card__placeholder {
+  overflow: hidden;
+  background: linear-gradient(135deg, var(--tag-pink-bright-background), var(--tag-violet-background));
+  color: var(--tag-pink-bright-text);
+}
+
+/* SVG injecté via v-html : hors du scope, d'où :deep(). */
+.content-card__placeholder :deep(svg) {
+  display: block;
+  width: 100%;
+  height: 100%;
 }
 </style>

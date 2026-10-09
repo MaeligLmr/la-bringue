@@ -14,6 +14,29 @@ describe('ContentCard', () => {
     expect(wrapper.findComponent(Tag).exists()).toBe(false)
   })
 
+  it('affiche le placeholder quand la photo est absente en base', () => {
+    const wrapper = mount(ContentCard, { props: { nom: 'Artiste sans photo', photo: null } })
+
+    expect(wrapper.find('.content-card__placeholder').exists()).toBe(true)
+    expect(wrapper.find('img').exists()).toBe(false)
+  })
+
+  it('bascule sur le placeholder si la photo est introuvable', async () => {
+    const wrapper = mount(ContentCard, { props: { nom: 'Charlotte de Witte', photo: '/introuvable.jpg' } })
+
+    await wrapper.find('.content-card__photo').trigger('error')
+
+    expect(wrapper.find('.content-card__placeholder').exists()).toBe(true)
+    expect(wrapper.find('img').exists()).toBe(false)
+  })
+
+  it('utilise telle quelle une URL complète (ex: Supabase Storage)', () => {
+    const url = 'https://exemple.supabase.co/storage/v1/object/public/photos/aya.jpg'
+    const wrapper = mount(ContentCard, { props: { nom: 'Aya Nakamura', photo: url } })
+
+    expect(wrapper.find('.content-card__photo').attributes('src')).toBe(url)
+  })
+
   it('affiche la scène et la date quand elles sont renseignées', () => {
     const wrapper = mount(ContentCard, {
       props: { nom: 'Aya Nakamura', photo: '/aya.jpg', scene: 'Chrome', date: 'Samedi - 21h' },
