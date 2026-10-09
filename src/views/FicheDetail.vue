@@ -4,6 +4,7 @@ import { useRouter } from 'vue-router'
 import Hero from '../components/layout/Hero.vue'
 import FichePresentation from '../components/fiche/FichePresentation.vue'
 import ContentCard from '../components/ui/ContentCard.vue'
+import Loader from '../components/ui/Loader.vue'
 import { loadFiche } from '../lib/fiche'
 import type { FicheData, FicheType } from '../types/ui/fiche.ts'
 
@@ -45,7 +46,7 @@ watch(
   <main class="fiche-detail">
     <Hero />
     <div class="fiche-detail__content">
-      <p v-if="status === 'loading'" class="fiche-detail__message">Chargement…</p>
+      <Loader v-if="status === 'loading'" />
       <p v-else-if="status === 'not-found'" class="fiche-detail__message">Cette fiche n’existe pas.</p>
       <p v-else-if="status === 'error'" class="fiche-detail__message">
         Impossible de charger cette fiche pour le moment.
