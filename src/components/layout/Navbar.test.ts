@@ -199,4 +199,32 @@ describe('Navbar', () => {
 
     wrapper.unmount()
   })
+
+  it('le menu burger permet de choisir le thème, sans se refermer', async () => {
+    mockSupabase(null)
+    const { wrapper } = await mountNavbar()
+    const { useTheme } = await import('../../composables/useTheme')
+    useTheme().setPreference('system')
+
+    await wrapper.find('button[aria-label="Ouvrir le menu"]').trigger('click')
+    await wrapper.vm.$nextTick()
+
+    const select = document.body.querySelector('.navbar__menu [role="combobox"][aria-label="Thème"]') as HTMLElement
+    expect(select.textContent?.trim()).toBe('Par défaut')
+
+    select.click()
+    await wrapper.vm.$nextTick()
+    const options = Array.from(document.body.querySelectorAll('.navbar__menu [role="option"]')) as HTMLElement[]
+    expect(options.map((option) => option.textContent?.trim())).toEqual(['Par défaut', 'Clair', 'Sombre'])
+
+    options[2].click()
+    await wrapper.vm.$nextTick()
+
+    expect(document.documentElement.dataset.theme).toBe('dark')
+    expect(select.textContent?.trim()).toBe('Sombre')
+    expect(document.body.querySelector('.navbar__menu')).not.toBeNull()
+
+    useTheme().setPreference('system')
+    wrapper.unmount()
+  })
 })

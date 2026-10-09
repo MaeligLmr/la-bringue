@@ -44,10 +44,10 @@ export const conferenceHandler = {
     return unwrap<string[]>(TABLE, await supabase.rpc('get_themes_conferences'))
   },
 
-  async getByTheme(theme: string): Promise<Conference[]> {
-    return unwrap<Conference[]>(
+  async getByTheme(theme: string): Promise<ConferenceDetail[]> {
+    return unwrap<ConferenceDetail[]>(
       TABLE,
-      await supabase.from(TABLE).select('*').eq('theme', theme).order('jour').order('heure_debut')
+      await supabase.from(TABLE).select(DETAIL_SELECT).eq('theme', theme).order('jour').order('heure_debut')
     )
   },
 }

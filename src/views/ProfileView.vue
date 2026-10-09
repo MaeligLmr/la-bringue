@@ -4,29 +4,15 @@ import { useRouter } from 'vue-router'
 import { toast } from 'vue-sonner'
 import { useAuth } from '../composables/useAuth'
 import { useAuthModal } from '../composables/useAuthModal'
-import { useTheme } from '../composables/useTheme'
-import type { ThemePreference } from '../composables/useTheme'
 import { validateProfileFields, type FieldErrors } from '../lib/auth-validation'
 import { mapAuthError } from '../lib/auth-errors'
 import { withTimeout } from '../lib/with-timeout'
 import { supabase } from '../supabase.js'
 import Button from '../components/ui/Button.vue'
-import Select from '../components/ui/Select.vue'
 
 const router = useRouter()
 const { user, isLoggedIn, signOut } = useAuth()
 const { open } = useAuthModal()
-const { preference, setPreference } = useTheme()
-
-const THEME_OPTIONS: { value: ThemePreference; label: string }[] = [
-  { value: 'system', label: 'Par défaut' },
-  { value: 'light', label: 'Clair' },
-  { value: 'dark', label: 'Sombre' },
-]
-
-function onThemeChange(value: string) {
-  setPreference(value as ThemePreference)
-}
 
 const firstName = ref('')
 const lastName = ref('')
@@ -156,17 +142,6 @@ async function handleSignOut() {
         {{ isSaving ? 'Enregistrement…' : 'Enregistrer' }}
       </Button>
     </form>
-
-    <div class="profile__field">
-      <span class="profile__field-label">Thème</span>
-      <Select
-        aria-label="Thème"
-        size="medium"
-        :model-value="preference"
-        :options="THEME_OPTIONS"
-        @update:model-value="onThemeChange"
-      />
-    </div>
 
     <Button
       v-if="isLoggedIn"

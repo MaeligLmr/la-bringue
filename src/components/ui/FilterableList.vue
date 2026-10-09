@@ -166,33 +166,37 @@ function reset() {
   line-height: 1;
 }
 
+/* Une ligne qui défile horizontalement, fondue sur le bord droit, plutôt
+   qu'un retour à la ligne — sur tous les écrans, pour que les filtres en
+   bout de ligne restent atteignables sur un petit écran desktop. */
 .filterable-list__filter {
   display: flex;
-  flex-wrap: wrap;
+  flex-wrap: nowrap;
   gap: 0.625rem;
+  overflow-x: auto;
+  scrollbar-width: thin;
+  /* Laisse la place à l'anneau de focus et permet au dernier bouton de
+     sortir de la zone fondue en fin de défilement. */
+  padding: var(--space-1) var(--space-8) var(--space-1) var(--space-1);
+  margin: calc(-1 * var(--space-1));
+  mask-image: linear-gradient(to right, #000 calc(100% - var(--space-10)), transparent);
 }
 
-/* Phone : une ligne qui défile horizontalement, fondue sur le bord droit,
-   plutôt qu'un retour à la ligne. */
+.filterable-list__filter > * {
+  flex-shrink: 0;
+  white-space: nowrap;
+}
+
+/* Phone : défilement au doigt, la barre de défilement est superflue. Sur
+   desktop elle reste visible (fine) : c'est le seul moyen de défiler à la
+   souris sans trackpad. */
 @media (max-width: 639px) {
   .filterable-list__filter {
-    flex-wrap: nowrap;
-    overflow-x: auto;
     scrollbar-width: none;
-    /* Laisse la place à l'anneau de focus et permet au dernier bouton de
-       sortir de la zone fondue en fin de défilement. */
-    padding: var(--space-1) var(--space-8) var(--space-1) var(--space-1);
-    margin: calc(-1 * var(--space-1));
-    mask-image: linear-gradient(to right, #000 calc(100% - var(--space-10)), transparent);
   }
 
   .filterable-list__filter::-webkit-scrollbar {
     display: none;
-  }
-
-  .filterable-list__filter > * {
-    flex-shrink: 0;
-    white-space: nowrap;
   }
 }
 

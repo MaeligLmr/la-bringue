@@ -2,8 +2,9 @@
 import { computed, onMounted, onUnmounted, ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { useAuth } from '../../composables/useAuth'
-import { useTheme } from '../../composables/useTheme'
+import { useTheme, type ThemePreference } from '../../composables/useTheme'
 import Button from '../ui/Button.vue'
+import Select from '../ui/Select.vue'
 import Drawer from './Drawer.vue'
 import type { IconName } from '../../types/ui/icon.ts'
 import logoLight from '../../assets/logo/Logo-Light.svg'
@@ -11,7 +12,13 @@ import logoDark from '../../assets/logo/Logo-Dark.svg'
 
 const router = useRouter()
 const { user, isLoggedIn } = useAuth()
-const { resolvedTheme } = useTheme()
+const { resolvedTheme, preference, setPreference } = useTheme()
+
+const THEME_OPTIONS: { value: ThemePreference; label: string }[] = [
+  { value: 'system', label: 'Par défaut' },
+  { value: 'light', label: 'Clair' },
+  { value: 'dark', label: 'Sombre' },
+]
 
 // Falls back to the email for accounts created before the username field
 // existed, or if it's ever missing for any other reason.
@@ -174,6 +181,18 @@ function goToAndCloseMenu(path: string) {
             />
           </div>
         </div>
+
+        <!-- Le menu reste ouvert au changement : on voit le thème s'appliquer. -->
+        <div class="navbar__theme">
+          <span class="navbar__theme-label" aria-hidden="true">Thème</span>
+          <Select
+            aria-label="Thème"
+            size="medium"
+            :model-value="preference"
+            :options="THEME_OPTIONS"
+            @update:model-value="(value) => setPreference(value as ThemePreference)"
+          />
+        </div>
       </nav>
     </Drawer>
   </header>
@@ -262,6 +281,22 @@ function goToAndCloseMenu(path: string) {
 
 .navbar__menu .navbar__socials {
   justify-content: center;
+}
+
+.navbar__theme {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-2);
+  margin-top: var(--space-3);
+  padding-top: var(--space-4);
+  border-top: 1px solid var(--border);
+}
+
+.navbar__theme-label {
+  font-size: var(--font-size-small);
+  font-weight: var(--font-weight-medium);
+  color: var(--text-h);
 }
 
 @media (min-width: 1025px) {

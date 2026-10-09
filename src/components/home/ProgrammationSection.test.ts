@@ -28,6 +28,7 @@ async function mountSection() {
     routes: [
       { path: '/', component: { template: '<div />' } },
       { path: '/programmation', component: { template: '<div />' } },
+      { path: '/:type/fiche/:id', name: 'fiche', component: { template: '<div />' } },
     ],
   })
   router.push('/')

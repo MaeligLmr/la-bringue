@@ -3,6 +3,7 @@ import { computed, ref, watch } from 'vue'
 import Tag from './Tag.vue'
 import Like from './Like.vue'
 import type { LikeTarget } from '../../types/ui/like'
+import { photoUrl } from '../../lib/photo'
 import cardBg from '../../assets/card/card-bg.png'
 // Importé en texte brut puis injecté via v-html (fichier statique du dépôt,
 // jamais de contenu utilisateur) : contrairement à un <img>, le SVG en ligne
@@ -31,19 +32,12 @@ const patternStyle = {
   backgroundImage: `url(${cardBg})`,
 }
 
-// `photo` est un chemin absolu (ex: "/programmation/aya-nakamura.jpg") vers
-// public/ : il faut le préfixer par BASE_URL pour rester valide une fois
-// l'app déployée sous un sous-chemin (voir vite.config.ts `base`). Une URL
-// complète (ex: Supabase Storage) est utilisée telle quelle. Sans photo en
-// base, ou si le fichier est introuvable, `photoSrc` est null et la carte
-// affiche le placeholder.
+// Sans photo en base, ou si le fichier est introuvable, `photoSrc` est null
+// et la carte affiche le placeholder.
 const photoFailed = ref(false)
 watch(() => props.photo, () => (photoFailed.value = false))
 
-const photoSrc = computed(() => {
-  if (!props.photo || photoFailed.value) return null
-  return /^https?:\/\//.test(props.photo) ? props.photo : import.meta.env.BASE_URL + props.photo.replace(/^\//, '')
-})
+const photoSrc = computed(() => (!props.photo || photoFailed.value ? null : photoUrl(props.photo)))
 </script>
 
 <template>

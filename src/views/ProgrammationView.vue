@@ -6,46 +6,15 @@ import FilterableList from '../components/ui/FilterableList.vue'
 import ContentCard from '../components/ui/ContentCard.vue'
 import type { FilterConfig, FilterValues } from '../types/ui/filterable-list.ts'
 import { JOURS, SCENES, type ArtisteCard } from '../types/ui/programmation.ts'
-import { concertHandler, type ConcertDetail } from '../handlers/concert'
-
-// "Chrome" ou "2000’" en base → "chrome" / "2000", les `value` de SCENES.
-function sceneValue(nom: string | null | undefined) {
-  return (nom ?? '').toLowerCase().replace(/[^a-z0-9]/g, '')
-}
-
-// "22:15:00" → "22h15"
-function formatHeure(heure: string | null) {
-  return heure ? heure.slice(0, 5).replace(':', 'h') : ''
-}
-
-// Une carte par artiste principal : les featurings ne figurent pas à l'affiche.
-function toCards(concerts: ConcertDetail[]): ArtisteCard[] {
-  return concerts.flatMap((concert) =>
-    concert.ConcertArtiste.flatMap(({ featuring, Artiste: artiste }) =>
-      featuring || !artiste
-        ? []
-        : [
-            {
-              id: `${concert.id_concert}-${artiste.id_artiste}`,
-              idArtiste: artiste.id_artiste,
-              nom: artiste.nom ?? '',
-              photo: artiste.photo,
-              date: concert.jour ?? '',
-              heure: formatHeure(concert.heure_debut),
-              scene: sceneValue(concert.Scene?.nom),
-              categorie: artiste.categorie ?? '',
-            },
-          ]
-    )
-  )
-}
+import { concertHandler } from '../handlers/concert'
+import { labelOf, toArtisteCards } from '../lib/cards'
 
 // Déjà triés par jour puis heure côté Supabase.
 const artistes = ref<ArtisteCard[]>([])
 
 onMounted(async () => {
   try {
-    artistes.value = toCards(await concertHandler.getAllDetailed())
+    artistes.value = toArtisteCards(await concertHandler.getAllDetailed())
   } catch (error) {
     console.error(error)
   }
@@ -63,10 +32,6 @@ const selected = ref<FilterValues>({ date: String(date ?? ''), scene: String(sce
 watch(selected, ({ date, scene }) => {
   router.replace({ query: { date: date || undefined, scene: scene || undefined } })
 })
-
-function labelOf(options: typeof JOURS, value: string) {
-  return options.find((option) => option.value === value)?.label ?? value
-}
 </script>
 
 <template>
