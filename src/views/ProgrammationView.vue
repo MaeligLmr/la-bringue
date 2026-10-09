@@ -1,16 +1,56 @@
 <script setup lang="ts">
-import { ref, watch } from 'vue'
+import { onMounted, ref, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import Hero from '../components/layout/Hero.vue'
 import FilterableList from '../components/ui/FilterableList.vue'
 import ContentCard from '../components/ui/ContentCard.vue'
 import type { FilterConfig, FilterValues } from '../types/ui/filterable-list.ts'
-import { JOURS, SCENES, type Artiste } from '../types/ui/programmation.ts'
-import programmationData from '../data/programmation.json'
+import { JOURS, SCENES, type ArtisteCard } from '../types/ui/programmation.ts'
+import { concertHandler, type ConcertDetail } from '../handlers/concert'
 
-const artistes: Artiste[] = [...programmationData].sort((a, b) =>
-  `${a.date} ${a.heure}`.localeCompare(`${b.date} ${b.heure}`)
-)
+const PLACEHOLDER_PHOTO = '/programmation/placeholder.svg'
+
+// "Chrome" ou "2000’" en base → "chrome" / "2000", les `value` de SCENES.
+function sceneValue(nom: string | null | undefined) {
+  return (nom ?? '').toLowerCase().replace(/[^a-z0-9]/g, '')
+}
+
+// "22:15:00" → "22h15"
+function formatHeure(heure: string | null) {
+  return heure ? heure.slice(0, 5).replace(':', 'h') : ''
+}
+
+// Une carte par artiste principal : les featurings ne figurent pas à l'affiche.
+function toCards(concerts: ConcertDetail[]): ArtisteCard[] {
+  return concerts.flatMap((concert) =>
+    concert.ConcertArtiste.flatMap(({ featuring, Artiste: artiste }) =>
+      featuring || !artiste
+        ? []
+        : [
+            {
+              id: `${concert.id_concert}-${artiste.id_artiste}`,
+              nom: artiste.nom ?? '',
+              photo: artiste.photo ?? PLACEHOLDER_PHOTO,
+              date: concert.jour ?? '',
+              heure: formatHeure(concert.heure_debut),
+              scene: sceneValue(concert.Scene?.nom),
+              categorie: artiste.categorie ?? '',
+            },
+          ]
+    )
+  )
+}
+
+// Déjà triés par jour puis heure côté Supabase.
+const artistes = ref<ArtisteCard[]>([])
+
+onMounted(async () => {
+  try {
+    artistes.value = toCards(await concertHandler.getAllDetailed())
+  } catch (error) {
+    console.error(error)
+  }
+})
 
 const filters: FilterConfig[] = [
   { key: 'date', label: 'Jour', allLabel: 'Tous les jours', options: JOURS },

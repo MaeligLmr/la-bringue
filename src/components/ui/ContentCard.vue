@@ -27,8 +27,11 @@ const patternStyle = {
 
 // `photo` est un chemin absolu (ex: "/programmation/placeholder.svg") vers
 // public/ : il faut le préfixer par BASE_URL pour rester valide une fois
-// l'app déployée sous un sous-chemin (voir vite.config.ts `base`).
-const photoSrc = computed(() => import.meta.env.BASE_URL + props.photo.replace(/^\//, ''))
+// l'app déployée sous un sous-chemin (voir vite.config.ts `base`). Une URL
+// complète (ex: Supabase Storage) est utilisée telle quelle.
+const photoSrc = computed(() =>
+  /^https?:\/\//.test(props.photo) ? props.photo : import.meta.env.BASE_URL + props.photo.replace(/^\//, '')
+)
 </script>
 
 <template>

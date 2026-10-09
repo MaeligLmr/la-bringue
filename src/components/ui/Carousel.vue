@@ -1,10 +1,10 @@
 <script setup lang="ts">
-import { onMounted, onUnmounted, ref } from 'vue'
+import { nextTick, onMounted, onUnmounted, ref, watch } from 'vue'
 import Button from './Button.vue'
 import CarouselTile from './CarouselTile.vue'
 import type { CarouselTileData } from '../../types/ui/carousel-tile.ts'
 
-defineProps<{
+const props = defineProps<{
   tiles: CarouselTileData[]
 }>()
 
@@ -36,6 +36,13 @@ onMounted(() => {
   resizeObserver = new ResizeObserver(updateScrollState)
   resizeObserver.observe(trackEl.value)
 })
+
+// Les tiles arrivent souvent de Supabase après le montage : la largeur du
+// track ne change pas, seul son contenu, donc le ResizeObserver ne suffit pas.
+watch(
+  () => props.tiles,
+  () => nextTick(updateScrollState)
+)
 
 onUnmounted(() => {
   resizeObserver?.disconnect()

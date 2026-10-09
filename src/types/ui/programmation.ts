@@ -13,7 +13,9 @@ export const SCENES: SelectOption[] = [
   { value: 'summer', label: 'Summer' },
 ]
 
-export interface Artiste {
+// Carte affichée sur la page Programmation : un artiste principal d'un concert.
+// `date` et `scene` reprennent les `value` de JOURS et SCENES pour les filtres.
+export interface ArtisteCard {
   id: string
   nom: string
   photo: string
