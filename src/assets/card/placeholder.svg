@@ -1,0 +1,5 @@
+<svg viewBox="0 0 256 160" preserveAspectRatio="xMidYMid meet" fill="currentColor" stroke="currentColor" stroke-width="6" stroke-linejoin="round" xmlns="http://www.w3.org/2000/svg">
+  <polygon transform="translate(96 48) scale(0.64)" points="50,0 61.76,33.82 97.55,34.55 69.02,56.18 79.39,90.45 50,70 20.61,90.45 30.98,56.18 2.45,34.55 38.24,33.82"/>
+  <polygon transform="translate(152 23) scale(0.24)" opacity="0.7" points="50,0 61.76,33.82 97.55,34.55 69.02,56.18 79.39,90.45 50,70 20.61,90.45 30.98,56.18 2.45,34.55 38.24,33.82"/>
+  <polygon transform="translate(69 116) scale(0.16)" opacity="0.5" points="50,0 61.76,33.82 97.55,34.55 69.02,56.18 79.39,90.45 50,70 20.61,90.45 30.98,56.18 2.45,34.55 38.24,33.82"/>
+</svg>

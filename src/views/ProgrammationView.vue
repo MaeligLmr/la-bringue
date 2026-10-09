@@ -8,8 +8,6 @@ import type { FilterConfig, FilterValues } from '../types/ui/filterable-list.ts'
 import { JOURS, SCENES, type ArtisteCard } from '../types/ui/programmation.ts'
 import { concertHandler, type ConcertDetail } from '../handlers/concert'
 
-const PLACEHOLDER_PHOTO = '/programmation/placeholder.svg'
-
 // "Chrome" ou "2000’" en base → "chrome" / "2000", les `value` de SCENES.
 function sceneValue(nom: string | null | undefined) {
   return (nom ?? '').toLowerCase().replace(/[^a-z0-9]/g, '')
@@ -30,7 +28,7 @@ function toCards(concerts: ConcertDetail[]): ArtisteCard[] {
             {
               id: `${concert.id_concert}-${artiste.id_artiste}`,
               nom: artiste.nom ?? '',
-              photo: artiste.photo ?? PLACEHOLDER_PHOTO,
+              photo: artiste.photo,
               date: concert.jour ?? '',
               heure: formatHeure(concert.heure_debut),
               scene: sceneValue(concert.Scene?.nom),

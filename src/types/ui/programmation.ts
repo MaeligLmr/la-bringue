@@ -18,7 +18,7 @@ export const SCENES: SelectOption[] = [
 export interface ArtisteCard {
   id: string
   nom: string
-  photo: string
+  photo: string | null
   date: string
   heure: string
   scene: string
