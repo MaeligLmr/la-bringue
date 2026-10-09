@@ -15,6 +15,7 @@ export const SCENES: SelectOption[] = [
 
 // Carte affichée sur la page Programmation : un artiste principal d'un concert.
 // `date` et `scene` reprennent les `value` de JOURS et SCENES pour les filtres.
+// `id` (concert-artiste) identifie la carte, `idArtiste` mène à la fiche.
 export interface ArtisteCard {
   id: string
   idArtiste: number

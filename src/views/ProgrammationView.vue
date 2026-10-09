@@ -82,6 +82,7 @@ function labelOf(options: typeof JOURS, value: string) {
             :date="`${labelOf(JOURS, item.date)} - ${item.heure}`"
             :categorie="item.categorie"
             likable
+            :on-click="() => router.push({ name: 'fiche', params: { type: 'artiste', id: item.idArtiste } })"
             :target="{ id: item.idArtiste, type: 'artiste' }"
           />
         </template>

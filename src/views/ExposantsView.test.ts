@@ -31,7 +31,10 @@ vi.mock('../handlers/exposant', () => ({
 async function mountExposants(url = '/') {
   const router = createRouter({
     history: createWebHistory(),
-    routes: [{ path: '/', component: ExposantsView }],
+    routes: [
+      { path: '/', component: ExposantsView },
+      { path: '/:type/fiche/:id', name: 'fiche', component: { render: () => null } },
+    ],
   })
   router.push(url)
   await router.isReady()
@@ -95,6 +98,17 @@ describe('ExposantsView', () => {
 
     expect(filterButton(wrapper, 'Écologie').attributes('aria-pressed')).toBe('true')
     expect(displayedNames(wrapper)).toEqual(['Green Fest'])
+
+    wrapper.unmount()
+  })
+
+  it('ouvre la fiche de l’exposant au clic sur sa carte', async () => {
+    const wrapper = await mountExposants()
+
+    await wrapper.findAll('.content-card')[1].trigger('click')
+    await flushPromises()
+
+    expect(wrapper.vm.$router.currentRoute.value.path).toBe(`/exposant/fiche/${EXPOSANTS[1].id_exposant}`)
 
     wrapper.unmount()
   })

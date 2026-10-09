@@ -60,7 +60,12 @@ watch(selected, ({ categorie }) => {
     <div class="exposants__content">
       <FilterableList v-model:selected="selected" :items="exposants" :filters="filters">
         <template #item="{ item }">
-          <ContentCard :nom="item.nom" :photo="item.photo" :categorie="item.categorie" />
+          <ContentCard
+            :nom="item.nom"
+            :photo="item.photo"
+            :categorie="item.categorie"
+            :on-click="() => router.push({ name: 'fiche', params: { type: 'exposant', id: item.id } })"
+          />
         </template>
       </FilterableList>
     </div>
