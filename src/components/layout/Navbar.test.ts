@@ -123,9 +123,24 @@ describe('Navbar', () => {
     wrapper.unmount()
   })
 
-  it('le cœur "Mon programme" navigue vers /mon-programme', async () => {
+  it('masque le cœur "Mon programme" quand personne n\'est connecté', async () => {
     mockSupabase(null)
+    const { wrapper } = await mountNavbar()
+    const { useAuth } = await import('../../composables/useAuth')
+    await useAuth().ready
+    await wrapper.vm.$nextTick()
+
+    expect(wrapper.find('button[aria-label="Mon programme"]').exists()).toBe(false)
+
+    wrapper.unmount()
+  })
+
+  it('le cœur "Mon programme" navigue vers /mon-programme une fois connectée', async () => {
+    mockSupabase({ user: { id: '1', email: 'alice@example.com' } })
     const { wrapper, router } = await mountNavbar()
+    const { useAuth } = await import('../../composables/useAuth')
+    await useAuth().ready
+    await wrapper.vm.$nextTick()
 
     await wrapper.find('button[aria-label="Mon programme"]').trigger('click')
     await vi.waitFor(() => expect(router.currentRoute.value.path).toBe('/mon-programme'))

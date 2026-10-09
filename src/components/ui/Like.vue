@@ -1,9 +1,13 @@
 <script setup lang="ts">
 import Icon from './Icon.vue'
+import { useAuth } from '../../composables/useAuth'
+import { useAuthModal } from '../../composables/useAuthModal'
+import type { LikeTarget } from '../../types/ui/like'
 
-withDefaults(
+const props = withDefaults(
   defineProps<{
     label?: string
+    target?: LikeTarget
   }>(),
   {
     label: 'Ajouter à Mon programme',
@@ -11,6 +15,18 @@ withDefaults(
 )
 
 const isLiked = defineModel<boolean>({ default: false })
+
+const { isLoggedIn, ready } = useAuth()
+const { open } = useAuthModal()
+
+async function toggle() {
+  await ready
+  if (!isLoggedIn.value) {
+    open('login', props.target)
+    return
+  }
+  isLiked.value = !isLiked.value
+}
 </script>
 
 <template>
@@ -19,7 +35,7 @@ const isLiked = defineModel<boolean>({ default: false })
     class="like"
     :aria-label="label"
     :aria-pressed="isLiked"
-    @click="isLiked = !isLiked"
+    @click="toggle"
   >
     <Icon :name="isLiked ? 'heart-filled' : 'heart'" size="medium" />
   </button>

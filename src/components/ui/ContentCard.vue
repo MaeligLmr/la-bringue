@@ -2,6 +2,7 @@
 import { computed, ref, watch } from 'vue'
 import Tag from './Tag.vue'
 import Like from './Like.vue'
+import type { LikeTarget } from '../../types/ui/like'
 import cardBg from '../../assets/card/card-bg.png'
 // Importé en texte brut puis injecté via v-html (fichier statique du dépôt,
 // jamais de contenu utilisateur) : contrairement à un <img>, le SVG en ligne
@@ -16,6 +17,7 @@ const props = withDefaults(
     scene?: string
     categorie?: string
     likable?: boolean
+    target?: LikeTarget
     onClick?: () => void
   }>(),
   {
@@ -68,6 +70,7 @@ const photoSrc = computed(() => {
         <Like
           v-if="likable"
           v-model="isLiked"
+          :target="target"
           :label="`Ajouter ${nom} à Mon programme`"
           @click.stop
         />
