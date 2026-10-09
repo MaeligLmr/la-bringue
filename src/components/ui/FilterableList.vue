@@ -110,7 +110,7 @@ function reset() {
     </p>
 
     <ul v-if="filteredItems.length" class="filterable-list__items">
-      <li v-for="item in filteredItems" :key="item.id">
+      <li class="filterable-list__item" v-for="item in filteredItems" :key="item.id">
         <slot name="item" :item="item" />
       </li>
     </ul>
@@ -172,6 +172,30 @@ function reset() {
   gap: 0.625rem;
 }
 
+/* Phone : une ligne qui défile horizontalement, fondue sur le bord droit,
+   plutôt qu'un retour à la ligne. */
+@media (max-width: 639px) {
+  .filterable-list__filter {
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    scrollbar-width: none;
+    /* Laisse la place à l'anneau de focus et permet au dernier bouton de
+       sortir de la zone fondue en fin de défilement. */
+    padding: var(--space-1) var(--space-8) var(--space-1) var(--space-1);
+    margin: calc(-1 * var(--space-1));
+    mask-image: linear-gradient(to right, #000 calc(100% - var(--space-10)), transparent);
+  }
+
+  .filterable-list__filter::-webkit-scrollbar {
+    display: none;
+  }
+
+  .filterable-list__filter > * {
+    flex-shrink: 0;
+    white-space: nowrap;
+  }
+}
+
 .filterable-list__count {
   font-size: var(--font-size-small);
 }
@@ -183,6 +207,11 @@ function reset() {
   margin: 0;
   padding: 0;
   list-style: none;
+}
+
+.filterable-list__item {
+  display: flex;
+  justify-content: center;
 }
 
 .filterable-list__empty {

@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { onMounted, ref, watch } from 'vue'
+import { computed, onMounted, ref, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import Hero from '../components/layout/Hero.vue'
 import FilterableList from '../components/ui/FilterableList.vue'
@@ -30,23 +30,38 @@ function toCards(conferences: ConferenceDetail[]): ConferenceCard[] {
 
 // Déjà triées par jour puis heure côté Supabase.
 const conferences = ref<ConferenceCard[]>([])
+// Valeurs de l'enum `themes_conferences`, dans l'ordre de la base.
+const themes = ref<string[]>([])
 
-onMounted(async () => {
-  try {
-    conferences.value = toCards(await conferenceHandler.getAllDetailed())
-  } catch (error) {
-    console.error(error)
-  }
+// Chargements indépendants : si la fonction RPC échoue, la liste s'affiche
+// quand même (sans options de filtre thème).
+onMounted(() => {
+  conferenceHandler
+    .getAllDetailed()
+    .then((rows) => (conferences.value = toCards(rows)))
+    .catch(console.error)
+  conferenceHandler
+    .getThemes()
+    .then((values) => (themes.value = values))
+    .catch(console.error)
 })
 
-const filters: FilterConfig[] = [{ key: 'date', label: 'Jour', allLabel: 'Tous les jours', options: JOURS }]
+const filters = computed<FilterConfig[]>(() => [
+  { key: 'date', label: 'Jour', allLabel: 'Tous les jours', options: JOURS },
+  {
+    key: 'theme',
+    label: 'Thème',
+    allLabel: 'Tous les thèmes',
+    options: themes.value.map((theme) => ({ value: theme, label: theme })),
+  },
+])
 
 const router = useRouter()
-const { date } = useRoute().query
-const selected = ref<FilterValues>({ date: String(date ?? '') })
+const { date, theme } = useRoute().query
+const selected = ref<FilterValues>({ date: String(date ?? ''), theme: String(theme ?? '') })
 
-watch(selected, ({ date }) => {
-  router.replace({ query: { date: date || undefined } })
+watch(selected, ({ date, theme }) => {
+  router.replace({ query: { date: date || undefined, theme: theme || undefined } })
 })
 
 function labelOf(value: string) {
