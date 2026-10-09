@@ -7,26 +7,8 @@ import ContentCard from '../components/ui/ContentCard.vue'
 import type { FilterConfig, FilterValues } from '../types/ui/filterable-list.ts'
 import { JOURS } from '../types/ui/programmation.ts'
 import type { ConferenceCard } from '../types/ui/conferences.ts'
-import { conferenceHandler, type ConferenceDetail } from '../handlers/conference'
-
-// "14:30:00" → "14h30"
-function formatHeure(heure: string | null) {
-  return heure ? heure.slice(0, 5).replace(':', 'h') : ''
-}
-
-function toCards(conferences: ConferenceDetail[]): ConferenceCard[] {
-  return conferences.map((conference) => ({
-    id: conference.id_conference,
-    nom: conference.titre ?? '',
-    photo: conference.photo,
-    date: conference.jour ?? '',
-    heure: formatHeure(conference.heure_debut),
-    conferencieres: conference.Participation.flatMap(({ Conferenciere }) =>
-      Conferenciere?.nom ? [Conferenciere.nom] : []
-    ).join(', '),
-    theme: conference.theme ?? '',
-  }))
-}
+import { conferenceHandler } from '../handlers/conference'
+import { labelOf, toConferenceCards } from '../lib/cards'
 
 // Déjà triées par jour puis heure côté Supabase.
 const conferences = ref<ConferenceCard[]>([])
@@ -38,7 +20,7 @@ const themes = ref<string[]>([])
 onMounted(() => {
   conferenceHandler
     .getAllDetailed()
-    .then((rows) => (conferences.value = toCards(rows)))
+    .then((rows) => (conferences.value = toConferenceCards(rows)))
     .catch(console.error)
   conferenceHandler
     .getThemes()
@@ -63,10 +45,6 @@ const selected = ref<FilterValues>({ date: String(date ?? ''), theme: String(the
 watch(selected, ({ date, theme }) => {
   router.replace({ query: { date: date || undefined, theme: theme || undefined } })
 })
-
-function labelOf(value: string) {
-  return JOURS.find((option) => option.value === value)?.label ?? value
-}
 </script>
 
 <template>
@@ -84,7 +62,7 @@ function labelOf(value: string) {
             :nom="item.nom"
             :photo="item.photo"
             :scene="item.conferencieres"
-            :date="`${labelOf(item.date)} - ${item.heure}`"
+            :date="`${labelOf(JOURS, item.date)} - ${item.heure}`"
             :categorie="item.theme"
             likable
             :on-click="() => router.push({ name: 'fiche', params: { type: 'conference', id: item.id } })"

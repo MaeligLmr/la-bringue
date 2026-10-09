@@ -1,5 +1,6 @@
 import { describe, it, expect } from 'vitest'
 import { mount } from '@vue/test-utils'
+import { createRouter, createWebHistory } from 'vue-router'
 import ProgrammationDay from './ProgrammationDay.vue'
 import type { Artiste } from '../../types/database/artiste'
 import type { DayLineup } from '../../handlers/concert'
@@ -13,8 +14,19 @@ const LINEUP: DayLineup = {
   others: [artiste(2, 'Ditter'), artiste(3, 'Mogwai')],
 }
 
+const router = createRouter({
+  history: createWebHistory(),
+  routes: [
+    { path: '/', component: { render: () => null } },
+    { path: '/:type/fiche/:id', name: 'fiche', component: { render: () => null } },
+  ],
+})
+
 const mountDay = (lineup: DayLineup = LINEUP) =>
-  mount(ProgrammationDay, { props: { label: 'Dimanche 30 août', date: '2026-08-30', lineup } })
+  mount(ProgrammationDay, {
+    props: { label: 'Dimanche 30 août', date: '2026-08-30', lineup },
+    global: { plugins: [router] },
+  })
 
 describe('ProgrammationDay', () => {
   it('affiche le jour puis la tête d’affiche', () => {
@@ -30,6 +42,14 @@ describe('ProgrammationDay', () => {
       .map((node) => node.text())
 
     expect(names).toEqual(['Ditter', 'Mogwai…'])
+  })
+
+  it('mène chaque artiste vers sa fiche', () => {
+    const hrefs = mountDay()
+      .findAll('.programmation-day__lien')
+      .map((node) => node.attributes('href'))
+
+    expect(hrefs).toEqual(['/artiste/fiche/1', '/artiste/fiche/2', '/artiste/fiche/3'])
   })
 
   it('n’affiche ni tête d’affiche ni liste vide', () => {

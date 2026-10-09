@@ -59,6 +59,13 @@ export const concertHandler = {
       await supabase.from(TABLE).select('*').eq('id_scene', idScene).order('jour').order('heure_debut')
     )
   },
+
+  async getDetailedByScene(idScene: number): Promise<ConcertDetail[]> {
+    return unwrap<ConcertDetail[]>(
+      TABLE,
+      await supabase.from(TABLE).select(DETAIL_SELECT).eq('id_scene', idScene).order('jour').order('heure_debut')
+    )
+  },
   // Affiche d'un jour pour la home (même principe que rockenseine.com) : la
   // tête d'affiche est le dernier concert de la scène Chrome, suivie des
   // `count` autres artistes les plus tardifs du jour. Un seul appel Supabase

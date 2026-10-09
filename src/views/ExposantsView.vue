@@ -7,16 +7,7 @@ import ContentCard from '../components/ui/ContentCard.vue'
 import type { FilterConfig, FilterValues } from '../types/ui/filterable-list.ts'
 import type { ExposantCard } from '../types/ui/exposants.ts'
 import { exposantHandler } from '../handlers/exposant'
-import type { Exposant } from '../types/database/exposant'
-
-function toCards(exposants: Exposant[]): ExposantCard[] {
-  return exposants.map((exposant) => ({
-    id: exposant.id_exposant,
-    nom: exposant.nom ?? '',
-    photo: exposant.photo,
-    categorie: exposant.categorie ?? '',
-  }))
-}
+import { toExposantCards } from '../lib/cards'
 
 // Déjà triés par nom côté Supabase.
 const exposants = ref<ExposantCard[]>([])
@@ -28,7 +19,7 @@ const categories = ref<string[]>([])
 onMounted(() => {
   exposantHandler
     .getAllByNom()
-    .then((rows) => (exposants.value = toCards(rows)))
+    .then((rows) => (exposants.value = toExposantCards(rows)))
     .catch(console.error)
   exposantHandler
     .getCategories()

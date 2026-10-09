@@ -7,18 +7,26 @@ defineProps<{
   date: string
   lineup: DayLineup
 }>()
+
+function ficheRoute(id: number) {
+  return { name: 'fiche', params: { type: 'artiste', id } }
+}
 </script>
 
 <template>
   <div class="programmation-day">
     <RouterLink :to="`/programmation?date=${date}`" class="programmation-day__jour">{{ label }}</RouterLink>
 
-    <p v-if="lineup.headliner" class="programmation-day__headliner">{{ lineup.headliner.nom }}</p>
+    <p v-if="lineup.headliner" class="programmation-day__headliner">
+      <RouterLink :to="ficheRoute(lineup.headliner.id_artiste)" class="programmation-day__lien">
+        {{ lineup.headliner.nom }}
+      </RouterLink>
+    </p>
 
     <ul v-if="lineup.others.length" class="programmation-day__others">
       <li v-for="(artiste, index) in lineup.others" :key="artiste.id_artiste" class="programmation-day__artiste">
         <Icon v-if="index > 0" name="star-separation" size="small" class="programmation-day__separator" />
-        {{ artiste.nom }}<template v-if="index === lineup.others.length - 1">…</template>
+        <span><RouterLink :to="ficheRoute(artiste.id_artiste)" class="programmation-day__lien">{{ artiste.nom }}</RouterLink><template v-if="index === lineup.others.length - 1">…</template></span>
       </li>
     </ul>
   </div>
@@ -77,6 +85,15 @@ defineProps<{
   display: inline-flex;
   align-items: center;
   gap: var(--space-3);
+}
+
+.programmation-day__lien {
+  color: inherit;
+  text-decoration: none;
+}
+
+.programmation-day__lien:hover {
+  text-decoration: underline;
 }
 
 .programmation-day__separator {
