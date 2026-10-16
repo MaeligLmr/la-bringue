@@ -8,12 +8,14 @@ import Footer from './components/layout/Footer.vue'
 import Modal from './components/layout/Modal.vue'
 import LoginForm from './components/auth/LoginForm.vue'
 import SignUpForm from './components/auth/SignUpForm.vue'
+import { useAuth } from './composables/useAuth'
 import { useAuthModal } from './composables/useAuthModal'
 import { useLikes } from './composables/useLikes'
 import { useTheme } from './composables/useTheme'
 
 const { isOpen, activeView, close, complete, takePendingLike, switchTo } = useAuthModal()
-const { addLike } = useLikes()
+const { addLike, loadLikes, clearLikes } = useLikes()
+const { user } = useAuth()
 const { resolvedTheme } = useTheme()
 const route = useRoute()
 
@@ -24,6 +26,18 @@ function onAuthSuccess() {
   const likeTarget = takePendingLike()
   if (likeTarget) addLike(likeTarget)
 }
+
+// Recharge les likes depuis la base à chaque connexion (ou au chargement d'une
+// session existante) et les vide à la déconnexion. On surveille l'id plutôt
+// que l'objet user, qui change aussi à chaque rafraîchissement du token.
+watch(
+  () => user.value?.id,
+  (id) => {
+    if (id) loadLikes()
+    else clearLikes()
+  },
+  { immediate: true }
+)
 
 watch(isOpen, async (open) => {
   if (!open) return

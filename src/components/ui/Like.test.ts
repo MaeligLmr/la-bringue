@@ -11,6 +11,10 @@ vi.mock('../../composables/useAuth', () => ({
   useAuth: () => ({ isLoggedIn: computed(() => loggedIn.value), ready: Promise.resolve() }),
 }))
 
+vi.mock('../../handlers/like', () => ({
+  likeHandler: { setLike: vi.fn().mockResolvedValue(undefined), getMine: vi.fn().mockResolvedValue([]) },
+}))
+
 function mountLike(props: Record<string, unknown> = {}) {
   const wrapper = mount(Like, {
     props: {
@@ -25,7 +29,7 @@ function mountLike(props: Record<string, unknown> = {}) {
 beforeEach(() => {
   loggedIn.value = true
   useAuthModal().close()
-  useLikes().setLiked({ id: 42, type: 'artiste' }, false)
+  useLikes().clearLikes()
 })
 
 describe('Like', () => {
