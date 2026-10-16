@@ -20,6 +20,10 @@ const { signInWithPassword, signUp } = vi.hoisted(() => ({
   signUp: vi.fn(() => new Promise(() => {})),
 }))
 
+const { rpc } = vi.hoisted(() => ({
+  rpc: vi.fn().mockResolvedValue({ data: null, error: null }),
+}))
+
 vi.mock('./supabase.js', () => ({
   supabase: {
     auth: {
@@ -29,6 +33,7 @@ vi.mock('./supabase.js', () => ({
       getSession: vi.fn().mockResolvedValue({ data: { session: null } }),
       onAuthStateChange: vi.fn(),
     },
+    rpc,
   },
 }))
 
@@ -179,8 +184,7 @@ describe("App (modale d'authentification)", () => {
 describe('App (like en attente après connexion)', () => {
   beforeEach(() => {
     vi.clearAllMocks()
-    useLikes().setLiked({ id: 42, type: 'artiste' }, false)
-    useLikes().setLiked({ id: 3, type: 'conference' }, false)
+    useLikes().clearLikes()
     useAuthModal().close()
     useAuthModal().switchTo('login')
   })
@@ -201,6 +205,7 @@ describe('App (like en attente après connexion)', () => {
 
     expect(document.querySelector('.modal__backdrop')).toBeNull()
     expect(useLikes().isLiked({ id: 42, type: 'artiste' })).toBe(true)
+    expect(rpc).toHaveBeenCalledWith('set_like', { p_type: 'artiste', p_id: 42, p_liked: true })
     expect(toast.success).toHaveBeenCalledWith('Ajouté à Mon programme')
     expect(useAuthModal().pendingLike.value).toBeNull()
   })
