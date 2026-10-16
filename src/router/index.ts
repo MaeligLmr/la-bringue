@@ -46,6 +46,9 @@ export const router = createRouter({
   // Un simple changement de query (filtres) ne fait pas défiler.
   scrollBehavior(to, from, savedPosition) {
     if (savedPosition) return savedPosition
+    // Lien d'ancre vers une autre page : la vue défile elle-même vers la
+    // section une fois ses données chargées (elle n'existe pas encore ici).
+    if (to.hash) return false
     if (to.path === from.path) return false
     return { top: 0 }
   },

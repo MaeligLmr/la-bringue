@@ -9,4 +9,5 @@ export interface InfoPratique {
   titre: string | null
   intro: string | null
   points: InfoPratiquePoint[]
+  homepage: boolean
 }
