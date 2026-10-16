@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { computed, onMounted, ref, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
+import { toast } from 'vue-sonner'
 import Hero from '../components/layout/Hero.vue'
 import FilterableList from '../components/ui/FilterableList.vue'
 import ContentCard from '../components/ui/ContentCard.vue'
@@ -20,11 +21,17 @@ onMounted(() => {
   exposantHandler
     .getAllByNom()
     .then((rows) => (exposants.value = toExposantCards(rows)))
-    .catch(console.error)
+    .catch((error) => {
+      console.error(error)
+      toast.error('Impossible de charger les exposants.')
+    })
   exposantHandler
     .getCategories()
     .then((values) => (categories.value = values))
-    .catch(console.error)
+    .catch((error) => {
+      console.error(error)
+      toast.error('Impossible de charger les catégories d’exposants.')
+    })
 })
 
 const filters = computed<FilterConfig[]>(() => [

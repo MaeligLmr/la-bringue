@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { onMounted, ref } from 'vue'
 import { useRouter } from 'vue-router'
+import { toast } from 'vue-sonner'
 import Button from '../ui/Button.vue'
 import ProgrammationDay from './ProgrammationDay.vue'
 import { JOURS } from '../../types/ui/programmation.ts'
@@ -15,6 +16,7 @@ onMounted(async () => {
     jours.value = JOURS.map((jour, index) => ({ ...jour, lineup: lineups[index] }))
   } catch (error) {
     console.error(error)
+    toast.error('Impossible de charger la programmation.')
   }
 })
 

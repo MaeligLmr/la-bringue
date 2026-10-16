@@ -2,6 +2,7 @@
 import { computed, ref } from 'vue'
 import Button from './Button.vue'
 import Icon from './Icon.vue'
+import { provideListSearch } from '../../composables/useListSearch'
 import type { FilterConfig, FilterValues, FilterableItem } from '../../types/ui/filterable-list.ts'
 
 const props = withDefaults(
@@ -21,6 +22,8 @@ defineSlots<{ item(props: { item: T }): unknown }>()
 const selected = defineModel<FilterValues>('selected', { default: () => ({}) })
 
 const search = ref('')
+// Les ContentCard de la liste surlignent cette recherche dans leur nom.
+provideListSearch(search)
 
 function normalize(value: string) {
   return value
@@ -40,10 +43,6 @@ const filteredItems = computed(() => {
     })
   })
 })
-
-const hasActiveCriteria = computed(
-  () => search.value.trim() !== '' || Object.values(selected.value).some(Boolean)
-)
 
 function setFilter(key: string, value: string) {
   selected.value = { ...selected.value, [key]: value }
@@ -114,17 +113,16 @@ function onFilterClick(event: MouseEvent) {
           :placeholder="searchPlaceholder"
           :aria-label="searchPlaceholder"
         />
+        <button
+          v-if="search"
+          type="button"
+          class="filterable-list__search-clear"
+          aria-label="Effacer la recherche"
+          @click="search = ''"
+        >
+          <Icon name="plus" size="small" />
+        </button>
       </label>
-
-      <Button
-        v-if="hasActiveCriteria"
-        color="secondary"
-        variant="ghost"
-        class="filterable-list__reset"
-        @click="reset"
-      >
-        Réinitialiser les filtres
-      </Button>
     </div>
 
     <div
@@ -278,5 +276,23 @@ function onFilterClick(event: MouseEvent) {
   gap: var(--space-4);
   padding: var(--space-8) 0;
   text-align: center;
+}
+
+/* Croix pour vider la recherche (celle, native, du champ est masquée). */
+.filterable-list__search-input::-webkit-search-cancel-button {
+  display: none;
+}
+
+.filterable-list__search-clear {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  border: none;
+  background: transparent;
+  color: inherit;
+  cursor: pointer;
+  /* Icône « plus » tournée : c'est une croix. */
+  transform: rotate(45deg);
 }
 </style>

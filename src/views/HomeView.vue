@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { onMounted, ref, type Ref } from 'vue'
+import { toast } from 'vue-sonner'
 import Hero from '../components/layout/Hero.vue'
 import Carousel from '../components/ui/Carousel.vue'
 import ProgrammationSection from '../components/home/ProgrammationSection.vue'
@@ -7,10 +8,13 @@ import type { CarouselTileData, CarouselTileVariant } from '../types/ui/carousel
 import { actualiteHandler } from '../handlers/actualite'
 import { formuleHandler } from '../handlers/formule'
 import { infoPratiqueHandler } from '../handlers/info-pratique'
+import { sectionAnchor } from '../lib/anchor'
 
 interface HomeTileSource {
   titre: string | null
   description: string | null
+  // Lien propre à la tuile ; à défaut, celui de la section (`to` de toTiles).
+  to?: string
 }
 
 // L'alternance pink/blue est purement esthétique (voir CarouselTileVariant) :
@@ -33,7 +37,7 @@ function toTiles(
     content: item.description ?? '',
     variant: alternateVariant(index, startVariant),
     ctaLabel,
-    to,
+    to: item.to ?? to,
     icon,
   }))
 }
@@ -43,21 +47,45 @@ const infosPratiquesTiles = ref<CarouselTileData[]>([])
 const actualitesTiles = ref<CarouselTileData[]>([])
 
 // Chaque section se charge indépendamment : une table en erreur ne vide pas les autres.
-async function load(target: Ref<CarouselTileData[]>, fetchTiles: () => Promise<CarouselTileData[]>) {
+async function load(
+  target: Ref<CarouselTileData[]>,
+  fetchTiles: () => Promise<CarouselTileData[]>,
+  errorMessage: string
+) {
   try {
     target.value = await fetchTiles()
   } catch (error) {
     console.error(error)
+    toast.error(errorMessage)
   }
 }
 
 onMounted(() => {
-  load(billetterieTiles, async () => toTiles(await formuleHandler.getAll(), 'Acheter', '/billetterie', 'ticket'))
-  load(infosPratiquesTiles, async () =>
-    toTiles(await infoPratiqueHandler.getAll(), 'En savoir plus', '/infos-pratiques', 'arrow-right', 'blue')
+  load(
+    billetterieTiles,
+    async () => toTiles(await formuleHandler.getAll(), 'Acheter', '/billetterie', 'ticket'),
+    'Impossible de charger la billetterie.'
   )
-  load(actualitesTiles, async () =>
-    toTiles(await actualiteHandler.getLatest(), 'En savoir plus', '/actualites', 'arrow-right')
+  load(
+    infosPratiquesTiles,
+    async () =>
+      toTiles(
+        (await infoPratiqueHandler.getAllHomepage()).map(({ id_info, titre, intro }) => ({
+          titre,
+          description: intro,
+          to: `/infos-pratiques#${sectionAnchor(titre, id_info)}`,
+        })),
+        'En savoir plus',
+        '/infos-pratiques',
+        'arrow-right',
+        'blue'
+      ),
+    'Impossible de charger les infos pratiques.'
+  )
+  load(
+    actualitesTiles,
+    async () => toTiles(await actualiteHandler.getLatest(), 'En savoir plus', '/actualites', 'arrow-right'),
+    'Impossible de charger les actualités.'
   )
 })
 </script>

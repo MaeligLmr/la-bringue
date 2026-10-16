@@ -134,6 +134,8 @@ src/
 │   ├── useAuth.ts                           # utilisatrice courante (session Supabase)
 │   ├── useAuthModal.ts                      # modale d'auth + like en attente pendant la connexion
 │   ├── useLikes.ts                          # état partagé des likes + toast de confirmation
+│   ├── useTextSearch.ts                     # recherche « Ctrl+F » dans une zone : compteur, résultat actif, navigation (page Infos pratiques)
+│   ├── useListSearch.ts                     # recherche d'une FilterableList partagée aux ContentCard pour surligner leur nom
 │   ├── useFocusTrap.ts                      # piège de focus clavier réutilisable
 │   └── useTheme.ts                          # thème clair/sombre/système (voir Design system)
 ├── types/
@@ -148,6 +150,8 @@ src/
 │   ├── with-timeout.ts                      # détection d'un Supabase injoignable/en timeout
 │   ├── cards.ts                             # données Supabase → cartes (Programmation, Conférences, Exposants)
 │   ├── fiche.ts                             # construction d'une fiche + suggestions
+│   ├── highlight.ts                         # splitMatches() : découpe un texte selon une recherche (sans accents ni casse), sans dépendance à Vue
+│   ├── anchor.ts                            # sectionAnchor() : ancre d'une section à partir de son titre
 │   └── photo.ts                             # photoUrl() : préfixe BASE_URL, URL complètes inchangées
 ├── supabase.js                              # client Supabase (config lue depuis .env.local)
 ├── App.vue

@@ -18,7 +18,9 @@ vi.mock('../handlers/formule', () => ({
 }))
 vi.mock('../handlers/info-pratique', () => ({
   infoPratiqueHandler: {
-    getAll: vi.fn().mockResolvedValue([{ id_info: 1, titre: 'Accès', description: 'Navettes gratuites' }]),
+    getAllHomepage: vi
+      .fn()
+      .mockResolvedValue([{ id_info: 1, titre: 'Accès & transport', intro: 'Navettes gratuites', points: [] }]),
   },
 }))
 vi.mock('../handlers/actualite', () => ({
@@ -30,7 +32,10 @@ vi.mock('../handlers/actualite', () => ({
 async function mountHome() {
   const router = createRouter({
     history: createWebHistory(),
-    routes: [{ path: '/', component: HomeView }],
+    routes: [
+      { path: '/', component: HomeView },
+      { path: '/infos-pratiques', component: { template: '<div />' } },
+    ],
   })
   router.push('/')
   await router.isReady()
@@ -64,7 +69,19 @@ describe('HomeView', () => {
   it('affiche les infos pratiques', async () => {
     const wrapper = await mountHome()
 
-    expect(sectionTileTitles(wrapper, 'Infos pratiques')).toEqual(['Accès'])
+    expect(sectionTileTitles(wrapper, 'Infos pratiques')).toEqual(['Accès & transport'])
+  })
+
+  it('fait pointer chaque tuile d’infos pratiques vers sa section', async () => {
+    const wrapper = await mountHome()
+    const router = wrapper.vm.$router
+
+    const section = wrapper.findAll('.home__section').find((node) => node.find('h2').text() === 'Infos pratiques')
+    await section!.find('.carousel-tile__cta').trigger('click')
+    await flushPromises()
+
+    expect(router.currentRoute.value.path).toBe('/infos-pratiques')
+    expect(router.currentRoute.value.hash).toBe('#acces-transport')
   })
 
   it('garde la section Actualités, vide, si son chargement échoue sans casser les autres', async () => {
