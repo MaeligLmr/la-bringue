@@ -53,10 +53,10 @@ Le festival est le prolongement de cette mission à l'échelle d'un événement 
 /programmation          Programmation musicale (liste filtrable : jour, scène)
 /exposants              Exposants — tatouage, restauration, artisanat (liste filtrable : catégorie)
 /conferences            Conférences (liste filtrable : jour)
-/fiche/:id              Fiche détail — template unique (artiste / conférence / exposant)
+/:type/fiche/:id        Fiche détail — template unique, type = artiste | conference | exposant (id numérique)
 /mon-programme          Mon programme (connecté uniquement)
 /profil                 Profil (connecté uniquement)
-/about                  About us (nos valeurs)
+/a-propos               À propos (nos valeurs)
 /actualites             Liste des actualités
 /actualites/:id         Détail d'une actualité
 /infos-pratiques        Infos pratiques (accès, horaires, camping, parking, cashless, PMR, règlement, contact)
@@ -78,11 +78,13 @@ Le festival est le prolongement de cette mission à l'échelle d'un événement 
 | Domaine | Choix |
 |---|---|
 | Framework front | [Vue.js](https://vuejs.org/) |
-| Authentification & données utilisateur | [Supabase](https://supabase.com/) (table `users`, `likes`, `contact_messages`) |
-| Contenu (programmation, exposants, conférences, billetterie, infos pratiques, actualités, about) | Fichiers JSON statiques (pas de backend pour ces données en V1) |
-| Tests | [Vitest](https://vitest.dev/) |
+| Routage | [Vue Router](https://router.vuejs.org/) (`src/router/index.ts`) |
+| Authentification & données | [Supabase](https://supabase.com/) (Auth + base Postgres, accédée via les *handlers* de `src/handlers/`) |
+| Notifications | [vue-sonner](https://vue-sonner.vercel.app/) (toasts, ex. « Ajouté à Mon programme ») |
+| Tests | [Vitest](https://vitest.dev/) + Vue Test Utils + happy-dom |
+| Déploiement | Build statique dans `docs/` (GitHub Pages, `base: '/la-bringue/'`) |
 
-Seules l'authentification et les likes passent par Supabase pour l'instant. Tout le reste du contenu du site est lu depuis des fichiers JSON versionnés dans le projet — voir [Structure du contenu](#structure-du-contenu).
+Le contenu du site (programmation, exposants, conférences, formules, infos pratiques, actualités…) et les likes sont lus dans Supabase — voir [Structure du contenu](#structure-du-contenu). Les images des artistes vivent dans `public/programmation/`.
 
 ---
 
@@ -92,35 +94,62 @@ Seules l'authentification et les likes passent par Supabase pour l'instant. Tout
 src/
 ├── assets/
 │   ├── icons/                               # SVG exportés de Figma, lazy-loadés par <Icon>
-│   └── card/, footer/, hero/, logo/, scenes/  # autres images/illustrations exportées de Figma
+│   └── card/, carrousel-tile/, conferenciere/, footer/, hero/, loader/, logo/, scenes/, sponsor/  # images/illustrations
 ├── components/
 │   ├── ui/
-│   │   ├── Icon.vue                         # <Icon name="..." size="small|medium|large" />
-│   │   ├── Button.vue                       # <Button color=... variant=... size=... />
-│   │   ├── Select.vue                       # <Select v-model=... :options=... size=... />
-│   │   ├── Tag.vue                          # <Tag label=... variant=... />
+│   │   ├── Icon.vue, Button.vue, Select.vue, Tag.vue
 │   │   ├── Like.vue                         # <Like v-model=... label=... />
-│   │   ├── ContentCard.vue                  # <ContentCard nom=... photo=... likable v-model:is-liked=... @click=... />
-│   │   └── FilterableList.vue               # <FilterableList :items=... :filters=... v-model:selected=...> + slot #item
+│   │   ├── ContentCard.vue                  # carte partagée des listes
+│   │   ├── FilterableList.vue               # recherche + filtres + slot #item
+│   │   ├── Carousel.vue, CarouselTile.vue   # carrousels d'accès rapide de la Home
+│   │   ├── Loader.vue                       # étoile du logo animée, suit le thème
+│   │   └── PasswordInput.vue                # champ mot de passe avec afficher/masquer
 │   ├── layout/
-│   │   ├── Navbar.vue
-│   │   └── Modal.vue                        # <Modal :open=... title=... @close=...> générique, réutilisable
+│   │   ├── Navbar.vue, Footer.vue, Hero.vue
+│   │   ├── Modal.vue                        # <Modal :open=... title=... @close=...> générique
+│   │   ├── Drawer.vue                       # panneau latéral (menu burger), focus piégé
+│   │   └── SupportSection.vue               # « Ils nous soutiennent » (sponsors), masquable par route
+│   ├── home/
+│   │   ├── ProgrammationSection.vue         # programmation par jour sur la Home
+│   │   └── ProgrammationDay.vue             # un jour : headliner + line-up
+│   ├── fiche/
+│   │   ├── FichePresentation.vue            # bloc commun artiste / conférence / exposant (photo, stickers par scène, tags)
+│   │   └── IntervenanteProfil.vue           # mini-profil d'une conférencière (fiche conférence)
 │   └── auth/
 │       ├── LoginForm.vue
 │       └── SignUpForm.vue
+├── views/                                   # une vue par route
+│   ├── HomeView, ProgrammationView, ExposantsView, ConferencesView
+│   ├── FicheDetail                          # gabarit unique des fiches, blocs spécifiques selon le type
+│   ├── MonProgrammeView, ProfileView
+│   └── AProposView, ActualitesView, BilletterieView, InfosPratiquesView
+├── router/
+│   └── index.ts                             # routes, scroll en haut de page, meta `hideSupport`
+├── handlers/                                # accès Supabase, un handler par table
+│   ├── crud.ts                              # createCrudHandler (getAll/getById/create/update/delete), HandlerError, unwrap
+│   ├── actualite, artiste, concert, concert-artiste, conference, conferenciere,
+│   │   exposant, formule, info-pratique, like, participation, promotion, scene
+│   └── index.ts                             # point d'entrée unique
 ├── composables/
-│   ├── useAuthModal.ts                     # état de la modale d'auth (ouverte/fermée, vue active) — utilisé par App.vue
-│   ├── useFocusTrap.ts                     # piège de focus clavier réutilisable
-│   └── useTheme.ts                         # thème clair/sombre/système (voir Design system)
+│   ├── useAuth.ts                           # utilisatrice courante (session Supabase)
+│   ├── useAuthModal.ts                      # modale d'auth + like en attente pendant la connexion
+│   ├── useLikes.ts                          # état partagé des likes + toast de confirmation
+│   ├── useFocusTrap.ts                      # piège de focus clavier réutilisable
+│   └── useTheme.ts                          # thème clair/sombre/système (voir Design system)
 ├── types/
-│   ├── icon.ts, button.ts, select.ts, tag.ts, filterable-list.ts  # noms/props valides des composants ui/ (IconName, ButtonColor, TagVariant, FilterConfig, ...)
+│   ├── database/                            # une interface par table Supabase
+│   └── ui/                                  # props/noms valides des composants et cartes (IconName, ButtonColor, Fiche, ArtisteCard, ...)
 ├── styles/
-│   └── tokens/                             # design tokens générés depuis Figma (voir Design system)
+│   ├── tokens/                              # design tokens générés depuis Figma (voir Design system)
+│   └── utilities.css
 ├── lib/
-│   ├── auth-validation.ts                  # validation des champs email/mot de passe
-│   ├── auth-errors.ts                      # traduction des erreurs Supabase Auth en messages FR
-│   └── with-timeout.ts                     # détection d'un Supabase injoignable/en timeout
-├── supabase.js                             # client Supabase (config lue depuis .env.local)
+│   ├── auth-validation.ts                   # validation des champs email/mot de passe
+│   ├── auth-errors.ts                       # traduction des erreurs Supabase Auth en messages FR
+│   ├── with-timeout.ts                      # détection d'un Supabase injoignable/en timeout
+│   ├── cards.ts                             # données Supabase → cartes (Programmation, Conférences, Exposants)
+│   ├── fiche.ts                             # construction d'une fiche + suggestions
+│   └── photo.ts                             # photoUrl() : préfixe BASE_URL, URL complètes inchangées
+├── supabase.js                              # client Supabase (config lue depuis .env.local)
 ├── App.vue
 ├── main.ts
 └── style.css                               # importe les tokens, pont vers les variables globales
@@ -172,7 +201,7 @@ const { preference, resolvedTheme, setPreference, toggleTheme } = useTheme()
 
 Par défaut, le thème suit la préférence de l'appareil (`prefers-color-scheme`). Un choix explicite (`setPreference('light' | 'dark' | 'system')`) est mémorisé dans `localStorage` et posé sur `<html data-theme="...">`. Le sélecteur clair/sombre/défaut de la Navbar en est la seule interface pour l'instant.
 
-**3. Composants `Icon`, `Button`, `Select`, `Tag`, `Like`, `ContentCard` et `FilterableList` — `src/components/ui/`**
+**3. Composants `ui/` : `Icon`, `Button`, `Select`, `Tag`, `Like`, `ContentCard`, `FilterableList`, `Carousel`, `Loader`, `PasswordInput` — `src/components/ui/`**
 
 ```vue
 <Icon name="heart-filled" size="large" />
@@ -207,7 +236,11 @@ Par défaut, le thème suit la préférence de l'appareil (`prefers-color-scheme
 </FilterableList>
 ```
 
-`Icon` charge à la demande (un chunk par icône, `import.meta.glob(..., { query: '?raw' })`) les SVG exportés de Figma (`src/assets/icons/`, `fill="currentColor"` pour hériter la couleur ambiante) — rien n'est chargé pour les icônes qu'une page n'utilise pas. `Button` couvre `color` (`primary` / `secondary` / `info` / `danger`), `variant` (`full` / `outlined` / `ghost`) et `size` (`medium` / `large`) — chaque instance pointe simplement vers les tokens `--button-{color}-{variant}-{state}-*` correspondants, sans règle CSS dédiée par combinaison. `Select` est un dropdown entièrement personnalisé (pas le `<select>` natif, dont la liste d'options ne peut pas être stylée), accessible au clavier, et calé sur le même `size` que `Button` pour rester à la même hauteur quand ils sont côte à côte (ex. la Navbar). `Tag` affiche un libellé court (scène, catégorie d'exposant, thème de conférence) ; sa `variant` (`pink` par défaut / `pink-bright` / `violet` / `blue`) ne change que la couleur, via les tokens `--tag-{variant}-*`. `ContentCard` est la carte partagée des listes Programmation, Exposants et Conférences (voir Figma "card listing") : `nom` et `photo` sont obligatoires, `date`, `scene` et `categorie` (rendue en `Tag`) ne s'affichent que si elles sont renseignées — la carte n'a pas de variante par scène. `likable` (`false` par défaut, donc pour les exposants) affiche le bouton `Like` ; un clic like, un second clic retire le like, sans jamais déclencher le `onClick` de la carte (exécuté au clic ou à Entrée sur le reste de la carte). Le like n'appelle pas Supabase (seule l'authentification passe par la base) : c'est un état `isLiked` que la page lit/fixe via `v-model:is-liked`. `FilterableList` est la liste partagée par ces trois pages : une recherche par nom en temps réel (insensible à la casse et aux accents), une rangée de `Button` par filtre passé dans `filters` (`{ key, label, allLabel, options }` — l'option active en `primary`, les autres en `secondary`, précédées du bouton `allLabel` qui retire le filtre, ex. "Tous les jours" ; `key` est le champ comparé sur chaque élément), sous la recherche, le tout combiné en logique ET, un bouton "Réinitialiser les filtres" et un message quand rien ne correspond. Les éléments doivent avoir au moins un `id` et un `nom` ; leur rendu est laissé à la page via le slot `#item`, et les filtres actifs sont exposés en `v-model:selected` (pour pré-appliquer un jour ou une scène depuis l'accueil).
+`Icon` charge à la demande (un chunk par icône, `import.meta.glob(..., { query: '?raw' })`) les SVG exportés de Figma (`src/assets/icons/`, `fill="currentColor"` pour hériter la couleur ambiante) — rien n'est chargé pour les icônes qu'une page n'utilise pas. `Button` couvre `color` (`primary` / `secondary` / `info` / `danger`), `variant` (`full` / `outlined` / `ghost`) et `size` (`medium` / `large`) — chaque instance pointe simplement vers les tokens `--button-{color}-{variant}-{state}-*` correspondants, sans règle CSS dédiée par combinaison. `Select` est un dropdown entièrement personnalisé (pas le `<select>` natif, dont la liste d'options ne peut pas être stylée), accessible au clavier, et calé sur le même `size` que `Button` pour rester à la même hauteur quand ils sont côte à côte (ex. la Navbar). `Tag` affiche un libellé court (scène, catégorie d'exposant, thème de conférence) ; sa `variant` (`pink` par défaut / `pink-bright` / `violet` / `blue`) ne change que la couleur, via les tokens `--tag-{variant}-*`. `ContentCard` est la carte partagée des listes Programmation, Exposants et Conférences (voir Figma "card listing") : `nom` et `photo` sont obligatoires, `date`, `scene` et `categorie` (rendue en `Tag`) ne s'affichent que si elles sont renseignées — la carte n'a pas de variante par scène. `likable` (`false` par défaut, donc pour les exposants) affiche le bouton `Like` ; un clic like, un second clic retire le like, sans jamais déclencher le `onClick` de la carte (exécuté au clic ou à Entrée sur le reste de la carte). Le like est un état `isLiked` que la page lit/fixe via `v-model:is-liked` (état partagé par `useLikes`, qui affiche le toast « Ajouté à Mon programme »). Déconnectée, un clic sur le cœur ouvre la modale de connexion en mémorisant le like (`useAuthModal`) ; il est appliqué automatiquement une fois la connexion réussie. `FilterableList` est la liste partagée par ces trois pages : une recherche par nom en temps réel (insensible à la casse et aux accents), une rangée de `Button` par filtre passé dans `filters` (`{ key, label, allLabel, options }` — l'option active en `primary`, les autres en `secondary`, précédées du bouton `allLabel` qui retire le filtre, ex. "Tous les jours" ; `key` est le champ comparé sur chaque élément), sous la recherche, le tout combiné en logique ET, un bouton "Réinitialiser les filtres" et un message quand rien ne correspond. Les éléments doivent avoir au moins un `id` et un `nom` ; leur rendu est laissé à la page via le slot `#item`, et les filtres actifs sont exposés en `v-model:selected` (pour pré-appliquer un jour ou une scène depuis l'accueil). `Carousel` / `CarouselTile` forment les carrousels d'accès rapide de la Home (flèches précédent/suivant désactivées aux extrémités). `Loader` affiche l'étoile du logo en rotation avec un libellé (`label`, « Chargement… » par défaut) et suit le thème. `PasswordInput` est le champ mot de passe avec bouton afficher/masquer des formulaires d'auth.
+
+**4. Fiches détail — `FicheDetail` + `src/components/fiche/`**
+
+Une seule vue (`/:type/fiche/:id`) sert les trois types de fiche. `lib/fiche.ts` construit les données (`FicheData`, types dans `types/ui/fiche.ts`) depuis les handlers ; `FichePresentation` rend le bloc commun (photo avec stickers selon la scène, tags, like) et seuls les champs renseignés sont affichés. Chaque type ajoute son bloc spécifique (ex. `IntervenanteProfil` pour les conférencières) et la page se termine par « Ça peut aussi vous intéresser » (`SUGGESTIONS_COUNT` = 3 cartes). Un `Loader` est affiché pendant le chargement.
 
 ---
 
@@ -220,8 +253,11 @@ npm install
 # Lancer le serveur de développement
 npm run dev
 
-# Build de production
+# Build de production (vue-tsc + vite, sortie dans docs/ pour GitHub Pages)
 npm run build
+
+# Prévisualiser le build
+npm run preview
 ```
 
 ## Variables d'environnement
@@ -233,7 +269,7 @@ VITE_SUPABASE_URL=https://xxxxx.supabase.co
 VITE_SUPABASE_PUBLISHABLE_KEY=sb_publishable_xxxxxxxxxxxxxxxxxxxxxx
 ```
 
-Ces clés sont utilisées uniquement par `supabase.js` pour l'authentification et la gestion des likes. `.env.local` est ignoré par git (`*.local`) — sans lui, `supabase.js` lève une erreur au chargement et la page reste blanche.
+Ces clés sont utilisées uniquement par `supabase.js` (authentification, contenu et likes). `.env.local` est ignoré par git (`*.local`) — sans lui, `supabase.js` lève une erreur au chargement et la page reste blanche.
 
 ## Tests
 
@@ -245,20 +281,23 @@ npm run test
 
 # Lancer les tests en mode watch
 npm run test:watch
+
+# Couverture
+npm run test:coverage
 ```
 
 ## Structure du contenu
 
-Le contenu du site (hors authentification et likes) vit dans des fichiers JSON, pensés pour être facilement remplacés par une vraie API plus tard sans changer les composants qui les consomment :
+Le contenu vit dans Supabase et est lu via les handlers de `src/handlers/` (un par table, construits sur `createCrudHandler`). Les composants ne parlent jamais directement à Supabase : ils appellent un handler, qui renvoie les données ou lève une `HandlerError`.
 
-```
-/data
-  ├── programmation.json     # artistes musicaux (nom, photo, date, scène)
-  ├── exposants.json         # stands (nom, photo, catégorie, horaires d'ouverture)
-  ├── conferences.json       # conférences (titre, photo, date, thème, conférenciers)
-  ├── billetterie.json       # formules, tarifs, promotions, statut
-  ├── infos-pratiques.json   # accès, horaires, camping, parking, cashless, PMR, règlement
-  ├── about.json             # manifeste, association, éditions précédentes
-  ├── actualites.json        # actualités (titre, image, résumé, date, contenu)
-  └── sponsors.json          # sponsors (nom, logo, lien, niveau)
-```
+| Handler | Données |
+|---|---|
+| `artisteHandler`, `concertHandler`, `concertArtisteHandler`, `sceneHandler` | Artistes, concerts (jour, horaire, scène), line-up par jour (`DayLineup`) |
+| `conferenceHandler`, `conferenciereHandler` | Conférences et leurs intervenantes (`ConferenceDetail`) |
+| `exposantHandler` | Stands (catégorie, horaires d'ouverture) |
+| `formuleHandler`, `promotionHandler` | Billetterie : formules et promotions (`FormuleAvecPromotions`) |
+| `infoPratiqueHandler` | Infos pratiques |
+| `actualiteHandler` | Actualités |
+| `likeHandler`, `participationHandler` | Likes de l'utilisatrice (« Mon programme », `LikeDetail`) et participations |
+
+Les types des lignes sont dans `src/types/database/`, un fichier par table. Les photos d'artistes sont des fichiers statiques de `public/programmation/` (champ `photo` = chemin, résolu par `photoUrl()`). Les sponsors sont des images locales (`src/assets/sponsor/`) affichées par `SupportSection`.
