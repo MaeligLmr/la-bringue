@@ -1,5 +1,6 @@
 import { describe, it, expect } from 'vitest'
 import { mount } from '@vue/test-utils'
+import ContentCard from './ContentCard.vue'
 import FilterableList from './FilterableList.vue'
 import type { FilterConfig } from '../../types/ui/filterable-list.ts'
 
@@ -144,11 +145,33 @@ describe('FilterableList', () => {
     wrapper.unmount()
   })
 
-  it('affiche le bouton "Réinitialiser les filtres" dès qu’un critère est actif', async () => {
+  it('affiche une croix dans le champ dès qu’une recherche est saisie, et elle la vide', async () => {
     const wrapper = mountList()
+    expect(wrapper.find('.filterable-list__search-clear').exists()).toBe(false)
 
-    await wrapper.find('input[type="search"]').setValue('a')
-    expect(wrapper.find('.filterable-list__reset').text()).toBe('Réinitialiser les filtres')
+    const input = wrapper.find('input[type="search"]')
+    await input.setValue('aya')
+    expect(displayedNames(wrapper)).toEqual(['Aya Nakamura'])
+
+    await wrapper.find('.filterable-list__search-clear').trigger('click')
+    expect((input.element as HTMLInputElement).value).toBe('')
+    expect(displayedNames(wrapper)).toEqual(['Beyoncé', 'Aya Nakamura', 'Angèle'])
+    expect(wrapper.find('.filterable-list__search-clear').exists()).toBe(false)
+
+    wrapper.unmount()
+  })
+
+  it('fournit la recherche aux cartes pour qu’elles surlignent le nom', async () => {
+    const wrapper = mount(FilterableList, {
+      props: { items: ITEMS },
+      slots: { item: `<template #item="{ item }"><ContentCard :nom="item.nom" /></template>` },
+      global: { components: { ContentCard } },
+      attachTo: document.body,
+    })
+
+    await wrapper.find('input[type="search"]').setValue('nak')
+
+    expect(wrapper.findAll('mark').map((node) => node.text())).toEqual(['Nak'])
 
     wrapper.unmount()
   })

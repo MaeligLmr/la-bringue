@@ -2,9 +2,10 @@
 //   1. ce fichier découpe un texte en morceaux « correspond / ne correspond pas »
 //      à la recherche (splitMatches) ;
 //   2. HighlightedText.vue rend chaque morceau, les correspondances dans un <mark> ;
-//   3. la page (ex. InfosPratiquesView) compte ces <mark> dans le DOM pour
-//      afficher « 2 / 5 » et passer d'un résultat à l'autre.
-// La logique de comparaison vit ici, seule, pour pouvoir être testée sans DOM.
+//   3. le composable useTextSearch compte ces <mark> dans le DOM pour afficher
+//      « 2 / 5 » et passer d'un résultat à l'autre.
+// La logique de comparaison vit ici, seule et sans dépendance à Vue, pour
+// pouvoir être testée sans DOM.
 
 export interface TextSegment {
   text: string

@@ -1,8 +1,10 @@
 <script setup lang="ts">
 import { computed, ref, watch } from 'vue'
 import Tag from './Tag.vue'
+import HighlightedText from './HighlightedText.vue'
 import Like from './Like.vue'
 import type { LikeTarget } from '../../types/ui/like'
+import { useListSearch } from '../../composables/useListSearch'
 import { photoUrl } from '../../lib/photo'
 import cardBg from '../../assets/card/card-bg.png'
 // Importé en texte brut puis injecté via v-html (fichier statique du dépôt,
@@ -25,6 +27,9 @@ const props = withDefaults(
     likable: false,
   }
 )
+
+// Recherche de la liste qui contient la carte (voir FilterableList) ; vide ailleurs.
+const searchQuery = useListSearch()
 
 const isLiked = defineModel<boolean>('isLiked', { default: false })
 
@@ -52,7 +57,7 @@ const photoSrc = computed(() => (!props.photo || photoFailed.value ? null : phot
 
     <div class="content-card__informations">
       <div class="content-card__details">
-        <h3 class="content-card__nom">{{ nom }}</h3>
+        <h3 class="content-card__nom"><HighlightedText :text="nom" :query="searchQuery" /></h3>
         <div v-if="scene || date" class="content-card__meta">
           <p v-if="scene" class="content-card__scene">{{ scene }}</p>
           <p v-if="date" class="content-card__date">{{ date }}</p>

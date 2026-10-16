@@ -1,14 +1,14 @@
 <script setup lang="ts">
-import { nextTick, onBeforeUnmount, onMounted, ref, watch } from 'vue'
+import { nextTick, onBeforeUnmount, onMounted, ref } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { toast } from 'vue-sonner'
+import { useTextSearch } from '../composables/useTextSearch'
 import Hero from '../components/layout/Hero.vue'
 import Icon from '../components/ui/Icon.vue'
 import HighlightedText from '../components/ui/HighlightedText.vue'
 import Loader from '../components/ui/Loader.vue'
 import { infoPratiqueHandler } from '../handlers/info-pratique'
 import { sectionAnchor } from '../lib/anchor'
-import { MIN_QUERY_LENGTH } from '../lib/highlight'
 import type { InfoPratique } from '../types/database/info-pratique'
 
 const LOAD_ERROR_MESSAGE = 'Impossible de charger les infos pratiques.'
@@ -51,55 +51,9 @@ function goTo(id: string) {
 
 // --- Recherche dans la page (type Ctrl+F) ----------------------------------
 
-const query = ref('')
-// Fonctionnement : `query` est passée à chaque <HighlightedText> de la page,
-// qui entoure les occurrences d'un <mark> (voir lib/highlight.ts). Ici on ne
-// recalcule rien du texte : on lit le DOM pour compter les <mark>, mettre en
-// avant l'un d'eux et défiler jusqu'à lui.
-const matchCount = ref(0)
-// Rang (à partir de 1) de l'occurrence mise en avant ; 0 s'il n'y en a pas.
-const currentMatch = ref(0)
-
-// Tous les <mark> de la colonne de contenu, dans l'ordre de lecture de la page
-// (le menu et le champ de recherche sont hors de cette colonne).
-function matchElements() {
-  return Array.from(mainEl.value?.querySelectorAll<HTMLElement>('.highlighted-text__match') ?? [])
-}
-
-// Pose la classe « actif » sur l'occurrence `currentMatch` (et la retire des
-// autres), puis la centre à l'écran si `scroll`. Classe gérée à la main plutôt
-// que par Vue : les <mark> viennent d'un composant enfant et la page ne connaît
-// leur nombre qu'après coup.
-function showCurrentMatch(scroll: boolean) {
-  const matches = matchElements()
-  matches.forEach((el, index) =>
-    el.classList.toggle('highlighted-text__match--current', index === currentMatch.value - 1)
-  )
-  if (scroll) matches[currentMatch.value - 1]?.scrollIntoView({ behavior: 'smooth', block: 'center' })
-}
-
-// À chaque frappe, Vue re-rend les textes avec les nouveaux <mark> : on attend
-// que le DOM soit à jour (nextTick) avant de les compter, puis on repart du
-// premier résultat. Les <mark> recréés ayant perdu la classe « actif », elle
-// est reposée ici.
-watch(query, async () => {
-  await nextTick()
-  matchCount.value = matchElements().length
-  currentMatch.value = matchCount.value ? 1 : 0
-  showCurrentMatch(true)
-})
-
-// Passe au résultat suivant (+1) ou précédent (-1), en bouclant : après le
-// dernier on revient au premier, et inversement.
-function stepMatch(delta: 1 | -1) {
-  if (!matchCount.value) return
-  currentMatch.value = ((currentMatch.value - 1 + delta + matchCount.value) % matchCount.value) + 1
-  showCurrentMatch(true)
-}
-
-function clearSearch() {
-  query.value = ''
-}
+// Voir composables/useTextSearch.ts : `query` est passée aux <HighlightedText>
+// de la colonne de contenu (`mainEl`), qui surlignent les occurrences.
+const { query, matchCount, currentMatch, isSearching, stepMatch, clearSearch } = useTextSearch(mainEl)
 
 onMounted(async () => {
   try {
@@ -181,7 +135,7 @@ const anchor = sectionAnchor
             </button>
           </label>
 
-          <p v-if="query.trim().length >= MIN_QUERY_LENGTH" class="infos-recherche__resultat" aria-live="polite">
+          <p v-if="isSearching" class="infos-recherche__resultat" aria-live="polite">
             <template v-if="matchCount">
               <span class="infos-recherche__compteur">{{ currentMatch }} / {{ matchCount }}</span>
               <button type="button" class="infos-recherche__icone infos-recherche__icone--haut" aria-label="Résultat précédent" @click="stepMatch(-1)">
