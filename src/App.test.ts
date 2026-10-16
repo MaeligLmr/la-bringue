@@ -1,9 +1,19 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
-import { mount, type VueWrapper } from '@vue/test-utils'
+import { flushPromises, mount, type VueWrapper } from '@vue/test-utils'
 import { nextTick } from 'vue'
 import { createRouter, createWebHistory } from 'vue-router'
 import App from './App.vue'
 import { useAuthModal } from './composables/useAuthModal'
+import { useLikes } from './composables/useLikes'
+import LoginForm from './components/auth/LoginForm.vue'
+import SignUpForm from './components/auth/SignUpForm.vue'
+
+const { toast } = vi.hoisted(() => ({ toast: { success: vi.fn() } }))
+
+vi.mock('vue-sonner', async (importOriginal) => ({
+  ...(await importOriginal<typeof import('vue-sonner')>()),
+  toast,
+}))
 
 const { signInWithPassword, signUp } = vi.hoisted(() => ({
   signInWithPassword: vi.fn(() => new Promise(() => {})),
@@ -163,6 +173,62 @@ describe("App (modale d'authentification)", () => {
     expect(document.activeElement).toBe(trigger)
 
     trigger.remove()
+  })
+})
+
+describe('App (like en attente après connexion)', () => {
+  beforeEach(() => {
+    vi.clearAllMocks()
+    useLikes().setLiked({ id: 42, type: 'artiste' }, false)
+    useLikes().setLiked({ id: 3, type: 'conference' }, false)
+    useAuthModal().close()
+    useAuthModal().switchTo('login')
+  })
+
+  afterEach(() => {
+    wrapper?.unmount()
+    wrapper = null
+    document.body.innerHTML = ''
+  })
+
+  it('applique le like demandé et affiche le toast après une connexion réussie', async () => {
+    wrapper = await mountApp()
+    useAuthModal().open('login', { id: 42, type: 'artiste' })
+    await nextTick()
+
+    wrapper.findComponent(LoginForm).vm.$emit('success')
+    await flushPromises()
+
+    expect(document.querySelector('.modal__backdrop')).toBeNull()
+    expect(useLikes().isLiked({ id: 42, type: 'artiste' })).toBe(true)
+    expect(toast.success).toHaveBeenCalledWith('Ajouté à Mon programme')
+    expect(useAuthModal().pendingLike.value).toBeNull()
+  })
+
+  it('applique aussi le like demandé après une inscription réussie', async () => {
+    wrapper = await mountApp()
+    useAuthModal().open('login', { id: 3, type: 'conference' })
+    useAuthModal().switchTo('signup')
+    await nextTick()
+
+    wrapper.findComponent(SignUpForm).vm.$emit('success')
+    await flushPromises()
+
+    expect(useLikes().isLiked({ id: 3, type: 'conference' })).toBe(true)
+    expect(toast.success).toHaveBeenCalledWith('Ajouté à Mon programme')
+  })
+
+  it("n'applique aucun like quand on se connecte sans être passé par un like", async () => {
+    wrapper = await mountApp()
+    useAuthModal().open('login')
+    await nextTick()
+
+    wrapper.findComponent(LoginForm).vm.$emit('success')
+    await flushPromises()
+
+    expect(useLikes().isLiked({ id: 42, type: 'artiste' })).toBe(false)
+    expect(useLikes().isLiked({ id: 3, type: 'conference' })).toBe(false)
+    expect(toast.success).not.toHaveBeenCalled()
   })
 })
 

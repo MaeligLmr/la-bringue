@@ -4,6 +4,7 @@ import { computed } from 'vue'
 import Like from './Like.vue'
 import Icon from './Icon.vue'
 import { useAuthModal } from '../../composables/useAuthModal'
+import { useLikes } from '../../composables/useLikes'
 
 const { loggedIn } = vi.hoisted(() => ({ loggedIn: { value: true } }))
 vi.mock('../../composables/useAuth', () => ({
@@ -24,6 +25,7 @@ function mountLike(props: Record<string, unknown> = {}) {
 beforeEach(() => {
   loggedIn.value = true
   useAuthModal().close()
+  useLikes().setLiked({ id: 42, type: 'artiste' }, false)
 })
 
 describe('Like', () => {
@@ -55,6 +57,17 @@ describe('Like', () => {
 
     await vi.waitFor(() => expect(wrapper.find('svg').exists()).toBe(true))
     expect(wrapper.findComponent(Icon).props('name')).toBe('heart-filled')
+  })
+
+  it('se remplit quand le like est appliqué ailleurs (après connexion par exemple)', async () => {
+    const wrapper = mountLike({ target: { id: 42, type: 'artiste' } })
+    expect(wrapper.findComponent(Icon).props('name')).toBe('heart')
+
+    useLikes().setLiked({ id: 42, type: 'artiste' }, true)
+    await flushPromises()
+
+    expect(wrapper.findComponent(Icon).props('name')).toBe('heart-filled')
+    expect(wrapper.attributes('aria-pressed')).toBe('true')
   })
 
   describe('sans être connectée', () => {

@@ -44,4 +44,14 @@ describe('useAuthModal', () => {
     expect(isOpen.value).toBe(false)
     expect(pendingLike.value).toEqual(TARGET)
   })
+  it('rend puis vide le like en attente une fois récupéré', () => {
+    const { open, complete, takePendingLike, pendingLike } = useAuthModal()
+
+    open('login', TARGET)
+    complete()
+
+    expect(takePendingLike()).toEqual(TARGET)
+    expect(pendingLike.value).toBeNull()
+    expect(takePendingLike()).toBeNull()
+  })
 })
