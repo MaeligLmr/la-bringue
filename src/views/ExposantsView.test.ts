@@ -3,6 +3,10 @@ import { flushPromises, mount } from '@vue/test-utils'
 import { createRouter, createWebHistory } from 'vue-router'
 import ExposantsView from './ExposantsView.vue'
 import type { Exposant } from '../types/database/exposant'
+import { toast } from 'vue-sonner'
+import { exposantHandler } from '../handlers/exposant'
+
+vi.mock('vue-sonner', () => ({ toast: { error: vi.fn() } }))
 
 let id = 0
 
@@ -109,6 +113,32 @@ describe('ExposantsView', () => {
     await flushPromises()
 
     expect(wrapper.vm.$router.currentRoute.value.path).toBe(`/exposant/fiche/${EXPOSANTS[1].id_exposant}`)
+
+    wrapper.unmount()
+  })
+
+  it('affiche un toast si les exposants ne se chargent pas, sans casser la page', async () => {
+    vi.spyOn(console, 'error').mockImplementation(() => {})
+    vi.mocked(exposantHandler.getAllByNom).mockRejectedValueOnce(new Error('[Exposant] permission denied'))
+    vi.mocked(toast.error).mockClear()
+
+    const wrapper = await mountExposants()
+
+    expect(toast.error).toHaveBeenCalledWith('Impossible de charger les exposants.')
+    expect(displayedNames(wrapper)).toEqual([])
+
+    wrapper.unmount()
+  })
+
+  it('affiche un toast si les catégories ne se chargent pas, la liste reste affichée', async () => {
+    vi.spyOn(console, 'error').mockImplementation(() => {})
+    vi.mocked(exposantHandler.getCategories).mockRejectedValueOnce(new Error('rpc failed'))
+    vi.mocked(toast.error).mockClear()
+
+    const wrapper = await mountExposants()
+
+    expect(toast.error).toHaveBeenCalledWith('Impossible de charger les catégories d’exposants.')
+    expect(displayedNames(wrapper)).toHaveLength(4)
 
     wrapper.unmount()
   })

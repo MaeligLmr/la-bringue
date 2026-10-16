@@ -26,7 +26,8 @@ const INFOS = [
 
 vi.mock('vue-sonner', () => ({ toast: { error: vi.fn() } }))
 const replace = vi.fn()
-vi.mock('vue-router', () => ({ useRoute: () => ({ hash: '' }), useRouter: () => ({ replace }) }))
+let routeHash = ''
+vi.mock('vue-router', () => ({ useRoute: () => ({ hash: routeHash }), useRouter: () => ({ replace }) }))
 vi.mock('../handlers/info-pratique', () => ({
   infoPratiqueHandler: { getAll: vi.fn(async () => INFOS) },
 }))
@@ -125,5 +126,78 @@ describe('InfosPratiquesView', () => {
     expect(toast.error).toHaveBeenCalledTimes(1)
     expect(wrapper.find('[role="alert"]').exists()).toBe(true)
     expect(wrapper.find('section').exists()).toBe(false)
+  })
+
+  it('défile jusqu’à la section visée par l’ancre de l’URL une fois les données chargées', async () => {
+    const scrollIntoView = vi.fn()
+    Element.prototype.scrollIntoView = scrollIntoView
+    routeHash = '#cashless'
+
+    const wrapper = await mountView()
+
+    expect(scrollIntoView).toHaveBeenCalledTimes(1)
+    expect(scrollIntoView.mock.contexts[0]).toBe(wrapper.find('#cashless').element)
+  })
+
+  it('met en évidence dans le menu la section qui traverse l’écran, et arrête d’observer au démontage', async () => {
+    const observed: Element[] = []
+    const disconnect = vi.fn()
+    let notify!: (entries: Partial<IntersectionObserverEntry>[]) => void
+    vi.stubGlobal(
+      'IntersectionObserver',
+      class {
+        constructor(callback: (entries: Partial<IntersectionObserverEntry>[]) => void) {
+          notify = callback
+        }
+        observe = (el: Element) => observed.push(el)
+        disconnect = disconnect
+      }
+    )
+    const wrapper = await mountView()
+    expect(observed.map((el) => el.id)).toEqual(['acces-transport', 'cashless'])
+
+    notify([{ isIntersecting: false, target: observed[0] }])
+    await flushPromises()
+    expect(wrapper.find('.infos-menu__lien--actif').exists()).toBe(false)
+
+    notify([{ isIntersecting: true, target: observed[1] }])
+    await flushPromises()
+    const actif = wrapper.find('.infos-menu__lien--actif')
+    expect(actif.text()).toBe('Cashless')
+    expect(actif.attributes('aria-current')).toBe('true')
+
+    wrapper.unmount()
+    expect(disconnect).toHaveBeenCalled()
+  })
+
+  it('revient au dernier résultat avec Maj+Entrée depuis le premier, et ne fait rien sans résultat', async () => {
+    Element.prototype.scrollIntoView = vi.fn()
+    const wrapper = await mountView()
+    const champ = wrapper.find('.infos-recherche__input')
+
+    await champ.setValue('en ')
+    await flushPromises()
+    const total = wrapper.findAll('mark').length
+    expect(wrapper.find('.infos-recherche__compteur').text()).toBe('1 / ' + total)
+
+    await champ.trigger('keydown.enter', { shiftKey: true })
+    expect(wrapper.find('.infos-recherche__compteur').text()).toBe(total + ' / ' + total)
+    expect(wrapper.findAll('mark')[total - 1].classes()).toContain('highlighted-text__match--current')
+
+    await champ.setValue('zzz')
+    await flushPromises()
+    await champ.trigger('keydown.enter')
+    expect(wrapper.find('.infos-recherche__resultat').text()).toContain('Aucun résultat')
+  })
+
+  it('efface la recherche avec la croix du champ', async () => {
+    const wrapper = await mountView()
+    const champ = wrapper.find('.infos-recherche__input')
+
+    await champ.setValue('cash')
+    await wrapper.find('.infos-recherche__icone--effacer').trigger('click')
+
+    expect((champ.element as HTMLInputElement).value).toBe('')
+    expect(wrapper.find('.infos-recherche__icone--effacer').exists()).toBe(false)
   })
 })

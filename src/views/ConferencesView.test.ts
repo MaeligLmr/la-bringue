@@ -3,6 +3,10 @@ import { flushPromises, mount } from '@vue/test-utils'
 import { createRouter, createWebHistory } from 'vue-router'
 import ConferencesView from './ConferencesView.vue'
 import type { ConferenceDetail } from '../handlers/conference'
+import { toast } from 'vue-sonner'
+import { conferenceHandler } from '../handlers/conference'
+
+vi.mock('vue-sonner', () => ({ toast: { error: vi.fn() } }))
 
 let id = 0
 
@@ -148,6 +152,32 @@ describe('ConferencesView', () => {
 
     expect(filterButton(wrapper, 'Dimanche 30 août').attributes('aria-pressed')).toBe('true')
     expect(displayedNames(wrapper)).toEqual(['Rap et engagement'])
+
+    wrapper.unmount()
+  })
+
+  it('affiche un toast si les conférences ne se chargent pas', async () => {
+    vi.spyOn(console, 'error').mockImplementation(() => {})
+    vi.mocked(conferenceHandler.getAllDetailed).mockRejectedValueOnce(new Error('[Conference] permission denied'))
+    vi.mocked(toast.error).mockClear()
+
+    const wrapper = await mountConferences()
+
+    expect(toast.error).toHaveBeenCalledWith('Impossible de charger les conférences.')
+    expect(displayedNames(wrapper)).toEqual([])
+
+    wrapper.unmount()
+  })
+
+  it('affiche un toast si les thèmes ne se chargent pas, la liste reste affichée', async () => {
+    vi.spyOn(console, 'error').mockImplementation(() => {})
+    vi.mocked(conferenceHandler.getThemes).mockRejectedValueOnce(new Error('rpc failed'))
+    vi.mocked(toast.error).mockClear()
+
+    const wrapper = await mountConferences()
+
+    expect(toast.error).toHaveBeenCalledWith('Impossible de charger les thèmes de conférences.')
+    expect(displayedNames(wrapper)).toHaveLength(4)
 
     wrapper.unmount()
   })
