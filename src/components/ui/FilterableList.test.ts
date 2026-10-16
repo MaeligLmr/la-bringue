@@ -1,4 +1,4 @@
-import { describe, it, expect } from 'vitest'
+import { describe, it, expect, vi } from 'vitest'
 import { mount } from '@vue/test-utils'
 import ContentCard from './ContentCard.vue'
 import FilterableList from './FilterableList.vue'
@@ -174,5 +174,110 @@ describe('FilterableList', () => {
     expect(wrapper.findAll('mark').map((node) => node.text())).toEqual(['Nak'])
 
     wrapper.unmount()
+  })
+
+  describe('rangées de filtres à la souris', () => {
+    // happy-dom ne fait aucune mise en page : on fixe les dimensions à la main.
+    function scrollableRow(wrapper: ReturnType<typeof mountList>, scrollLeft = 0) {
+      const row = wrapper.find('[role="group"]').element as HTMLElement
+      Object.defineProperty(row, 'scrollWidth', { value: 500, configurable: true })
+      Object.defineProperty(row, 'clientWidth', { value: 100, configurable: true })
+      row.scrollLeft = scrollLeft
+      row.setPointerCapture = vi.fn()
+      return row
+    }
+
+    function wheel(row: HTMLElement, init: WheelEventInit) {
+      const event = new WheelEvent('wheel', { bubbles: true, cancelable: true, ...init })
+      row.dispatchEvent(event)
+      return event
+    }
+
+    it('la molette verticale fait défiler la rangée horizontalement', () => {
+      const wrapper = mountList()
+      const row = scrollableRow(wrapper)
+
+      const event = wheel(row, { deltaY: 40 })
+
+      expect(event.defaultPrevented).toBe(true)
+      expect(row.scrollLeft).toBe(40)
+
+      wrapper.unmount()
+    })
+
+    it('convertit les lignes de la molette en pixels', () => {
+      const wrapper = mountList()
+      const row = scrollableRow(wrapper)
+
+      wheel(row, { deltaY: 2, deltaMode: WheelEvent.DOM_DELTA_LINE })
+
+      expect(row.scrollLeft).toBe(32)
+
+      wrapper.unmount()
+    })
+
+    it('laisse la page défiler quand la rangée est au bout, ou pour un défilement horizontal', () => {
+      const wrapper = mountList()
+      const row = scrollableRow(wrapper)
+
+      expect(wheel(row, { deltaY: -40 }).defaultPrevented).toBe(false)
+      expect(wheel(row, { deltaX: 50, deltaY: 10 }).defaultPrevented).toBe(false)
+
+      row.scrollLeft = 400
+      expect(wheel(row, { deltaY: 40 }).defaultPrevented).toBe(false)
+
+      wrapper.unmount()
+    })
+
+    it('laisse la page défiler quand la rangée n’a rien à défiler', () => {
+      const wrapper = mountList()
+      const row = wrapper.find('[role="group"]').element as HTMLElement
+
+      expect(wheel(row, { deltaY: 40 }).defaultPrevented).toBe(false)
+
+      wrapper.unmount()
+    })
+
+    it('un glissement à la souris fait défiler la rangée sans sélectionner le filtre sous le curseur', async () => {
+      vi.useFakeTimers()
+      const wrapper = mountList()
+      const row = scrollableRow(wrapper, 100)
+      const group = wrapper.find('[role="group"]')
+
+      await group.trigger('pointerdown', { pointerType: 'mouse', button: 0, clientX: 200 })
+      await group.trigger('pointermove', { pointerType: 'mouse', clientX: 197 })
+      expect(row.scrollLeft).toBe(100) // sous le seuil : pas encore un glissement
+
+      await group.trigger('pointermove', { pointerType: 'mouse', clientX: 150, pointerId: 1 })
+      expect(row.setPointerCapture).toHaveBeenCalledWith(1)
+      expect(row.scrollLeft).toBe(150)
+
+      await group.trigger('pointerup')
+      await filterButton(wrapper, 'Samedi').trigger('click')
+      expect(filterButton(wrapper, 'Samedi').attributes('aria-pressed')).toBe('false')
+
+      // Après le relâchement, le clic suivant sélectionne de nouveau.
+      vi.runAllTimers()
+      await filterButton(wrapper, 'Samedi').trigger('click')
+      expect(filterButton(wrapper, 'Samedi').attributes('aria-pressed')).toBe('true')
+
+      vi.useRealTimers()
+      wrapper.unmount()
+    })
+
+    it('ignore le doigt et les boutons autres que le principal', async () => {
+      const wrapper = mountList()
+      const row = scrollableRow(wrapper)
+      const group = wrapper.find('[role="group"]')
+
+      await group.trigger('pointerdown', { pointerType: 'touch', button: 0, clientX: 200 })
+      await group.trigger('pointermove', { clientX: 100 })
+      await group.trigger('pointerdown', { pointerType: 'mouse', button: 2, clientX: 200 })
+      await group.trigger('pointermove', { clientX: 100 })
+
+      expect(row.scrollLeft).toBe(0)
+
+      wrapper.unmount()
+    })
   })
 })

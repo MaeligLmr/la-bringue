@@ -3,6 +3,10 @@ import { flushPromises, mount } from '@vue/test-utils'
 import { createRouter, createWebHistory } from 'vue-router'
 import ProgrammationView from './ProgrammationView.vue'
 import type { ConcertDetail } from '../handlers/concert'
+import { toast } from 'vue-sonner'
+import { concertHandler } from '../handlers/concert'
+
+vi.mock('vue-sonner', () => ({ toast: { error: vi.fn() } }))
 
 let id = 0
 
@@ -153,6 +157,19 @@ describe('ProgrammationView', () => {
     const wrapper = await mountProgrammation('/?date=2026-08-29')
 
     expect(filterButton(wrapper, 'Samedi 29 août').attributes('aria-pressed')).toBe('true')
+
+    wrapper.unmount()
+  })
+
+  it('affiche un toast si la programmation ne se charge pas', async () => {
+    vi.spyOn(console, 'error').mockImplementation(() => {})
+    vi.mocked(concertHandler.getAllDetailed).mockRejectedValueOnce(new Error('[Concert] permission denied'))
+    vi.mocked(toast.error).mockClear()
+
+    const wrapper = await mountProgrammation()
+
+    expect(toast.error).toHaveBeenCalledWith('Impossible de charger la programmation.')
+    expect(displayedNames(wrapper)).toEqual([])
 
     wrapper.unmount()
   })

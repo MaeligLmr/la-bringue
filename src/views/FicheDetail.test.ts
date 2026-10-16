@@ -4,6 +4,9 @@ import { createRouter, createWebHistory, RouterView } from 'vue-router'
 import FicheDetail from './FicheDetail.vue'
 import { loadFiche } from '../lib/fiche'
 import type { FicheData } from '../types/ui/fiche'
+import { toast } from 'vue-sonner'
+
+vi.mock('vue-sonner', () => ({ toast: { error: vi.fn() } }))
 
 vi.mock('../lib/fiche', () => ({ loadFiche: vi.fn() }))
 
@@ -40,7 +43,11 @@ async function mountFiche(url: string) {
   return { wrapper, router }
 }
 
-beforeEach(() => vi.mocked(loadFiche).mockReset())
+// Accolades : un beforeEach qui renvoie une fonction la fait exécuter comme
+// nettoyage après le test (ici le mock, qui lèverait l'erreur simulée).
+beforeEach(() => {
+  vi.mocked(loadFiche).mockReset()
+})
 
 describe('FicheDetail', () => {
   it('charge la fiche selon le type et l’identifiant de l’URL', async () => {
@@ -104,6 +111,44 @@ describe('FicheDetail', () => {
     const { wrapper } = await mountFiche('/exposant/fiche/99')
 
     expect(wrapper.text()).toContain('Cette fiche n’existe pas.')
+    wrapper.unmount()
+  })
+
+  it('affiche un toast et un message si le chargement échoue', async () => {
+    vi.spyOn(console, 'error').mockImplementation(() => {})
+    vi.mocked(loadFiche).mockImplementation(async () => {
+      throw new Error('[Exposant] permission denied')
+    })
+    vi.mocked(toast.error).mockClear()
+
+    const { wrapper } = await mountFiche('/exposant/fiche/1')
+
+    expect(toast.error).toHaveBeenCalledWith('Impossible de charger cette fiche.')
+    expect(wrapper.find('.fiche-detail__message').exists()).toBe(true)
+    wrapper.unmount()
+  })
+
+  it('ignore la réponse d’un chargement devenu obsolète (échec comme succès)', async () => {
+    vi.spyOn(console, 'error').mockImplementation(() => {})
+    vi.mocked(toast.error).mockClear()
+    let rejectFirst!: (error: Error) => void
+    vi.mocked(loadFiche).mockImplementation((_type, id) =>
+      id === 1
+        ? new Promise<FicheData | null>((_resolve, reject) => (rejectFirst = reject))
+        : Promise.resolve(data('Ink & Love'))
+    )
+
+    const { wrapper, router } = await mountFiche('/exposant/fiche/1')
+    await router.push('/exposant/fiche/2')
+    await flushPromises()
+    expect(wrapper.find('h1.fiche-presentation__nom').text()).toBe('Ink & Love')
+
+    // La première requête échoue après coup : sans effet sur la fiche affichée.
+    rejectFirst(new Error('trop tard'))
+    await flushPromises()
+
+    expect(toast.error).not.toHaveBeenCalled()
+    expect(wrapper.find('h1.fiche-presentation__nom').text()).toBe('Ink & Love')
     wrapper.unmount()
   })
 })
