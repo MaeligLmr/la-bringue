@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { ref, watch } from 'vue'
 import { useRouter } from 'vue-router'
+import { toast } from 'vue-sonner'
 import Hero from '../components/layout/Hero.vue'
 import FichePresentation from '../components/fiche/FichePresentation.vue'
 import IntervenanteProfil from '../components/fiche/IntervenanteProfil.vue'
@@ -37,6 +38,7 @@ watch(
       if (current !== requestId) return
       console.error(error)
       status.value = 'error'
+      toast.error('Impossible de charger cette fiche.')
     }
   },
   { immediate: true }

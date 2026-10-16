@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { onMounted, ref, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
+import { toast } from 'vue-sonner'
 import Hero from '../components/layout/Hero.vue'
 import FilterableList from '../components/ui/FilterableList.vue'
 import ContentCard from '../components/ui/ContentCard.vue'
@@ -17,6 +18,7 @@ onMounted(async () => {
     artistes.value = toArtisteCards(await concertHandler.getAllDetailed())
   } catch (error) {
     console.error(error)
+    toast.error('Impossible de charger la programmation.')
   }
 })
 

@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { computed, onMounted, ref, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
+import { toast } from 'vue-sonner'
 import Hero from '../components/layout/Hero.vue'
 import FilterableList from '../components/ui/FilterableList.vue'
 import ContentCard from '../components/ui/ContentCard.vue'
@@ -21,11 +22,17 @@ onMounted(() => {
   conferenceHandler
     .getAllDetailed()
     .then((rows) => (conferences.value = toConferenceCards(rows)))
-    .catch(console.error)
+    .catch((error) => {
+      console.error(error)
+      toast.error('Impossible de charger les conférences.')
+    })
   conferenceHandler
     .getThemes()
     .then((values) => (themes.value = values))
-    .catch(console.error)
+    .catch((error) => {
+      console.error(error)
+      toast.error('Impossible de charger les thèmes de conférences.')
+    })
 })
 
 const filters = computed<FilterConfig[]>(() => [
