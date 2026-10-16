@@ -6,6 +6,8 @@ export interface Formule {
   jour_debut: string | null
   jour_fin: string | null
   lien_shotgun: string | null
-  nbr_places: number | null
+  nbr_places_total: number | null
+  nbr_places_restantes: number | null
+  homepage: boolean
   nb_jours: string | null
 }

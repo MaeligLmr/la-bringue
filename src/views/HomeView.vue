@@ -63,7 +63,7 @@ async function load(
 onMounted(() => {
   load(
     billetterieTiles,
-    async () => toTiles(await formuleHandler.getAll(), 'Acheter', '/billetterie', 'ticket'),
+    async () => toTiles(await formuleHandler.getAllHomepage(), 'Acheter', '/billetterie', 'ticket'),
     'Impossible de charger la billetterie.'
   )
   load(
