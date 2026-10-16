@@ -54,7 +54,13 @@ async function load(target: Ref<CarouselTileData[]>, fetchTiles: () => Promise<C
 onMounted(() => {
   load(billetterieTiles, async () => toTiles(await formuleHandler.getAll(), 'Acheter', '/billetterie', 'ticket'))
   load(infosPratiquesTiles, async () =>
-    toTiles(await infoPratiqueHandler.getAll(), 'En savoir plus', '/infos-pratiques', 'arrow-right', 'blue')
+    toTiles(
+      (await infoPratiqueHandler.getAll()).map(({ titre, intro }) => ({ titre, description: intro })),
+      'En savoir plus',
+      '/infos-pratiques',
+      'arrow-right',
+      'blue'
+    )
   )
   load(actualitesTiles, async () =>
     toTiles(await actualiteHandler.getLatest(), 'En savoir plus', '/actualites', 'arrow-right')

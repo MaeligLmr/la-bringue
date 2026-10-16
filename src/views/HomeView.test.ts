@@ -18,7 +18,7 @@ vi.mock('../handlers/formule', () => ({
 }))
 vi.mock('../handlers/info-pratique', () => ({
   infoPratiqueHandler: {
-    getAll: vi.fn().mockResolvedValue([{ id_info: 1, titre: 'Accès', description: 'Navettes gratuites' }]),
+    getAll: vi.fn().mockResolvedValue([{ id_info: 1, titre: 'Accès', intro: 'Navettes gratuites', points: [] }]),
   },
 }))
 vi.mock('../handlers/actualite', () => ({
