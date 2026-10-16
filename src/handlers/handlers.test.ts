@@ -210,6 +210,20 @@ describe('formuleHandler et promotionHandler', () => {
     expect(chain.order).toHaveBeenCalledWith('jour_debut')
   })
 
+  it('getAllHomepage ne garde que les formules marquées pour l’accueil, avec leurs promotions', async () => {
+    const rows = [{ id_formule: 1, titre: 'Pass 1 jour', Promotion: [] }]
+    const { from, chain } = mockSupabase({ data: rows })
+    const { formuleHandler } = await import('./formule')
+
+    const result = await formuleHandler.getAllHomepage()
+
+    expect(from).toHaveBeenCalledWith('Formule')
+    expect(chain.select).toHaveBeenCalledWith('*, Promotion(*)')
+    expect(chain.eq).toHaveBeenCalledWith('homepage', true)
+    expect(chain.order).toHaveBeenCalledWith('jour_debut')
+    expect(result).toEqual(rows)
+  })
+
   it('getByFormule filtre sur la formule', async () => {
     const { from, chain } = mockSupabase()
     const { promotionHandler } = await import('./promotion')

@@ -10,7 +10,7 @@ vi.mock('../handlers/concert', () => ({
 }))
 vi.mock('../handlers/formule', () => ({
   formuleHandler: {
-    getAll: vi.fn().mockResolvedValue([
+    getAllHomepage: vi.fn().mockResolvedValue([
       { id_formule: 1, titre: 'Pass 1 jour', description: 'Un jour au choix' },
       { id_formule: 2, titre: 'Pass 3 jours', description: 'Les trois jours' },
     ]),
