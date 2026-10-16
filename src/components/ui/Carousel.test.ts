@@ -42,6 +42,24 @@ describe('Carousel', () => {
     expect(wrapper.text()).toContain('Pass 3 jours')
   })
 
+  it('affiche le contenu du slot #tile à la place des CarouselTile, avec l’élément et son rang', async () => {
+    const router = createRouter({ history: createWebHistory(), routes: [{ path: '/', component: { template: '<div />' } }] })
+    router.push('/')
+    await router.isReady()
+    const wrapper = mount(Carousel, {
+      props: { tiles: TILES },
+      slots: { tile: `<template #tile="{ tile, index }"><p class="perso">{{ index }}-{{ tile.title }}</p></template>` },
+      global: { plugins: [router] },
+    })
+
+    expect(wrapper.findAll('.carousel-tile')).toHaveLength(0)
+    expect(wrapper.findAll('.perso').map((node) => node.text())).toEqual([
+      '0-Pass 1 jour',
+      '1-Pass 2 jours',
+      '2-Pass 3 jours',
+    ])
+  })
+
   it("n'affiche aucune flèche quand le contenu tient déjà dans le viewport", async () => {
     const wrapper = await mountCarousel([TILES[0]])
 

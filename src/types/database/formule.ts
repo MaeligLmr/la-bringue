@@ -5,6 +5,8 @@ export interface Formule {
   description: string | null
   jour_debut: string | null
   jour_fin: string | null
+  // Prix plein en euros (la réduction d'une promotion se calcule à l'affichage).
+  prix: number | null
   lien_shotgun: string | null
   nbr_places_total: number | null
   nbr_places_restantes: number | null

@@ -2,6 +2,7 @@
 import { onMounted, ref, type Ref } from 'vue'
 import { toast } from 'vue-sonner'
 import Hero from '../components/layout/Hero.vue'
+import BilletterieCard from '../components/billetterie/BilletterieCard.vue'
 import Carousel from '../components/ui/Carousel.vue'
 import ProgrammationSection from '../components/home/ProgrammationSection.vue'
 import type { CarouselTileData, CarouselTileVariant } from '../types/ui/carousel-tile.ts'
@@ -9,6 +10,8 @@ import { actualiteHandler } from '../handlers/actualite'
 import { formuleHandler } from '../handlers/formule'
 import { infoPratiqueHandler } from '../handlers/info-pratique'
 import { sectionAnchor } from '../lib/anchor'
+import { openBilletterie, toFormuleCards } from '../lib/billetterie'
+import type { FormuleCard } from '../types/ui/billetterie'
 
 interface HomeTileSource {
   titre: string | null
@@ -42,16 +45,12 @@ function toTiles(
   }))
 }
 
-const billetterieTiles = ref<CarouselTileData[]>([])
+const formules = ref<FormuleCard[]>([])
 const infosPratiquesTiles = ref<CarouselTileData[]>([])
 const actualitesTiles = ref<CarouselTileData[]>([])
 
 // Chaque section se charge indépendamment : une table en erreur ne vide pas les autres.
-async function load(
-  target: Ref<CarouselTileData[]>,
-  fetchTiles: () => Promise<CarouselTileData[]>,
-  errorMessage: string
-) {
+async function load<T>(target: Ref<T[]>, fetchTiles: () => Promise<T[]>, errorMessage: string) {
   try {
     target.value = await fetchTiles()
   } catch (error) {
@@ -62,8 +61,8 @@ async function load(
 
 onMounted(() => {
   load(
-    billetterieTiles,
-    async () => toTiles(await formuleHandler.getAllHomepage(), 'Acheter', '/billetterie', 'ticket'),
+    formules,
+    async () => toFormuleCards(await formuleHandler.getAllHomepage()),
     'Impossible de charger la billetterie.'
   )
   load(
@@ -101,7 +100,13 @@ onMounted(() => {
 
     <section class="home__section">
       <h2>Billetterie</h2>
-      <Carousel :tiles="billetterieTiles" />
+      <Carousel :tiles="formules">
+        <template #tile="{ tile }">
+          <div class="home__formule">
+            <BilletterieCard :formule="tile" @buy="openBilletterie(tile)" />
+          </div>
+        </template>
+      </Carousel>
     </section>
 
     <section class="home__section">
@@ -124,5 +129,14 @@ onMounted(() => {
 
 .home__section h2 {
   margin: 0 0 var(--space-4);
+}
+
+/* Largeur de carte fixe dans le carrousel, comme les tuiles : toutes de même
+   taille, et la carte remplit la hauteur de la rangée. */
+.home__formule {
+  display: flex;
+  width: 18rem;
+  height: 100%;
+  text-align: left;
 }
 </style>

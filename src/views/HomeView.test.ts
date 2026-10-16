@@ -11,7 +11,7 @@ vi.mock('../handlers/concert', () => ({
 vi.mock('../handlers/formule', () => ({
   formuleHandler: {
     getAllHomepage: vi.fn().mockResolvedValue([
-      { id_formule: 1, titre: 'Pass 1 jour', description: 'Un jour au choix' },
+      { id_formule: 1, titre: 'Pass 1 jour', description: 'Un jour au choix', lien_shotgun: 'https://shotgun.live/pass-1-jour', prix: 30 },
       { id_formule: 2, titre: 'Pass 3 jours', description: 'Les trois jours' },
     ]),
   },
@@ -48,7 +48,7 @@ async function mountHome() {
 function sectionTileTitles(wrapper: Awaited<ReturnType<typeof mountHome>>, title: string) {
   const section = wrapper.findAll('.home__section').find((node) => node.find('h2').text() === title)
   if (!section) throw new Error(`Section "${title}" introuvable`)
-  return section.findAll('.carousel-tile__title').map((node) => node.text())
+  return section.findAll('.carousel-tile__title, .formule__titre').map((node) => node.text())
 }
 
 describe('HomeView', () => {
@@ -64,6 +64,24 @@ describe('HomeView', () => {
     const wrapper = await mountHome()
 
     expect(sectionTileTitles(wrapper, 'Billetterie')).toEqual(['Pass 1 jour', 'Pass 3 jours'])
+  })
+
+  it('affiche les formules sous forme de cartes de billetterie, avec leur prix', async () => {
+    const wrapper = await mountHome()
+
+    const section = wrapper.findAll('.home__section').find((node) => node.find('h2').text() === 'Billetterie')!
+    expect(section.findAll('.formule')).toHaveLength(2)
+    expect(section.find('.formule__prix-final').text().replace(/\s/g, ' ')).toBe('30 €')
+  })
+
+  it('ouvre la billetterie Shotgun depuis une carte de l’accueil', async () => {
+    const open = vi.spyOn(window, 'open').mockImplementation(() => null)
+    const wrapper = await mountHome()
+
+    await wrapper.find('.formule__cta').trigger('click')
+
+    expect(open).toHaveBeenCalledWith('https://shotgun.live/pass-1-jour', '_blank', 'noopener,noreferrer')
+    open.mockRestore()
   })
 
   it('affiche les infos pratiques', async () => {
