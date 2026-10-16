@@ -9,13 +9,21 @@ import Modal from './components/layout/Modal.vue'
 import LoginForm from './components/auth/LoginForm.vue'
 import SignUpForm from './components/auth/SignUpForm.vue'
 import { useAuthModal } from './composables/useAuthModal'
+import { useLikes } from './composables/useLikes'
 import { useTheme } from './composables/useTheme'
 
-const { isOpen, activeView, close, complete, switchTo } = useAuthModal()
+const { isOpen, activeView, close, complete, takePendingLike, switchTo } = useAuthModal()
+const { addLike } = useLikes()
 const { resolvedTheme } = useTheme()
 const route = useRoute()
 
 const formRef = ref<{ focusFirstField: () => void } | null>(null)
+
+function onAuthSuccess() {
+  complete()
+  const likeTarget = takePendingLike()
+  if (likeTarget) addLike(likeTarget)
+}
 
 watch(isOpen, async (open) => {
   if (!open) return
@@ -44,13 +52,13 @@ watch(isOpen, async (open) => {
       v-if="activeView === 'login'"
       ref="formRef"
       @switch="switchTo('signup')"
-      @success="complete"
+      @success="onAuthSuccess"
     />
     <SignUpForm
       v-else
       ref="formRef"
       @switch="switchTo('login')"
-      @success="complete"
+      @success="onAuthSuccess"
     />
   </Modal>
 </template>

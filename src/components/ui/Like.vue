@@ -1,7 +1,9 @@
 <script setup lang="ts">
+import { computed } from 'vue'
 import Icon from './Icon.vue'
 import { useAuth } from '../../composables/useAuth'
 import { useAuthModal } from '../../composables/useAuthModal'
+import { useLikes } from '../../composables/useLikes'
 import type { LikeTarget } from '../../types/ui/like'
 
 const props = withDefaults(
@@ -18,6 +20,9 @@ const isLiked = defineModel<boolean>({ default: false })
 
 const { isLoggedIn, ready } = useAuth()
 const { open } = useAuthModal()
+const likes = useLikes()
+
+const liked = computed(() => (props.target ? likes.isLiked(props.target) : isLiked.value))
 
 async function toggle() {
   await ready
@@ -25,7 +30,9 @@ async function toggle() {
     open('login', props.target)
     return
   }
-  isLiked.value = !isLiked.value
+  const next = !liked.value
+  if (props.target) likes.setLiked(props.target, next)
+  isLiked.value = next
 }
 </script>
 
@@ -34,10 +41,10 @@ async function toggle() {
     type="button"
     class="like"
     :aria-label="label"
-    :aria-pressed="isLiked"
+    :aria-pressed="liked"
     @click="toggle"
   >
-    <Icon :name="isLiked ? 'heart-filled' : 'heart'" size="medium" />
+    <Icon :name="liked ? 'heart-filled' : 'heart'" size="medium" />
   </button>
 </template>
 

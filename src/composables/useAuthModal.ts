@@ -22,10 +22,16 @@ function complete() {
   isOpen.value = false
 }
 
+function takePendingLike(): LikeTarget | null {
+  const likeTarget = pendingLike.value
+  pendingLike.value = null
+  return likeTarget
+}
+
 function switchTo(view: AuthView) {
   activeView.value = view
 }
 
 export function useAuthModal() {
-  return { isOpen, activeView, pendingLike, open, close, complete, switchTo }
+  return { isOpen, activeView, pendingLike, open, close, complete, takePendingLike, switchTo }
 }
