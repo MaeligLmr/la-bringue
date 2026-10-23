@@ -5,6 +5,7 @@ import { toast } from 'vue-sonner'
 import Hero from '../components/layout/Hero.vue'
 import BilletterieCard from '../components/billetterie/BilletterieCard.vue'
 import Carousel from '../components/ui/Carousel.vue'
+import Loader from '../components/ui/Loader.vue'
 import ProgrammationSection from '../components/home/ProgrammationSection.vue'
 import type { CarouselTileData, CarouselTileVariant } from '../types/ui/carousel-tile.ts'
 import { actualiteHandler } from '../handlers/actualite'
@@ -50,25 +51,37 @@ const router = useRouter()
 const formules = ref<FormuleCard[]>([])
 const infosPratiquesTiles = ref<CarouselTileData[]>([])
 const actualitesTiles = ref<CarouselTileData[]>([])
+const formulesLoading = ref(true)
+const infosPratiquesLoading = ref(true)
+const actualitesLoading = ref(true)
 
 // Chaque section se charge indépendamment : une table en erreur ne vide pas les autres.
-async function load<T>(target: Ref<T[]>, fetchTiles: () => Promise<T[]>, errorMessage: string) {
+async function load<T>(
+  target: Ref<T[]>,
+  loading: Ref<boolean>,
+  fetchTiles: () => Promise<T[]>,
+  errorMessage: string
+) {
   try {
     target.value = await fetchTiles()
   } catch (error) {
     console.error(error)
     toast.error(errorMessage)
+  } finally {
+    loading.value = false
   }
 }
 
 onMounted(() => {
   load(
     formules,
+    formulesLoading,
     async () => toFormuleCards(await formuleHandler.getAllHomepage()),
     'Impossible de charger la billetterie.'
   )
   load(
     infosPratiquesTiles,
+    infosPratiquesLoading,
     async () =>
       toTiles(
         (await infoPratiqueHandler.getAllHomepage()).map(({ id_info, titre, intro }) => ({
@@ -85,6 +98,7 @@ onMounted(() => {
   )
   load(
     actualitesTiles,
+    actualitesLoading,
     async () => toTiles(await actualiteHandler.getLatest(), 'En savoir plus', '/actualites', 'arrow-right'),
     'Impossible de charger les actualités.'
   )
@@ -102,7 +116,8 @@ onMounted(() => {
 
     <section class="home__section">
       <h2>Billetterie</h2>
-      <Carousel :tiles="formules">
+      <Loader v-if="formulesLoading" />
+      <Carousel v-else :tiles="formules">
         <template #tile="{ tile }">
           <div class="home__formule">
             <!-- Depuis l'accueil, « Acheter » mène à la page Billetterie. -->
@@ -114,12 +129,14 @@ onMounted(() => {
 
     <section class="home__section">
       <h2>Infos pratiques</h2>
-      <Carousel :tiles="infosPratiquesTiles" />
+      <Loader v-if="infosPratiquesLoading" />
+      <Carousel v-else :tiles="infosPratiquesTiles" />
     </section>
 
     <section class="home__section">
       <h2>Actualités</h2>
-      <Carousel :tiles="actualitesTiles" />
+      <Loader v-if="actualitesLoading" />
+      <Carousel v-else :tiles="actualitesTiles" />
     </section>
   </main>
 </template>
