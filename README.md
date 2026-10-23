@@ -102,6 +102,7 @@ src/
 │   │   ├── ContentCard.vue                  # carte partagée des listes
 │   │   ├── FilterableList.vue               # recherche + filtres + slot #item
 │   │   ├── Carousel.vue, CarouselTile.vue   # carrousels d'accès rapide de la Home
+│   │   ├── HighlightedText.vue              # texte avec surlignage des occurrences d'une recherche
 │   │   ├── Loader.vue                       # étoile du logo animée, suit le thème
 │   │   └── PasswordInput.vue                # champ mot de passe avec afficher/masquer
 │   ├── layout/
@@ -112,6 +113,8 @@ src/
 │   ├── home/
 │   │   ├── ProgrammationSection.vue         # programmation par jour sur la Home
 │   │   └── ProgrammationDay.vue             # un jour : headliner + line-up
+│   ├── billetterie/
+│   │   └── BilletterieCard.vue              # carte d'une formule (dates, prix, promotion, places restantes)
 │   ├── fiche/
 │   │   ├── FichePresentation.vue            # bloc commun artiste / conférence / exposant (photo, stickers par scène, tags)
 │   │   └── IntervenanteProfil.vue           # mini-profil d'une conférencière (fiche conférence)
@@ -122,7 +125,8 @@ src/
 │   ├── HomeView, ProgrammationView, ExposantsView, ConferencesView
 │   ├── FicheDetail                          # gabarit unique des fiches, blocs spécifiques selon le type
 │   ├── MonProgrammeView, ProfileView
-│   └── AProposView, ActualitesView, BilletterieView, InfosPratiquesView
+│   ├── AProposView, BilletterieView, InfosPratiquesView
+│   └── ActualitesView, ActualiteDetailView  # liste des actualités + page article
 ├── router/
 │   └── index.ts                             # routes, scroll en haut de page, meta `hideSupport`
 ├── handlers/                                # accès Supabase, un handler par table
@@ -151,6 +155,8 @@ src/
 │   ├── cards.ts                             # données Supabase → cartes (Programmation, Conférences, Exposants)
 │   ├── fiche.ts                             # construction d'une fiche + suggestions
 │   ├── highlight.ts                         # splitMatches() : découpe un texte selon une recherche (sans accents ni casse), sans dépendance à Vue
+│   ├── billetterie.ts                       # formules → cartes : dates, promotion (urgente ≤ 7 jours), places restantes (< 20)
+│   ├── mon-programme.ts                     # likes → items de « Mon programme », regroupés par jour
 │   ├── anchor.ts                            # sectionAnchor() : ancre d'une section à partir de son titre
 │   └── photo.ts                             # photoUrl() : préfixe BASE_URL, URL complètes inchangées
 ├── supabase.js                              # client Supabase (config lue depuis .env.local)
