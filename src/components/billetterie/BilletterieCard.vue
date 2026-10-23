@@ -7,15 +7,10 @@ import type { FormuleCard } from '../../types/ui/billetterie'
 // Une formule de la grille de billetterie : durée, dates, prix, contenu, statut
 // et bouton d'achat. Purement présentationnelle : l'ouverture de la billetterie
 // externe est laissée à la page, via l'événement `buy`.
-//
-// `requiresLink` : sans lien de billetterie, le bouton est désactivé (page
-// Billetterie, où il ouvre Shotgun). À `false` — accueil, où le bouton renvoie
-// vers la page Billetterie —, il reste actif même sans lien.
-const props = withDefaults(defineProps<{ formule: FormuleCard; requiresLink?: boolean }>(), {
-  requiresLink: true,
-})
+const props = defineProps<{ formule: FormuleCard }>()
 
-const unavailable = computed(() => props.formule.complet || (props.requiresLink && !props.formule.lienShotgun))
+// Pass de plus d'un jour : carte bleue (rose sinon), comme l'alternance des tiles.
+const multiJours = computed(() => Number(props.formule.duree?.match(/\d+/)?.[0] ?? 1) > 1)
 
 const emit = defineEmits<{ buy: [] }>()
 
@@ -27,7 +22,7 @@ function delai(joursRestants: number) {
 </script>
 
 <template>
-  <article class="formule shadow" :class="{ 'formule--complet': formule.complet }">
+  <article class="formule shadow" :class="{ 'formule--complet': formule.complet, 'formule--bleue': multiJours }">
     <!-- Date limite : mise en avant en tête de carte, renforcée quand elle approche. -->
     <p v-if="formule.promo" class="formule__promo" :class="{ 'formule__promo--urgente': formule.promo.urgente }">
       <strong>{{ formule.promo.nom }} −{{ formule.promo.reduction }} %</strong>
@@ -39,10 +34,12 @@ function delai(joursRestants: number) {
 
     <header class="formule__entete">
       <h2 class="formule__titre">{{ formule.titre }}</h2>
-      <Tag v-if="formule.duree" :label="formule.duree" variant="blue" />
     </header>
 
-    <p v-if="formule.dates" class="formule__dates">{{ formule.dates }}</p>
+    <div v-if="formule.duree || formule.dates" class="formule__infos">
+      <Tag v-if="formule.duree" class="formule__duree" :label="formule.duree" :variant="multiJours ? 'pink' : 'blue'" />
+      <p v-if="formule.dates" class="formule__dates">{{ formule.dates }}</p>
+    </div>
 
     <p v-if="formule.prix" class="formule__prix">
       <s v-if="formule.prixInitial" class="formule__prix-initial">
@@ -53,29 +50,33 @@ function delai(joursRestants: number) {
 
     <p v-if="formule.description" class="formule__contenu">{{ formule.description }}</p>
 
-    <p class="formule__statut">
+    <p v-if="formule.complet || formule.placesRestantes" class="formule__statut">
       <Tag v-if="formule.complet" label="Complet" variant="pink-bright" />
       <Tag
         v-else-if="formule.placesRestantes"
         :label="`Plus que ${formule.placesRestantes} places`"
         variant="pink-bright"
       />
-      <Tag v-else label="Disponible" variant="violet" />
     </p>
 
     <Button
       class="formule__cta"
-      :disabled="unavailable"
+      :color="multiJours ? 'info' : 'primary'"
+      :disabled="formule.complet || !formule.lienShotgun"
       icon-right="ticket"
       @click="emit('buy')"
     >
-      {{ formule.complet ? 'Complet' : unavailable ? 'Bientôt disponible' : 'Acheter' }}
+      {{ formule.complet ? 'Complet' : formule.lienShotgun ? 'Acheter' : 'Bientôt disponible' }}
     </Button>
   </article>
 </template>
 
 <style scoped>
 .formule {
+  position: relative;
+  isolation: isolate;
+  /* Même hauteur que les carrousel tiles : une carte courte ne rétrécit pas. */
+  min-height: 20rem;
   display: flex;
   flex: 1;
   flex-direction: column;
@@ -83,9 +84,25 @@ function delai(joursRestants: number) {
   box-sizing: border-box;
   overflow: hidden;
   padding: var(--card-padding-y) var(--card-padding-x) var(--card-padding-y);
-  border-radius: var(--card-radius);
-  background: var(--card-background);
-  color: var(--card-text);
+  border-radius: var(--carrousel-tile-radius);
+  background-color: var(--carrousel-tile-pink-background);
+  color: var(--carrousel-tile-pink-text);
+}
+
+.formule--bleue {
+  background-color: var(--carrousel-tile-blue-background);
+  color: var(--carrousel-tile-blue-text);
+}
+
+/* Image décorative des carrousel tiles (voir CarouselTile), derrière le contenu. */
+.formule::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  background: url('../../assets/carrousel-tile/carrousel-tile-bg.png') center / cover no-repeat;
+  opacity: 0.4;
+  pointer-events: none;
 }
 
 /* Formule complète : atténuée, mais toujours lisible. */
@@ -105,6 +122,12 @@ function delai(joursRestants: number) {
   color: var(--tag-pink-bright-text);
 }
 
+/* Carte bleue : bandeau bleu aussi (l'urgence garde la couleur d'accent). */
+.formule--bleue .formule__promo:not(.formule__promo--urgente) {
+  background: var(--tag-blue-background);
+  color: var(--tag-blue-text);
+}
+
 /* Date limite proche : fond d'accent, impossible à manquer. */
 .formule__promo--urgente {
   background: var(--accent);
@@ -118,13 +141,20 @@ function delai(joursRestants: number) {
 
 .formule__entete {
   display: flex;
+  justify-content: center;
+}
+
+/* Tag de durée sous le titre, sur la même ligne que les dates. */
+.formule__infos {
+  display: flex;
+  flex-wrap: wrap;
   align-items: center;
-  justify-content: space-between;
   gap: var(--space-2);
 }
 
 .formule__titre {
   margin: 0;
+  text-align: center;
   font-size: var(--font-size-heading-3);
   line-height: var(--line-height-heading-3);
 }
