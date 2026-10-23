@@ -64,18 +64,28 @@ onMounted(async () => {
   height: 100%;
 }
 
-/* Photos alignées en bas, quelle que soit la longueur du texte. */
+/* Photos alignées en bas, quelle que soit la longueur du texte ; les titres
+   restent en haut (la carte les aligne en bas par défaut). */
 .actualites :deep(.content-card__informations) {
   flex: 1;
+  align-items: flex-start;
 }
 
 .actualites :deep(.content-card__nom) {
   min-height: 0;
 }
 
+/* Décalage une colonne sur deux, comme les autres listes (voir Exposants). */
 @media (min-width: 640px) {
   .actualites :deep(.filterable-list__items) {
     grid-template-columns: repeat(2, minmax(0, 1fr));
+    padding-bottom: var(--space-20);
+  }
+}
+
+@media (min-width: 640px) and (max-width: 1024px) {
+  .actualites :deep(.filterable-list__items > li:nth-child(2n)) {
+    transform: translateY(var(--space-20));
   }
 }
 
@@ -86,6 +96,23 @@ onMounted(async () => {
 
   .actualites :deep(.filterable-list__items) {
     grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+@media (min-width: 1025px) and (max-width: 1439px) {
+  .actualites :deep(.filterable-list__items > li:nth-child(3n + 2)) {
+    transform: translateY(var(--space-20));
+  }
+}
+
+@media (min-width: 1440px) {
+  .actualites :deep(.filterable-list__items) {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+
+  .actualites :deep(.filterable-list__items > li:nth-child(4n + 2)),
+  .actualites :deep(.filterable-list__items > li:nth-child(4n + 4)) {
+    transform: translateY(var(--space-20));
   }
 }
 </style>
