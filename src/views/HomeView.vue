@@ -13,6 +13,7 @@ import { infoPratiqueHandler } from '../handlers/info-pratique'
 import { sectionAnchor } from '../lib/anchor'
 import { openBilletterie, toFormuleCards } from '../lib/billetterie'
 import type { FormuleCard } from '../types/ui/billetterie'
+import { useScrollReveal } from '../composables/useScrollReveal'
 
 interface HomeTileSource {
   titre: string | null
@@ -111,6 +112,9 @@ onMounted(() => {
     'Impossible de charger les actualités.'
   )
 })
+
+// Apparition des titres, textes et cartes au défilement.
+useScrollReveal()
 </script>
 
 <template>

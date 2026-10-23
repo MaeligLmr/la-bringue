@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { onBeforeUnmount, onMounted } from 'vue'
+import { useScrollReveal } from '../composables/useScrollReveal'
 import Hero from '../components/layout/Hero.vue'
 import Button from '../components/ui/Button.vue'
 import { SOCIALS } from '../lib/socials'
@@ -12,41 +12,10 @@ import pa2000 from '../assets/scenes/2000/pa.png'
 import kittySoft from '../assets/scenes/soft/hellokitty.png'
 import cherriesSoft from '../assets/scenes/soft/cherries.png'
 
-// Apparition au défilement : chaque bloc arrive (fondu + glissement) quand il
-// entre à l'écran. La classe « reveal » n'est posée que côté navigateur : sans
-// JavaScript, IntersectionObserver ou avec « réduire les animations », tout
-// reste simplement visible.
-const REVEAL_SELECTOR =
+// Apparition au défilement (voir composables/useScrollReveal.ts), sur les blocs de la page.
+useScrollReveal(
   '.a-propos__intro, .a-propos__section, .a-propos__valeur, .a-propos__scenes-intro, .a-propos__scene, .a-propos__conclusion'
-let revealObserver: IntersectionObserver | null = null
-
-onMounted(() => {
-  const canAnimate =
-    typeof IntersectionObserver !== 'undefined' &&
-    !window.matchMedia?.('(prefers-reduced-motion: reduce)').matches
-  if (!canAnimate) return
-
-  revealObserver = new IntersectionObserver(
-    (entries) => {
-      for (const entry of entries) {
-        if (!entry.isIntersecting) continue
-        entry.target.classList.add('reveal--visible')
-        revealObserver?.unobserve(entry.target)
-      }
-    },
-    { threshold: 0.15 }
-  )
-
-  document.querySelectorAll<HTMLElement>(REVEAL_SELECTOR).forEach((el) => {
-    // Décalage entre frères d'une même liste (cartes de valeurs, scènes).
-    const siblings = el.parentElement ? Array.from(el.parentElement.children) : []
-    el.style.setProperty('--reveal-delay', `${siblings.indexOf(el) * 0.12}s`)
-    el.classList.add('reveal')
-    revealObserver?.observe(el)
-  })
-})
-
-onBeforeUnmount(() => revealObserver?.disconnect())
+)
 </script>
 
 <template>
@@ -198,6 +167,11 @@ onBeforeUnmount(() => revealObserver?.disconnect())
 </template>
 
 <style scoped>
+.a-propos {
+  /* clip (et non hidden) : coupe ce qui déborde sans créer de zone de défilement. */
+  overflow-x: clip;
+}
+
 .a-propos__content {
   display: flex;
   flex-direction: column;
@@ -378,21 +352,18 @@ onBeforeUnmount(() => revealObserver?.disconnect())
   --chrome-fond: linear-gradient(
     180deg,
     #1f4fb0 0%,
-    #4f7fe0 8%,
-    #ffffff 17%,
-    #c3d2ea 25%,
-    #2b3a55 35%,
-    #7b90b2 42%,
-    #5b6e8c 47%,
-    #25324a 50%,
-    #9fb7da 54%,
-    #ffffff 62%,
-    #b4c8e6 70%,
-    #394a68 82%,
-    #c9d8ee 92%,
-    #5f7190 100%
+    #6f9ae8 11%,
+    #f4f8ff 24%,
+    #b8c7dc 40%,
+    #6e7f99 47%,
+    #2c3a52 50%,
+    #8c9fba 54%,
+    #dfe8f4 64%,
+    #ffffff 76%,
+    #9fb0c8 100%
   );
-  --chrome-filtre: drop-shadow(0 0.05em 0.08em rgb(0 0 0 / 0.35));
+  /* Tranche sombre sous les lettres + ombre bleutée : détache le chrome du fond clair. */
+  --chrome-filtre: drop-shadow(0 0.04em 0 #2c3a52) drop-shadow(0 0.1em 0.12em rgb(30 45 70 / 0.5));
 }
 
 @media (prefers-color-scheme: dark) {
@@ -516,9 +487,12 @@ onBeforeUnmount(() => revealObserver?.disconnect())
   margin-left: 0.2em;
   border-radius: 0.06em;
   background: #ffffff;
+  /* Mêmes effets que les lettres : contour rose, lueur, ombre violette décalée. */
   box-shadow:
+    0 0 0 0.04em #ff3cb4,
     0 0 0.15em #ff3cb4,
-    0 0 0.4em #ff3cb4;
+    0 0 0.4em #ff3cb4,
+    0.06em 0.06em 0 #7a2bb8;
 }
 
 /* Soft Y2K : lettres rondes et dodues, contour blanc perlé, lueur douce. */
@@ -723,22 +697,9 @@ onBeforeUnmount(() => revealObserver?.disconnect())
   }
 }
 
-/* Apparition au défilement (voir le script). Propriétés individuelles
-   (opacity, translate, scale, rotate) pour ne pas écraser les « transform »
-   d'inclinaison des scènes. */
-.reveal {
-  opacity: 0;
-  translate: 0 2rem;
-  transition:
-    opacity 0.6s ease var(--reveal-delay, 0s),
-    translate 0.6s ease var(--reveal-delay, 0s);
-}
-
-.reveal--visible {
-  opacity: 1;
-  translate: 0 0;
-}
-
+/* Apparition au défilement : règles de base dans style.css ; ici, les scènes
+   surgissent plus fort (propriétés individuelles pour ne pas écraser les
+   « transform » d'inclinaison). */
 /* Les scènes surgissent : elles arrivent en tournant et en grossissant. */
 .a-propos__scene.reveal {
   scale: 0.6;
