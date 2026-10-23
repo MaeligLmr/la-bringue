@@ -107,4 +107,18 @@ describe('BilletterieCard', () => {
     expect(bouton.text()).toBe('Bientôt disponible')
     expect(bouton.attributes('disabled')).toBeDefined()
   })
+
+  it('garde le bouton actif sans lien quand requiresLink est faux (accueil), sauf si la formule est complète', () => {
+    const sansLien = mount(BilletterieCard, {
+      props: { formule: formule({ lienShotgun: null }), requiresLink: false },
+    })
+    expect(sansLien.find('.formule__cta').attributes('disabled')).toBeUndefined()
+    expect(sansLien.find('.formule__cta').text()).toBe('Acheter')
+
+    const complete = mount(BilletterieCard, {
+      props: { formule: formule({ lienShotgun: null, complet: true }), requiresLink: false },
+    })
+    expect(complete.find('.formule__cta').attributes('disabled')).toBeDefined()
+    expect(complete.find('.formule__cta').text()).toBe('Complet')
+  })
 })

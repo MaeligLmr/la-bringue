@@ -35,6 +35,7 @@ async function mountHome() {
     routes: [
       { path: '/', component: HomeView },
       { path: '/infos-pratiques', component: { template: '<div />' } },
+      { path: '/billetterie', component: { template: '<div />' } },
     ],
   })
   router.push('/')
@@ -74,14 +75,25 @@ describe('HomeView', () => {
     expect(section.find('.formule__prix-final').text().replace(/\s/g, ' ')).toBe('30 €')
   })
 
-  it('ouvre la billetterie Shotgun depuis une carte de l’accueil', async () => {
+  it('redirige vers la page Billetterie depuis le bouton Acheter d’une carte de l’accueil', async () => {
     const open = vi.spyOn(window, 'open').mockImplementation(() => null)
     const wrapper = await mountHome()
 
     await wrapper.find('.formule__cta').trigger('click')
+    await flushPromises()
 
-    expect(open).toHaveBeenCalledWith('https://shotgun.live/pass-1-jour', '_blank', 'noopener,noreferrer')
+    expect(wrapper.vm.$router.currentRoute.value.path).toBe('/billetterie')
+    expect(open).not.toHaveBeenCalled()
     open.mockRestore()
+  })
+
+  it('garde le bouton Acheter actif sur l’accueil même quand la formule n’a pas de lien Shotgun', async () => {
+    const wrapper = await mountHome()
+
+    // La 2e formule du faux handler n'a pas de lien_shotgun.
+    const boutons = wrapper.findAll('.formule__cta')
+    expect(boutons[1].attributes('disabled')).toBeUndefined()
+    expect(boutons[1].text()).toBe('Acheter')
   })
 
   it('affiche les infos pratiques', async () => {

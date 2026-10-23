@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { onMounted, ref, type Ref } from 'vue'
+import { useRouter } from 'vue-router'
 import { toast } from 'vue-sonner'
 import Hero from '../components/layout/Hero.vue'
 import BilletterieCard from '../components/billetterie/BilletterieCard.vue'
@@ -10,7 +11,7 @@ import { actualiteHandler } from '../handlers/actualite'
 import { formuleHandler } from '../handlers/formule'
 import { infoPratiqueHandler } from '../handlers/info-pratique'
 import { sectionAnchor } from '../lib/anchor'
-import { openBilletterie, toFormuleCards } from '../lib/billetterie'
+import { toFormuleCards } from '../lib/billetterie'
 import type { FormuleCard } from '../types/ui/billetterie'
 
 interface HomeTileSource {
@@ -45,6 +46,7 @@ function toTiles(
   }))
 }
 
+const router = useRouter()
 const formules = ref<FormuleCard[]>([])
 const infosPratiquesTiles = ref<CarouselTileData[]>([])
 const actualitesTiles = ref<CarouselTileData[]>([])
@@ -103,7 +105,8 @@ onMounted(() => {
       <Carousel :tiles="formules">
         <template #tile="{ tile }">
           <div class="home__formule">
-            <BilletterieCard :formule="tile" @buy="openBilletterie(tile)" />
+            <!-- Depuis l'accueil, « Acheter » mène à la page Billetterie. -->
+            <BilletterieCard :formule="tile" :requires-link="false" @buy="router.push('/billetterie')" />
           </div>
         </template>
       </Carousel>

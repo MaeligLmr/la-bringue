@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { computed } from 'vue'
 import Button from '../ui/Button.vue'
 import Tag from '../ui/Tag.vue'
 import type { FormuleCard } from '../../types/ui/billetterie'
@@ -6,7 +7,15 @@ import type { FormuleCard } from '../../types/ui/billetterie'
 // Une formule de la grille de billetterie : durée, dates, prix, contenu, statut
 // et bouton d'achat. Purement présentationnelle : l'ouverture de la billetterie
 // externe est laissée à la page, via l'événement `buy`.
-defineProps<{ formule: FormuleCard }>()
+//
+// `requiresLink` : sans lien de billetterie, le bouton est désactivé (page
+// Billetterie, où il ouvre Shotgun). À `false` — accueil, où le bouton renvoie
+// vers la page Billetterie —, il reste actif même sans lien.
+const props = withDefaults(defineProps<{ formule: FormuleCard; requiresLink?: boolean }>(), {
+  requiresLink: true,
+})
+
+const unavailable = computed(() => props.formule.complet || (props.requiresLink && !props.formule.lienShotgun))
 
 const emit = defineEmits<{ buy: [] }>()
 
@@ -56,11 +65,11 @@ function delai(joursRestants: number) {
 
     <Button
       class="formule__cta"
-      :disabled="formule.complet || !formule.lienShotgun"
+      :disabled="unavailable"
       icon-right="ticket"
       @click="emit('buy')"
     >
-      {{ formule.complet ? 'Complet' : formule.lienShotgun ? 'Acheter' : 'Bientôt disponible' }}
+      {{ formule.complet ? 'Complet' : unavailable ? 'Bientôt disponible' : 'Acheter' }}
     </Button>
   </article>
 </template>
