@@ -20,7 +20,7 @@ vi.mock('../handlers/exposant', () => ({
   exposantHandler: { getById: vi.fn(), getByCategorie: vi.fn() },
 }))
 
-const CHROME = { id_scene: 1, created_at: '', nom: 'Chrome', style_musical: null }
+const CHROME = { id_scene: 1, created_at: '', nom: 'Chrome' }
 
 function artiste(id: number, nom: string, categorie = 'Rap'): Artiste {
   return { id_artiste: id, created_at: '', nom, photo: null, description: `Bio de ${nom}`, categorie }

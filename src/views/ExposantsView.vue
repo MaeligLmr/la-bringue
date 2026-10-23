@@ -9,6 +9,7 @@ import type { FilterConfig, FilterValues } from '../types/ui/filterable-list.ts'
 import type { ExposantCard } from '../types/ui/exposants.ts'
 import { exposantHandler } from '../handlers/exposant'
 import { toExposantCards } from '../lib/cards'
+import { useScrollReveal } from '../composables/useScrollReveal'
 
 // Déjà triés par nom côté Supabase.
 const exposants = ref<ExposantCard[]>([])
@@ -50,6 +51,9 @@ const selected = ref<FilterValues>({ categorie: String(categorie ?? '') })
 watch(selected, ({ categorie }) => {
   router.replace({ query: { categorie: categorie || undefined } })
 })
+
+// Apparition des titres, textes et cartes au défilement.
+useScrollReveal()
 </script>
 
 <template>

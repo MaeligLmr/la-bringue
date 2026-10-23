@@ -8,6 +8,7 @@ import { toActualiteCards } from '../lib/cards'
 import { photoUrl } from '../lib/photo'
 import type { ActualiteCard } from '../types/ui/actualites.ts'
 import placeholderSvg from '../assets/card/placeholder.svg?raw'
+import { useScrollReveal } from '../composables/useScrollReveal'
 
 const props = defineProps<{ id: number }>()
 
@@ -44,6 +45,9 @@ const photoSrc = computed(() => {
   const photo = actualite.value?.photo
   return !photo || photoFailed.value ? null : photoUrl(photo)
 })
+
+// Apparition des titres, textes et cartes au défilement.
+useScrollReveal()
 </script>
 
 <template>

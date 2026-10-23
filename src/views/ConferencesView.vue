@@ -10,6 +10,7 @@ import { JOURS } from '../types/ui/programmation.ts'
 import type { ConferenceCard } from '../types/ui/conferences.ts'
 import { conferenceHandler } from '../handlers/conference'
 import { labelOf, toConferenceCards } from '../lib/cards'
+import { useScrollReveal } from '../composables/useScrollReveal'
 
 // Déjà triées par jour puis heure côté Supabase.
 const conferences = ref<ConferenceCard[]>([])
@@ -52,6 +53,9 @@ const selected = ref<FilterValues>({ date: String(date ?? ''), theme: String(the
 watch(selected, ({ date, theme }) => {
   router.replace({ query: { date: date || undefined, theme: theme || undefined } })
 })
+
+// Apparition des titres, textes et cartes au défilement.
+useScrollReveal()
 </script>
 
 <template>
