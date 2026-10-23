@@ -118,6 +118,9 @@ onUnmounted(() => {
   /* flex: none : garde la largeur fixe de CarouselTile (16rem), ne la
      laisse ni s'étirer ni se réduire. */
   flex: none;
+  /* La tile s'étire à la hauteur de la rangée (align-items: stretch en
+     desktop) : toutes de même hauteur, même si l'une est plus haute. */
+  display: flex;
 }
 
 .carousel__arrow {
