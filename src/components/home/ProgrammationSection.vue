@@ -58,6 +58,12 @@ function goToProgrammation() {
   margin: 0;
 }
 
+.programmation-section :deep(.loader) {
+  width: 100%;
+  border-radius: var(--card-radius);
+  background-color: var(--card-background);
+}
+
 .programmation-section__jours {
   display: flex;
   flex-direction: column;

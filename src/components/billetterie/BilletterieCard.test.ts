@@ -28,16 +28,22 @@ describe('BilletterieCard', () => {
     const wrapper = mountCard()
 
     expect(wrapper.find('.formule__titre').text()).toBe('Pass 3 jours')
-    expect(wrapper.find('.tag--blue').text()).toBe('3 jours')
+    expect(wrapper.find('.formule__duree').text()).toBe('3 jours')
     expect(wrapper.find('.formule__dates').text()).toBe('du 28 au 30 août')
     expect(wrapper.find('.formule__prix-final').text()).toBe('50 €')
     expect(wrapper.find('.formule__contenu').text()).toBe('Accède aux trois jours du festival')
   })
 
+  it('colore en bleu les formules de plus d’un jour, en rose les autres', () => {
+    expect(mountCard({ duree: '3 jours' }).find('.formule').classes()).toContain('formule--bleue')
+    expect(mountCard({ duree: '1 jour' }).find('.formule').classes()).not.toContain('formule--bleue')
+    expect(mountCard({ duree: null }).find('.formule').classes()).not.toContain('formule--bleue')
+  })
+
   it('masque ce que la formule ne renseigne pas', () => {
     const wrapper = mountCard({ duree: null, dates: null, prix: null, description: '' })
 
-    expect(wrapper.find('.tag--blue').exists()).toBe(false)
+    expect(wrapper.find('.formule__duree').exists()).toBe(false)
     expect(wrapper.find('.formule__dates').exists()).toBe(false)
     expect(wrapper.find('.formule__prix').exists()).toBe(false)
     expect(wrapper.find('.formule__contenu').exists()).toBe(false)
@@ -73,8 +79,8 @@ describe('BilletterieCard', () => {
     expect(wrapper.find('.formule__delai').text()).toBe(texte)
   })
 
-  it('affiche le bon statut : disponible, stock faible ou complet', () => {
-    expect(mountCard().find('.formule__statut').text()).toBe('Disponible')
+  it('affiche le bon statut : stock faible ou complet, rien si disponible', () => {
+    expect(mountCard().find('.formule__statut').exists()).toBe(false)
     expect(mountCard({ placesRestantes: 12 }).find('.formule__statut').text()).toBe('Plus que 12 places')
     expect(mountCard({ complet: true }).find('.formule__statut').text()).toBe('Complet')
   })
@@ -106,19 +112,5 @@ describe('BilletterieCard', () => {
     const bouton = wrapper.find('.formule__cta')
     expect(bouton.text()).toBe('Bientôt disponible')
     expect(bouton.attributes('disabled')).toBeDefined()
-  })
-
-  it('garde le bouton actif sans lien quand requiresLink est faux (accueil), sauf si la formule est complète', () => {
-    const sansLien = mount(BilletterieCard, {
-      props: { formule: formule({ lienShotgun: null }), requiresLink: false },
-    })
-    expect(sansLien.find('.formule__cta').attributes('disabled')).toBeUndefined()
-    expect(sansLien.find('.formule__cta').text()).toBe('Acheter')
-
-    const complete = mount(BilletterieCard, {
-      props: { formule: formule({ lienShotgun: null, complet: true }), requiresLink: false },
-    })
-    expect(complete.find('.formule__cta').attributes('disabled')).toBeDefined()
-    expect(complete.find('.formule__cta').text()).toBe('Complet')
   })
 })

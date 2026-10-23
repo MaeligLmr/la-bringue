@@ -80,7 +80,8 @@ onMounted(async () => {
 
 .billetterie__grille {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(16rem, 1fr));
+  grid-template-columns: repeat(auto-fit, 16rem);
+  justify-content: center;
   gap: var(--space-6);
   margin: 0;
   padding: 0;
