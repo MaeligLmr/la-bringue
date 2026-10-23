@@ -6,7 +6,7 @@ import { useTheme, type ThemePreference } from '../../composables/useTheme'
 import Button from '../ui/Button.vue'
 import Select from '../ui/Select.vue'
 import Drawer from './Drawer.vue'
-import type { IconName } from '../../types/ui/icon.ts'
+import { SOCIALS } from '../../lib/socials'
 import logoLight from '../../assets/logo/Logo-Light.svg'
 import logoDark from '../../assets/logo/Logo-Dark.svg'
 
@@ -27,13 +27,6 @@ const displayName = computed(() => user.value?.user_metadata?.username ?? user.v
 // The Figma export ships one logo lockup per theme ("Mode") rather than a
 // single asset recolored in CSS.
 const logoSrc = computed(() => (resolvedTheme.value === 'dark' ? logoDark : logoLight))
-
-const SOCIALS: { icon: IconName; label: string }[] = [
-  { icon: 'instagram', label: 'Instagram' },
-  { icon: 'tiktok', label: 'TikTok' },
-  { icon: 'whatsapp', label: 'WhatsApp' },
-  { icon: 'facebook', label: 'Facebook' },
-]
 
 const MENU_LINKS: { path: string; label: string }[] = [
   { path: '/exposants', label: 'Exposants' },
@@ -93,6 +86,7 @@ function goToAndCloseMenu(path: string) {
             variant="ghost"
             :icon-only="social.icon"
             :label="social.label"
+            :href="social.url"
           />
         </div>
       </div>
@@ -179,6 +173,7 @@ function goToAndCloseMenu(path: string) {
               variant="ghost"
               :icon-only="social.icon"
               :label="social.label"
+              :href="social.url"
             />
           </div>
         </div>

@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import Button from '../ui/Button.vue'
 import Icon from '../ui/Icon.vue'
-import type { IconName } from '../../types/ui/icon.ts'
+import { SOCIALS } from '../../lib/socials'
 import footerBg from '../../assets/footer/footer-bg.png'
 
 // Le motif est carrelé en repeat et teinté par --footer-image-mask à ~35%
@@ -14,12 +14,6 @@ const footerBackgroundStyle = {
   backgroundImage: `linear-gradient(color-mix(in srgb, var(--footer-image-mask) 65%, transparent), color-mix(in srgb, var(--footer-image-mask) 65%, transparent)), url(${footerBg})`,
 }
 
-const SOCIALS: { icon: IconName; label: string }[] = [
-  { icon: 'instagram', label: 'Instagram' },
-  { icon: 'tiktok', label: 'TikTok' },
-  { icon: 'whatsapp', label: 'WhatsApp' },
-  { icon: 'facebook', label: 'Facebook' },
-]
 </script>
 
 <template>
@@ -56,6 +50,7 @@ const SOCIALS: { icon: IconName; label: string }[] = [
             variant="ghost"
             :icon-only="social.icon"
             :label="social.label"
+            :href="social.url"
           />
         </div>
       </div>
@@ -154,6 +149,7 @@ const SOCIALS: { icon: IconName; label: string }[] = [
 
 .footer__socials {
   display: flex;
+  width : 100%;
   align-items: center;
   gap: var(--space-1);
 }
