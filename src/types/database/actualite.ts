@@ -4,4 +4,5 @@ export interface Actualite {
   titre: string | null
   description: string | null
   date_publication: string | null
+  photo: string | null
 }

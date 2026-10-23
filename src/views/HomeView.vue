@@ -97,7 +97,17 @@ onMounted(() => {
   load(
     actualitesTiles,
     actualitesLoading,
-    async () => toTiles(await actualiteHandler.getLatest(), 'En savoir plus', '/actualites', 'arrow-right'),
+    async () =>
+      toTiles(
+        (await actualiteHandler.getLatest(3)).map(({ id_actualite, titre, description }) => ({
+          titre,
+          description,
+          to: `/actualites/${id_actualite}`,
+        })),
+        'En savoir plus',
+        '/actualites',
+        'arrow-right'
+      ),
     'Impossible de charger les actualités.'
   )
 })

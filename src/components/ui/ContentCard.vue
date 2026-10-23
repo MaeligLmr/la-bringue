@@ -19,6 +19,7 @@ const props = withDefaults(
     date?: string
     scene?: string
     categorie?: string
+    description?: string
     likable?: boolean
     target?: LikeTarget
     onClick?: () => void
@@ -62,6 +63,7 @@ const photoSrc = computed(() => (!props.photo || photoFailed.value ? null : phot
           <p v-if="scene" class="content-card__scene">{{ scene }}</p>
           <p v-if="date" class="content-card__date">{{ date }}</p>
         </div>
+        <p v-if="description" class="content-card__description">{{ description }}</p>
       </div>
 
       <div v-if="categorie || likable" class="content-card__actions">
@@ -147,6 +149,15 @@ const photoSrc = computed(() => (!props.photo || photoFailed.value ? null : phot
   font-size: var(--font-size-medium);
   font-weight: var(--font-weight-semi-bold);
   line-height: var(--line-height-medium);
+}
+
+.content-card__description {
+  margin: 0;
+  display: -webkit-box;
+  -webkit-line-clamp: 4;
+  line-clamp: 4;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
 }
 
 .content-card--clickable {
