@@ -47,28 +47,28 @@ useScrollReveal(
       <section class="a-propos__section" aria-labelledby="valeurs-titre">
         <h2 id="valeurs-titre">Nos valeurs</h2>
         <ul class="a-propos__valeurs">
-          <li class="a-propos__valeur">
+          <li class="a-propos__valeur a-propos__valeur--rose">
             <h3>Bienveillant et safe</h3>
             <p>
               Chacune doit pouvoir sortir, danser et profiter sans craindre pour sa sécurité. Ici, le
               respect des autres et de leurs limites est la règle de base.
             </p>
           </li>
-          <li class="a-propos__valeur">
+          <li class="a-propos__valeur a-propos__valeur--violet">
             <h3>Féministe et inclusif</h3>
             <p>
               Nous créons un espace où les femmes sont au centre, où chaque parcours a sa place et où
               la parole circule librement. « No men, no problem. »
             </p>
           </li>
-          <li class="a-propos__valeur">
+          <li class="a-propos__valeur a-propos__valeur--bleu">
             <h3>Écologique</h3>
             <p>
               Un festival en plein air se doit de respecter le lieu qui l'accueille : nous pensons
               l'événement pour limiter son impact sur l'environnement.
             </p>
           </li>
-          <li class="a-propos__valeur">
+          <li class="a-propos__valeur a-propos__valeur--vif">
             <h3>Friendly pour tous les régimes</h3>
             <p>
               Végétarienne, végétalienne, sans gluten ou simplement gourmande : la restauration est
@@ -212,28 +212,68 @@ useScrollReveal(
   margin-top: var(--space-3);
 }
 
-/* Valeurs : cartes en grille. */
+/* Valeurs : cartes « stickers » colorées, un peu penchées, avec
+   ombre dure. Une couleur par valeur. Pas d'effet au survol : elles ne sont pas
+   cliquables. */
 .a-propos__valeurs {
   display: grid;
   grid-template-columns: 1fr;
-  gap: var(--space-4);
-  margin: var(--space-2) 0 0;
-  padding: 0;
+  gap: var(--space-6);
+  margin: var(--space-4) 0 0;
+  padding: 0 var(--space-2) var(--space-3);
   list-style: none;
 }
 
 .a-propos__valeur {
+  position: relative;
   display: flex;
   flex-direction: column;
   gap: var(--space-2);
-  padding: var(--space-4);
-  border: 1px solid var(--border);
-  border-radius: var(--radius-medium);
-  box-shadow: 0 0.25rem 1rem var(--card-shadow-color);
+  padding: var(--space-5, 1.25rem);
+  border: 0.15rem solid var(--valeur-texte);
+  border-radius: var(--radius-large, 1.5rem);
+  background: var(--valeur-fond);
+  color: var(--valeur-texte);
+  box-shadow: 0.4rem 0.4rem 0 var(--valeur-texte);
+  rotate: var(--valeur-angle, 0deg);
 }
 
 .a-propos__valeur h3 {
-  color: var(--tag-pink-text);
+  position: relative;
+  font-family: var(--heading);
+  font-size: var(--font-size-heading-3);
+  line-height: var(--line-height-heading-3);
+  text-transform: uppercase;
+  color: var(--valeur-texte);
+}
+
+.a-propos__valeur p {
+  position: relative;
+  color: var(--valeur-texte);
+}
+
+.a-propos__valeur--rose {
+  --valeur-fond: var(--tag-pink-background);
+  --valeur-texte: var(--tag-pink-text);
+  --valeur-angle: -1.5deg;
+}
+
+.a-propos__valeur--violet {
+  --valeur-fond: var(--tag-violet-background);
+  --valeur-texte: var(--tag-violet-text);
+  --valeur-angle: 1.2deg;
+}
+
+.a-propos__valeur--bleu {
+  --valeur-fond: var(--tag-blue-background);
+  --valeur-texte: var(--tag-blue-text);
+  --valeur-angle: 1.5deg;
+}
+
+.a-propos__valeur--vif {
+  --valeur-fond: var(--tag-pink-bright-background);
+  --valeur-texte: var(--tag-pink-bright-text);
+  --valeur-angle: -1.2deg;
 }
 
 /* Raisons du festival : liste à puces rose. */
@@ -561,6 +601,11 @@ useScrollReveal(
 @media (min-width: 36rem) {
   .a-propos__valeurs {
     grid-template-columns: 1fr 1fr;
+  }
+
+  /* Quinconce : une carte sur deux descend. */
+  .a-propos__valeur:nth-child(even) {
+    margin-top: var(--space-6);
   }
 }
 
