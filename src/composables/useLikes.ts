@@ -1,4 +1,4 @@
-import { reactive } from 'vue'
+import { reactive, readonly, ref } from 'vue'
 import { toast } from 'vue-sonner'
 import { likeHandler } from '../handlers/like'
 import type { LikeTarget } from '../types/ui/like'
@@ -17,6 +17,8 @@ const pendingWrites = new Map<string, { liked: boolean }>()
 // Les écritures d'un même contenu partent l'une après l'autre, pour que le
 // dernier clic soit aussi le dernier état enregistré en base.
 const writeQueues = new Map<string, Promise<unknown>>()
+
+const likesReady = ref(false)
 
 // Incrémenté à chaque chargement ou déconnexion : une réponse périmée est ignorée.
 let loadId = 0
@@ -75,14 +77,17 @@ async function loadLikes() {
   } catch (error) {
     console.error(error)
     if (id === loadId) toast.error(LIKES_LOAD_ERROR_MESSAGE)
+  } finally {
+    if (id === loadId) likesReady.value = true
   }
 }
 
 function clearLikes() {
   loadId++
   likedKeys.clear()
+  likesReady.value = false
 }
 
 export function useLikes() {
-  return { isLiked, setLiked, addLike, loadLikes, clearLikes }
+  return { isLiked, setLiked, addLike, loadLikes, clearLikes, likesReady: readonly(likesReady) }
 }
