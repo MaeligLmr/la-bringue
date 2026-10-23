@@ -7,6 +7,7 @@ import Loader from '../components/ui/Loader.vue'
 import { formuleHandler } from '../handlers/formule'
 import { openBilletterie, toFormuleCards } from '../lib/billetterie'
 import type { FormuleCard } from '../types/ui/billetterie'
+import { useScrollReveal } from '../composables/useScrollReveal'
 
 const LOAD_ERROR_MESSAGE = 'Impossible de charger la billetterie.'
 
@@ -27,6 +28,9 @@ onMounted(async () => {
   }
 })
 
+
+// Apparition des titres, textes et cartes au défilement.
+useScrollReveal()
 </script>
 
 <template>

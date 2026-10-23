@@ -4,6 +4,10 @@ import { toast } from 'vue-sonner'
 import InfosPratiquesView from './InfosPratiquesView.vue'
 import { infoPratiqueHandler } from '../handlers/info-pratique'
 
+// L'apparition au défilement crée son propre IntersectionObserver : on la coupe
+// ici pour que le test ne voie que celui du menu des sections.
+vi.mock('../composables/useScrollReveal', () => ({ useScrollReveal: vi.fn() }))
+
 const INFOS = [
   {
     id_info: 1,

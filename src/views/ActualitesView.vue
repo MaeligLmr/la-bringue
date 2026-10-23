@@ -9,6 +9,7 @@ import Loader from '../components/ui/Loader.vue'
 import type { ActualiteCard } from '../types/ui/actualites.ts'
 import { actualiteHandler } from '../handlers/actualite'
 import { toActualiteCards } from '../lib/cards'
+import { useScrollReveal } from '../composables/useScrollReveal'
 
 // Déjà triées de la plus récente à la plus ancienne côté Supabase.
 const actualites = ref<ActualiteCard[]>([])
@@ -25,6 +26,9 @@ onMounted(async () => {
     loading.value = false
   }
 })
+
+// Apparition des titres, textes et cartes au défilement.
+useScrollReveal()
 </script>
 
 <template>

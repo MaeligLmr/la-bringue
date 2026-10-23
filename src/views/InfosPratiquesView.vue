@@ -10,6 +10,7 @@ import Loader from '../components/ui/Loader.vue'
 import { infoPratiqueHandler } from '../handlers/info-pratique'
 import { sectionAnchor } from '../lib/anchor'
 import type { InfoPratique } from '../types/database/info-pratique'
+import { useScrollReveal } from '../composables/useScrollReveal'
 
 const LOAD_ERROR_MESSAGE = 'Impossible de charger les infos pratiques.'
 
@@ -76,6 +77,10 @@ onMounted(async () => {
 onBeforeUnmount(() => observer?.disconnect())
 
 const anchor = sectionAnchor
+
+// Apparition de chaque section au défilement (chargées après le montage : le
+// composable les prend en compte quand elles arrivent).
+useScrollReveal('.infos-section')
 </script>
 
 <template>

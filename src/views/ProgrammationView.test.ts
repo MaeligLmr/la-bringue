@@ -24,7 +24,7 @@ function concert(
     jour,
     heure_debut: heure,
     heure_fin: null,
-    Scene: { id_scene: 0, created_at: '', nom: scene, style_musical: null },
+    Scene: { id_scene: 0, created_at: '', nom: scene },
     ConcertArtiste: artistes.map(({ nom, categorie, featuring = false }, index) => ({
       id_artiste: idConcert * 10 + index,
       id_concert: idConcert,

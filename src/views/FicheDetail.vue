@@ -9,6 +9,7 @@ import ContentCard from '../components/ui/ContentCard.vue'
 import Loader from '../components/ui/Loader.vue'
 import { loadFiche } from '../lib/fiche'
 import type { FicheData, FicheType } from '../types/ui/fiche.ts'
+import { useScrollReveal } from '../composables/useScrollReveal'
 
 const props = defineProps<{
   type: FicheType
@@ -43,6 +44,9 @@ watch(
   },
   { immediate: true }
 )
+
+// Apparition des titres, textes et cartes au défilement.
+useScrollReveal()
 </script>
 
 <template>
