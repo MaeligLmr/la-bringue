@@ -101,7 +101,6 @@ const photoSrc = computed(() => (!props.photo || photoFailed.value ? null : phot
   padding: var(--card-padding-y) var(--card-padding-x);
   background-color: var(--card-background);
   color: var(--card-text);
-  max-width: 288px;
 }
 
 .content-card__pattern {

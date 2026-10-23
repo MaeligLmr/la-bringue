@@ -64,6 +64,11 @@ onMounted(async () => {
   height: 100%;
 }
 
+/* Photos alignées en bas, quelle que soit la longueur du texte. */
+.actualites :deep(.content-card__informations) {
+  flex: 1;
+}
+
 .actualites :deep(.content-card__nom) {
   min-height: 0;
 }
