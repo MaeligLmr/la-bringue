@@ -38,6 +38,7 @@ const SOCIALS: { icon: IconName; label: string }[] = [
 const MENU_LINKS: { path: string; label: string }[] = [
   { path: '/exposants', label: 'Exposants' },
   { path: '/conferences', label: 'Conférences' },
+  { path: '/actualites', label: 'Actualités' },
   { path: '/a-propos', label: 'À propos' },
   { path: '/infos-pratiques', label: 'Infos pratiques' },
 ]

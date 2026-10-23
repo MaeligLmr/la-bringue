@@ -16,6 +16,7 @@ import ConferencesView from '../views/ConferencesView.vue'
 import AProposView from '../views/AProposView.vue'
 import InfosPratiquesView from '../views/InfosPratiquesView.vue'
 import ActualitesView from '../views/ActualitesView.vue'
+import ActualiteDetailView from '../views/ActualiteDetailView.vue'
 import FicheDetail from '../views/FicheDetail.vue'
 
 export const router = createRouter({
@@ -35,6 +36,12 @@ export const router = createRouter({
     { path: '/a-propos', name: 'a-propos', component: AProposView },
     { path: '/infos-pratiques', name: 'infos-pratiques', component: InfosPratiquesView },
     { path: '/actualites', name: 'actualites', component: ActualitesView },
+    {
+      path: '/actualites/:id(\\d+)',
+      name: 'actualite',
+      component: ActualiteDetailView,
+      props: (route) => ({ id: Number(route.params.id) }),
+    },
     {
       path: '/:type(artiste|conference|exposant)/fiche/:id(\\d+)',
       name: 'fiche',
