@@ -10,8 +10,8 @@ vi.mock('../handlers/concert', () => ({
 }))
 vi.mock('../handlers/formule', () => ({
   formuleHandler: {
-    getAll: vi.fn().mockResolvedValue([
-      { id_formule: 1, titre: 'Pass 1 jour', description: 'Un jour au choix' },
+    getAllHomepage: vi.fn().mockResolvedValue([
+      { id_formule: 1, titre: 'Pass 1 jour', description: 'Un jour au choix', lien_shotgun: 'https://shotgun.live/pass-1-jour', prix: 30 },
       { id_formule: 2, titre: 'Pass 3 jours', description: 'Les trois jours' },
     ]),
   },
@@ -35,6 +35,7 @@ async function mountHome() {
     routes: [
       { path: '/', component: HomeView },
       { path: '/infos-pratiques', component: { template: '<div />' } },
+      { path: '/billetterie', component: { template: '<div />' } },
     ],
   })
   router.push('/')
@@ -48,7 +49,7 @@ async function mountHome() {
 function sectionTileTitles(wrapper: Awaited<ReturnType<typeof mountHome>>, title: string) {
   const section = wrapper.findAll('.home__section').find((node) => node.find('h2').text() === title)
   if (!section) throw new Error(`Section "${title}" introuvable`)
-  return section.findAll('.carousel-tile__title').map((node) => node.text())
+  return section.findAll('.carousel-tile__title, .formule__titre').map((node) => node.text())
 }
 
 describe('HomeView', () => {
@@ -64,6 +65,35 @@ describe('HomeView', () => {
     const wrapper = await mountHome()
 
     expect(sectionTileTitles(wrapper, 'Billetterie')).toEqual(['Pass 1 jour', 'Pass 3 jours'])
+  })
+
+  it('affiche les formules sous forme de cartes de billetterie, avec leur prix', async () => {
+    const wrapper = await mountHome()
+
+    const section = wrapper.findAll('.home__section').find((node) => node.find('h2').text() === 'Billetterie')!
+    expect(section.findAll('.formule')).toHaveLength(2)
+    expect(section.find('.formule__prix-final').text().replace(/\s/g, ' ')).toBe('30 €')
+  })
+
+  it('redirige vers la page Billetterie depuis le bouton Acheter d’une carte de l’accueil', async () => {
+    const open = vi.spyOn(window, 'open').mockImplementation(() => null)
+    const wrapper = await mountHome()
+
+    await wrapper.find('.formule__cta').trigger('click')
+    await flushPromises()
+
+    expect(wrapper.vm.$router.currentRoute.value.path).toBe('/billetterie')
+    expect(open).not.toHaveBeenCalled()
+    open.mockRestore()
+  })
+
+  it('garde le bouton Acheter actif sur l’accueil même quand la formule n’a pas de lien Shotgun', async () => {
+    const wrapper = await mountHome()
+
+    // La 2e formule du faux handler n'a pas de lien_shotgun.
+    const boutons = wrapper.findAll('.formule__cta')
+    expect(boutons[1].attributes('disabled')).toBeUndefined()
+    expect(boutons[1].text()).toBe('Acheter')
   })
 
   it('affiche les infos pratiques', async () => {

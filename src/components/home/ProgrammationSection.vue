@@ -3,12 +3,14 @@ import { onMounted, ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { toast } from 'vue-sonner'
 import Button from '../ui/Button.vue'
+import Loader from '../ui/Loader.vue'
 import ProgrammationDay from './ProgrammationDay.vue'
 import { JOURS } from '../../types/ui/programmation.ts'
 import { concertHandler, type DayLineup } from '../../handlers/concert'
 
-// Les jours s'affichent tout de suite ; leur lineup arrive de Supabase ensuite.
+// Un loader remplace les jours tant que leur lineup n'est pas arrivé de Supabase.
 const jours = ref(JOURS.map((jour) => ({ ...jour, lineup: { others: [] } as DayLineup })))
+const loading = ref(true)
 
 onMounted(async () => {
   try {
@@ -17,6 +19,8 @@ onMounted(async () => {
   } catch (error) {
     console.error(error)
     toast.error('Impossible de charger la programmation.')
+  } finally {
+    loading.value = false
   }
 })
 
@@ -29,7 +33,8 @@ function goToProgrammation() {
 
 <template>
   <section class="programmation-section">
-    <div class="programmation-section__jours">
+    <Loader v-if="loading" />
+    <div v-else class="programmation-section__jours">
       <ProgrammationDay v-for="jour in jours" :key="jour.value" :label="jour.label" :date="jour.value" :lineup="jour.lineup" />
     </div>
 

@@ -18,4 +18,10 @@ export const formuleHandler = {
       await supabase.from(TABLE).select('*, Promotion(*)').order('jour_debut')
     )
   },
+  async getAllHomepage(): Promise<FormuleAvecPromotions[]> {
+    return unwrap<FormuleAvecPromotions[]>(
+      TABLE,
+      await supabase.from(TABLE).select('*, Promotion(*)').eq('homepage', true).order('jour_debut')
+    )
+  }
 }

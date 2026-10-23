@@ -1,12 +1,19 @@
-<script setup lang="ts">
+<script setup lang="ts" generic="T = CarouselTileData">
 import { nextTick, onMounted, onUnmounted, ref, watch } from 'vue'
 import Button from './Button.vue'
 import CarouselTile from './CarouselTile.vue'
 import type { CarouselTileData } from '../../types/ui/carousel-tile.ts'
 
 const props = defineProps<{
-  tiles: CarouselTileData[]
+  // Par défaut des CarouselTile ; avec le slot #tile, n'importe quels éléments
+  // (ex. les BilletterieCard de l'accueil).
+  tiles: T[]
 }>()
+
+defineSlots<{ tile?(props: { tile: T; index: number }): unknown }>()
+
+// Rendu par défaut : les éléments sont alors des CarouselTileData.
+const asTile = (tile: T) => tile as CarouselTileData
 
 const trackEl = ref<HTMLElement | null>(null)
 const canScrollPrev = ref(false)
@@ -66,14 +73,16 @@ onUnmounted(() => {
 
     <div ref="trackEl" class="carousel__track" @scroll="updateScrollState">
       <div v-for="(tile, index) in tiles" :key="index" class="carousel__item">
-        <CarouselTile
-          :title="tile.title"
-          :content="tile.content"
-          :variant="tile.variant"
-          :icon="tile.icon"
-          :cta-label="tile.ctaLabel"
-          :to="tile.to"
-        />
+        <slot name="tile" :tile="tile" :index="index">
+          <CarouselTile
+            :title="asTile(tile).title"
+            :content="asTile(tile).content"
+            :variant="asTile(tile).variant"
+            :icon="asTile(tile).icon"
+            :cta-label="asTile(tile).ctaLabel"
+            :to="asTile(tile).to"
+          />
+        </slot>
       </div>
     </div>
 
