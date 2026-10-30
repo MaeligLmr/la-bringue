@@ -20,6 +20,8 @@ const props = withDefaults(
     scene?: string
     categorie?: string
     description?: string
+    // Affiche la photo entière, à son ratio d'origine, au lieu de la recadrer.
+    keepPhotoRatio?: boolean
     likable?: boolean
     target?: LikeTarget
     onClick?: () => void
@@ -81,10 +83,18 @@ const photoSrc = computed(() => (!props.photo || photoFailed.value ? null : phot
     <div
       v-if="!photoSrc"
       class="content-card__photo content-card__placeholder"
+      :class="{ 'content-card__placeholder--fill': keepPhotoRatio }"
       aria-hidden="true"
       v-html="placeholderSvg"
     />
-    <img v-else :src="photoSrc" alt="" class="content-card__photo" @error="photoFailed = true" />
+    <img
+      v-else
+      :src="photoSrc"
+      alt=""
+      class="content-card__photo"
+      :class="{ 'content-card__photo--natural': keepPhotoRatio }"
+      @error="photoFailed = true"
+    />
   </article>
 </template>
 
@@ -179,10 +189,23 @@ const photoSrc = computed(() => (!props.photo || photoFailed.value ? null : phot
   object-fit: cover;
 }
 
+.content-card__photo--natural {
+  height: auto;
+  object-fit: contain;
+}
+
 .content-card__placeholder {
   overflow: hidden;
   background: linear-gradient(135deg, var(--tag-pink-bright-background), var(--tag-violet-background));
   color: var(--tag-pink-bright-text);
+}
+
+/* Cartes à ratio libre : une carte sans photo s'étire à la hauteur de sa
+   voisine de rangée, le placeholder remplit l'espace restant. */
+.content-card__placeholder--fill {
+  flex: 1 1 auto;
+  height: auto;
+  min-height: 10rem;
 }
 
 /* SVG injecté via v-html : hors du scope, d'où :deep(). */

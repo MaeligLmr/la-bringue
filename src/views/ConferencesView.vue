@@ -75,6 +75,7 @@ useScrollReveal()
             :scene="item.conferencieres"
             :date="`${labelOf(JOURS, item.date)} - ${item.heure}`"
             :categorie="item.theme"
+            keep-photo-ratio
             likable
             :target="{ id: item.id, type: 'conference' }"
             :on-click="() => router.push({ name: 'fiche', params: { type: 'conference', id: item.id } })"

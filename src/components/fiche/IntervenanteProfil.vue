@@ -31,7 +31,10 @@ const photoSrc = computed(() =>
 .intervenante-profil {
   display: flex;
   flex-direction: column;
+  align-items: center;
   gap: var(--space-4);
+  /* Mobile : photo au-dessus, photo et texte centrés. */
+  text-align: center;
 }
 
 .intervenante-profil__photo {
@@ -59,6 +62,7 @@ const photoSrc = computed(() =>
     flex-direction: row;
     align-items: flex-start;
     gap: var(--space-8);
+    text-align: left;
   }
 
   .intervenante-profil__photo {
