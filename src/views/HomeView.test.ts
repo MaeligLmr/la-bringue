@@ -102,6 +102,22 @@ describe('HomeView', () => {
     expect(router.currentRoute.value.hash).toBe('#acces-transport')
   })
 
+  it.each([
+    ['Billetterie', '/billetterie'],
+    ['Infos pratiques', '/infos-pratiques'],
+    ['Actualités', '/actualites'],
+  ])('le bouton « Voir plus » de la section %s mène à %s', async (title, path) => {
+    const wrapper = await mountHome()
+    const router = wrapper.vm.$router
+
+    const section = wrapper.findAll('.home__section').find((node) => node.find('h2').text() === title)!
+    const button = section.findAll('button').find((node) => node.text() === 'Voir plus')!
+    await button.trigger('click')
+    await flushPromises()
+
+    expect(router.currentRoute.value.path).toBe(path)
+  })
+
   it('garde la section Actualités, vide, si son chargement échoue sans casser les autres', async () => {
     vi.spyOn(console, 'error').mockImplementation(() => {})
     const wrapper = await mountHome()
