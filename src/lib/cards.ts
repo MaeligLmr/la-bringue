@@ -39,6 +39,7 @@ export function toArtisteCards(concerts: ConcertDetail[]): ArtisteCard[] {
               photo: artiste.photo,
               date: concert.jour ?? '',
               heure: formatHeure(concert.heure_debut),
+              heureFin: formatHeure(concert.heure_fin),
               scene: sceneValue(concert.Scene?.nom),
               categorie: artiste.categorie ?? '',
             },
@@ -54,6 +55,7 @@ export function toConferenceCards(conferences: ConferenceDetail[]): ConferenceCa
     photo: conference.photo,
     date: conference.jour ?? '',
     heure: formatHeure(conference.heure_debut),
+    heureFin: formatHeure(conference.heure_fin),
     conferencieres: conference.Participation.flatMap(({ Conferenciere }) =>
       Conferenciere?.nom ? [Conferenciere.nom] : []
     ).join(', '),

@@ -22,14 +22,14 @@ const { likeHandler } = vi.hoisted(() => ({
 }))
 vi.mock('../handlers/like', () => ({ likeHandler }))
 
-function concert(id: number, jour: string, heure: string, nom: string): ConcertDetail {
+function concert(id: number, jour: string, heure: string, nom: string, heureFin: string | null = null): ConcertDetail {
   return {
     id_concert: id,
     created_at: '',
     id_scene: null,
     jour,
     heure_debut: heure,
-    heure_fin: null,
+    heure_fin: heureFin,
     Scene: { id_scene: 0, created_at: '', nom: 'Chrome' },
     ConcertArtiste: [
       {
@@ -44,7 +44,7 @@ function concert(id: number, jour: string, heure: string, nom: string): ConcertD
   }
 }
 
-function conference(id: number, jour: string, heure: string, titre: string): ConferenceDetail {
+function conference(id: number, jour: string, heure: string, titre: string, heureFin: string | null = null): ConferenceDetail {
   return {
     id_conference: id,
     created_at: '',
@@ -54,7 +54,7 @@ function conference(id: number, jour: string, heure: string, titre: string): Con
     description: null,
     jour,
     heure_debut: heure,
-    heure_fin: null,
+    heure_fin: heureFin,
     Participation: [],
   }
 }
@@ -85,7 +85,7 @@ async function mountMonProgramme() {
 function joursAffiches(wrapper: Awaited<ReturnType<typeof mountMonProgramme>>['wrapper']) {
   return wrapper.findAll('.mon-programme__jour').map((jour) => ({
     titre: jour.find('h3').text(),
-    noms: jour.findAll('.content-card__nom').map((nom) => nom.text()),
+    noms: jour.findAll('.frise__nom').map((nom) => nom.text()),
   }))
 }
 
@@ -110,17 +110,18 @@ beforeEach(async () => {
 })
 
 describe('MonProgrammeView', () => {
-  it('affiche les artistes et conférences likés, regroupés par jour et triés par horaire', async () => {
+  it('affiche les artistes et conférences likés, regroupés par jour puis par scène', async () => {
     const { wrapper } = await mountMonProgramme()
 
+    // Lu colonne par colonne : la scène Chrome, puis les conférences.
     expect(joursAffiches(wrapper)).toEqual([
-      { titre: 'Vendredi 28 août', noms: ['Table ronde', 'Aya Nakamura'] },
+      { titre: 'Vendredi 28 août', noms: ['Aya Nakamura', 'Table ronde'] },
       { titre: 'Dimanche 30 août', noms: ['Oklou'] },
     ])
-    expect(wrapper.findAll('.content-card__date').map((date) => date.text())).toEqual(['14h00', '22h15', '19h00'])
+    expect(wrapper.findAll('.frise__details').map((details) => details.text())).toEqual(['22h15', '14h00', '19h00'])
   })
 
-  it('retire la carte quand on enlève le like depuis la page', async () => {
+  it('retire l’élément de la frise quand on enlève le like depuis la page', async () => {
     const { wrapper } = await mountMonProgramme()
 
     await wrapper.find('button[aria-label="Ajouter Oklou à Mon programme"]').trigger('click')
@@ -130,13 +131,55 @@ describe('MonProgrammeView', () => {
     expect(likeHandler.setLike).toHaveBeenCalledWith({ id: 3, type: 'artiste' }, false)
   })
 
-  it('ouvre la fiche au clic sur une carte', async () => {
-    const { wrapper, router } = await mountMonProgramme()
+  it('signale les deux éléments likés dont les horaires se chevauchent', async () => {
+    concertHandler.getAllDetailed.mockResolvedValue([
+      concert(1, '2026-08-28', '14:30:00', 'Aya Nakamura', '15:30:00'),
+      concert(3, '2026-08-30', '19:00:00', 'Oklou', '20:00:00'),
+    ])
+    conferenceHandler.getAllDetailed.mockResolvedValue([
+      conference(7, '2026-08-28', '14:00:00', 'Table ronde', '15:00:00'),
+    ])
+    const { wrapper } = await mountMonProgramme()
 
-    await wrapper.findAll('.content-card')[0].trigger('click')
+    // Une colonne par scène, puis les conférences : les deux éléments en
+    // conflit sont dans deux colonnes, décrits en toutes lettres pour les
+    // lecteurs d'écran.
+    const [vendredi] = wrapper.findAll('.mon-programme__jour')
+    expect(vendredi.findAll('.frise__entete').map((entete) => entete.text())).toEqual(['Chrome', 'Conférences'])
+    const enConflit = wrapper.findAll('.frise__bloc--conflit')
+    expect(enConflit.map((bloc) => bloc.find('.frise__nom').text())).toEqual(['Aya Nakamura', 'Table ronde'])
+    expect(enConflit.map((bloc) => bloc.find('.frise__sr-only').text())).toEqual([
+      'En même temps que Table ronde',
+      'En même temps que Aya Nakamura',
+    ])
+    expect(wrapper.findAll('.frise__details').map((details) => details.text())).toEqual([
+      '14h30 – 15h30',
+      '14h00 – 15h00',
+      '19h00 – 20h00',
+    ])
+  })
+
+  it("retire l'alerte quand on enlève le like d'un des deux éléments en conflit", async () => {
+    concertHandler.getAllDetailed.mockResolvedValue([concert(1, '2026-08-28', '14:30:00', 'Aya Nakamura', '15:30:00')])
+    conferenceHandler.getAllDetailed.mockResolvedValue([
+      conference(7, '2026-08-28', '14:00:00', 'Table ronde', '15:00:00'),
+    ])
+    const { wrapper } = await mountMonProgramme()
+
+    await wrapper.find('button[aria-label="Ajouter Aya Nakamura à Mon programme"]').trigger('click')
     await flushPromises()
 
-    expect(router.currentRoute.value.path).toBe('/conference/fiche/7')
+    expect(wrapper.findAll('.frise__nom').map((nom) => nom.text())).toEqual(['Table ronde'])
+    expect(wrapper.find('.frise__bloc--conflit').exists()).toBe(false)
+  })
+
+  it('ouvre la fiche au clic sur le nom', async () => {
+    const { wrapper, router } = await mountMonProgramme()
+
+    await wrapper.findAll('.frise__nom')[0].trigger('click')
+    await flushPromises()
+
+    expect(router.currentRoute.value.path).toBe('/artiste/fiche/1')
   })
 
   it('affiche le message vide et un bouton vers la Programmation sans aucun like', async () => {
@@ -145,7 +188,7 @@ describe('MonProgrammeView', () => {
     const { wrapper, router } = await mountMonProgramme()
 
     expect(wrapper.text()).toContain(EMPTY_MESSAGE)
-    expect(wrapper.find('.content-card').exists()).toBe(false)
+    expect(wrapper.find('.frise__bloc').exists()).toBe(false)
 
     const bouton = wrapper.findAll('button').find((button) => button.text() === 'Voir la programmation')
     await bouton?.trigger('click')
