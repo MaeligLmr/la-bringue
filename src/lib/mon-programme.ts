@@ -166,16 +166,16 @@ export function construireFrise(items: ProgrammeItem[]): Frise {
   const origine = Math.floor(places[0].debut / 60) * 60
   const finFrise = Math.ceil(Math.max(...places.map((place) => place.fin)) / 60) * 60
 
-  const parColonne = new Map<string, { label: string; places: Place[] }>()
+  const parColonne = new Map<string, ReturnType<typeof colonneDe> & { places: Place[] }>()
   for (const { colonne, ...place } of places) {
-    const entree = parColonne.get(colonne.id) ?? { label: colonne.label, places: [] }
+    const entree = parColonne.get(colonne.id) ?? { ...colonne, places: [] }
     entree.places.push({ ...place, debut: place.debut - origine, fin: place.fin - origine })
     parColonne.set(colonne.id, entree)
   }
 
-  const colonnes: FriseColonne[] = [...parColonne.entries()]
-    .sort(([a], [b]) => ordreColonne(a) - ordreColonne(b))
-    .map(([id, { label, places }]) => ({ id, label, blocs: repartirEnPistes(places) }))
+  const colonnes: FriseColonne[] = [...parColonne.values()]
+    .sort((a, b) => a.ordre - b.ordre)
+    .map(({ id, label, places }) => ({ id, label, blocs: repartirEnPistes(places) }))
 
   const heures = []
   for (let position = 0; position <= finFrise - origine; position += 60) {
