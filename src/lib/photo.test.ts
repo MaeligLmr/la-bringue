@@ -25,6 +25,11 @@ describe('photoUrl', () => {
     )
   })
 
+  it.each(['conferences', 'conferencieres'])('résout les photos du dossier %s vers le bucket Supabase', (dossier) => {
+    vi.stubEnv('VITE_SUPABASE_URL', SUPABASE_URL)
+    expect(photoUrl(`/${dossier}/a.webp`)).toBe(`${SUPABASE_URL}/storage/v1/object/public/images/${dossier}/a.webp`)
+  })
+
   it('accepte un chemin sans slash initial', () => {
     vi.stubEnv('VITE_SUPABASE_URL', SUPABASE_URL)
     expect(photoUrl('exposants/zoe-kaba.webp')).toBe(`${SUPABASE_URL}/storage/v1/object/public/images/exposants/zoe-kaba.webp`)

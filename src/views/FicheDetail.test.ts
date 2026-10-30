@@ -2,6 +2,7 @@ import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { flushPromises, mount } from '@vue/test-utils'
 import { createRouter, createWebHistory, RouterView } from 'vue-router'
 import FicheDetail from './FicheDetail.vue'
+import { photoUrl } from '../lib/photo'
 import { loadFiche } from '../lib/fiche'
 import type { FicheData } from '../types/ui/fiche'
 import { toast } from 'vue-sonner'
@@ -89,7 +90,7 @@ describe('FicheDetail', () => {
     const { wrapper } = await mountFiche('/conference/fiche/1')
 
     const intervenante = wrapper.find('.intervenante-profil')
-    expect(intervenante.find('img').attributes('src')).toBe('/conferencieres/ines.jpg')
+    expect(intervenante.find('img').attributes('src')).toBe(photoUrl('/conferencieres/ines.jpg'))
     expect(intervenante.find('h3').text()).toBe('Inès Moreau')
     expect(intervenante.find('p').text()).toBe('Programmatrice de festivals')
     expect(intervenante.find('a').exists()).toBe(false)

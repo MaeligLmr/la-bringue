@@ -125,6 +125,11 @@ useScrollReveal()
   .fiche-detail__intervenantes :deep(.intervenante-profil:nth-of-type(even)) {
     flex-direction: row-reverse;
   }
+
+  /* Texte aligné contre la photo, donc à droite. */
+  .fiche-detail__intervenantes :deep(.intervenante-profil:nth-of-type(even) .intervenante-profil__texte) {
+    text-align: right;
+  }
 }
 
 .fiche-detail__suggestions {
@@ -138,8 +143,9 @@ useScrollReveal()
 }
 
 /* Rangée centrée (et non une grille) : une ou deux suggestions restent au
-   milieu au lieu de se caler dans les premières colonnes. Les cartes
-   gardent la largeur max de ContentCard. */
+   milieu au lieu de se caler dans les premières colonnes. Les cartes sont
+   fluides : elles s'élargissent pour remplir la rangée, jusqu'à 30rem, ce qui
+   laisse de la place aux titres de conférence longs. */
 .fiche-detail__suggestions-list {
   display: flex;
   flex-wrap: wrap;
@@ -152,7 +158,8 @@ useScrollReveal()
 
 .fiche-detail__suggestions-list > li {
   display: flex;
-  flex: 0 1 18rem;
+  flex: 1 1 22rem;
+  max-width: 30rem;
 }
 
 .fiche-detail__suggestions :deep(.content-card) {

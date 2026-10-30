@@ -12,8 +12,6 @@ export const exposantHandler = {
     return unwrap<Exposant[]>(TABLE, await supabase.from(TABLE).select('*').order('nom'))
   },
 
-  // Valeurs de l'enum `categories_exposants`, via la fonction SQL
-  // supabase/get_categories_exposants.sql (PostgREST n'expose pas les enums).
   async getCategories(): Promise<string[]> {
     return unwrap<string[]>(TABLE, await supabase.rpc('get_categories_exposants'))
   },

@@ -192,11 +192,12 @@ const isLiked = ref(false)
 .fiche-presentation__photo {
   display: block;
   width: 100%;
-  aspect-ratio: 3 / 2;
-  object-fit: cover;
+  height: auto;
 }
 
+/* Seul le placeholder a un cadre fixe : les vraies photos gardent leur ratio. */
 .fiche-presentation__placeholder {
+  aspect-ratio: 3 / 2;
   overflow: hidden;
   background: linear-gradient(135deg, var(--tag-pink-bright-background), var(--tag-violet-background));
   color: var(--tag-pink-bright-text);
