@@ -17,6 +17,8 @@ const props = withDefaults(
     iconOnly?: IconName
     /** Accessible label, used as aria-label when `iconOnly` is set (required in that case). */
     label?: string
+    /** Renders a link (<a>, opened in a new tab) instead of a <button>. */
+    href?: string
   }>(),
   {
     color: 'primary',
@@ -33,7 +35,7 @@ if (import.meta.env.DEV && props.iconOnly && !props.label) {
 
 const iconSize = computed<IconSize>(() => (props.size === 'large' ? 'large' : 'medium'))
 
-const buttonEl = ref<HTMLButtonElement | null>(null)
+const buttonEl = ref<HTMLElement | null>(null)
 defineExpose({
   /** Programmatically focus this button — e.g. `buttonRef.value?.focus()`. */
   focus: () => buttonEl.value?.focus(),
@@ -65,13 +67,17 @@ const tokenStyle = computed(() => {
 </script>
 
 <template>
-  <button
+  <component
+    :is="href ? 'a' : 'button'"
     ref="buttonEl"
-    :type="type"
+    :type="href ? undefined : type"
+    :href="href"
+    :target="href ? '_blank' : undefined"
+    :rel="href ? 'noopener noreferrer' : undefined"
     class="button"
     :class="[`button--${size}`, { 'button--icon-only': !!iconOnly }]"
     :style="tokenStyle"
-    :disabled="disabled"
+    :disabled="href ? undefined : disabled"
     :aria-label="iconOnly ? label : undefined"
   >
     <Icon v-if="iconOnly" :name="iconOnly" :size="iconSize" />
@@ -80,7 +86,7 @@ const tokenStyle = computed(() => {
       <span v-if="$slots.default" class="button__label"><slot /></span>
       <Icon v-if="iconRight" :name="iconRight" :size="iconSize" />
     </template>
-  </button>
+  </component>
 </template>
 
 <style scoped>
@@ -97,6 +103,7 @@ const tokenStyle = computed(() => {
   font-family: inherit;
   font-weight: var(--font-weight-medium);
   line-height: 1;
+  text-decoration: none;
   cursor: pointer;
   transition:
     background-color 0.15s ease,

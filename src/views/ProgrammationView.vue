@@ -9,6 +9,7 @@ import type { FilterConfig, FilterValues } from '../types/ui/filterable-list.ts'
 import { JOURS, SCENES, type ArtisteCard } from '../types/ui/programmation.ts'
 import { concertHandler } from '../handlers/concert'
 import { labelOf, toArtisteCards } from '../lib/cards'
+import { useScrollReveal } from '../composables/useScrollReveal'
 
 // Déjà triés par jour puis heure côté Supabase.
 const artistes = ref<ArtisteCard[]>([])
@@ -34,6 +35,9 @@ const selected = ref<FilterValues>({ date: String(date ?? ''), scene: String(sce
 watch(selected, ({ date, scene }) => {
   router.replace({ query: { date: date || undefined, scene: scene || undefined } })
 })
+
+// Apparition des titres, textes et cartes au défilement.
+useScrollReveal()
 </script>
 
 <template>

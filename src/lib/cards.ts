@@ -1,10 +1,12 @@
 import type { ConcertDetail } from '../handlers/concert'
 import type { ConferenceDetail } from '../handlers/conference'
+import type { Actualite } from '../types/database/actualite'
 import type { Exposant } from '../types/database/exposant'
 import type { SelectOption } from '../types/ui/select'
 import type { ArtisteCard } from '../types/ui/programmation'
 import type { ConferenceCard } from '../types/ui/conferences'
 import type { ExposantCard } from '../types/ui/exposants'
+import type { ActualiteCard } from '../types/ui/actualites'
 
 // Mise en forme des données Supabase en cartes, partagée par les pages liste
 // (Programmation, Conférences, Exposants) et les suggestions des fiches.
@@ -67,5 +69,25 @@ export function toExposantCards(exposants: Exposant[]): ExposantCard[] {
     nom: exposant.nom ?? '',
     photo: exposant.photo,
     categorie: exposant.categorie ?? '',
+  }))
+}
+
+const DATE_PUBLICATION_FORMAT = new Intl.DateTimeFormat('fr-FR', {
+  day: 'numeric',
+  month: 'long',
+  year: 'numeric',
+  timeZone: 'Europe/Paris',
+})
+
+// Conserve l'ordre reçu : le tri (plus récentes d'abord) est fait par le handler.
+export function toActualiteCards(actualites: Actualite[]): ActualiteCard[] {
+  return actualites.map((actualite) => ({
+    id: actualite.id_actualite,
+    nom: actualite.titre ?? '',
+    description: actualite.description ?? '',
+    photo: actualite.photo,
+    date: actualite.date_publication
+      ? DATE_PUBLICATION_FORMAT.format(new Date(actualite.date_publication))
+      : '',
   }))
 }

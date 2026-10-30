@@ -30,7 +30,7 @@ function concert(id: number, jour: string, heure: string, nom: string, heureFin:
     jour,
     heure_debut: heure,
     heure_fin: heureFin,
-    Scene: { id_scene: 0, created_at: '', nom: 'Chrome', style_musical: null },
+    Scene: { id_scene: 0, created_at: '', nom: 'Chrome' },
     ConcertArtiste: [
       {
         id_artiste: id,

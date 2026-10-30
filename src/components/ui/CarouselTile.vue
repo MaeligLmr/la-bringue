@@ -70,7 +70,10 @@ const patternStyle = {
      donc qu'en desktop (rangée). Généreux pour limiter le risque de
      contenu tronqué (overflow: hidden) avec une description plus longue. */
   width: 16rem;
-  height: 20rem;
+  /* min-height : la tile grandit si titre + description + CTA dépassent
+     20rem, au lieu de rogner le bouton ; en desktop, les tiles d'une rangée
+     s'alignent sur la plus haute (voir Carousel.vue). */
+  min-height: 20rem;
   box-sizing: border-box;
   border-radius: var(--carrousel-tile-radius);
   padding: var(--carrousel-tile-padding-y) var(--carrousel-tile-padding-x);
@@ -101,6 +104,8 @@ const patternStyle = {
 
 .carousel-tile__content {
   position: relative;
+  /* Remplit la tile (min-height de la tile) pour que le CTA reste en bas. */
+  min-height: calc(20rem - 2 * var(--carrousel-tile-padding-y));
   height: 100%;
   display: flex;
   flex-direction: column;

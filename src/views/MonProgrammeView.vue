@@ -15,6 +15,7 @@ import { toArtisteCards, toConferenceCards } from '../lib/cards'
 import { EMPTY_MESSAGE, groupProgrammeByJour } from '../lib/mon-programme'
 import type { ArtisteCard } from '../types/ui/programmation'
 import type { ConferenceCard } from '../types/ui/conferences'
+import { useScrollReveal } from '../composables/useScrollReveal'
 
 const router = useRouter()
 const { isLoggedIn, ready } = useAuth()
@@ -53,6 +54,9 @@ const jours = computed(() =>
     conferences.value.filter((card) => isLiked({ id: card.id, type: 'conference' }))
   )
 )
+
+// Apparition des titres, textes et cartes au défilement.
+useScrollReveal()
 </script>
 
 <template>

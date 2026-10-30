@@ -57,9 +57,11 @@ describe('Footer', () => {
   it('affiche les icônes des réseaux sociaux', async () => {
     const { wrapper } = await mountFooter()
 
-    expect(wrapper.find('button[aria-label="Instagram"]').exists()).toBe(true)
-    expect(wrapper.find('button[aria-label="TikTok"]').exists()).toBe(true)
-    expect(wrapper.find('button[aria-label="WhatsApp"]').exists()).toBe(true)
-    expect(wrapper.find('button[aria-label="Facebook"]').exists()).toBe(true)
+    const instagram = wrapper.find('a[aria-label="Instagram"]')
+    expect(instagram.attributes('href')).toBe('https://www.instagram.com/bringue_party/')
+    expect(instagram.attributes('target')).toBe('_blank')
+    expect(wrapper.find('a[aria-label="TikTok"]').exists()).toBe(true)
+    expect(wrapper.find('[aria-label="WhatsApp"]').exists()).toBe(false)
+    expect(wrapper.find('[aria-label="Facebook"]').exists()).toBe(false)
   })
 })

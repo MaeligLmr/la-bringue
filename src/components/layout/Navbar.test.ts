@@ -32,6 +32,7 @@ async function mountNavbar() {
       { path: '/mon-programme', component: { template: '<div />' } },
       { path: '/exposants', component: { template: '<div />' } },
       { path: '/conferences', component: { template: '<div />' } },
+      { path: '/actualites', component: { template: '<div />' } },
       { path: '/a-propos', component: { template: '<div />' } },
       { path: '/infos-pratiques', component: { template: '<div />' } },
     ],
@@ -176,7 +177,7 @@ describe('Navbar', () => {
     wrapper.unmount()
   })
 
-  it('le menu burger propose aussi Exposants, Conférences, À propos et Infos pratiques, et navigue au clic', async () => {
+  it('le menu burger propose aussi Exposants, Conférences, Actualités, À propos et Infos pratiques, et navigue au clic', async () => {
     mockSupabase(null)
     const { wrapper, router } = await mountNavbar()
 
@@ -187,6 +188,7 @@ describe('Navbar', () => {
     expect(menu).not.toBeNull()
     expect(menu.textContent).toContain('Exposants')
     expect(menu.textContent).toContain('Conférences')
+    expect(menu.textContent).toContain('Actualités')
     expect(menu.textContent).toContain('À propos')
     expect(menu.textContent).toContain('Infos pratiques')
 
