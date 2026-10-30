@@ -14,6 +14,8 @@ import { sectionAnchor } from '../lib/anchor'
 import { openBilletterie, toFormuleCards } from '../lib/billetterie'
 import type { FormuleCard } from '../types/ui/billetterie'
 import { useScrollReveal } from '../composables/useScrollReveal'
+import Button from '../components/ui/Button.vue'
+import { useRouter } from 'vue-router'
 
 interface HomeTileSource {
   titre: string | null
@@ -22,6 +24,7 @@ interface HomeTileSource {
   to?: string
 }
 
+const router = useRouter()
 // L'alternance pink/blue est purement esthétique (voir CarouselTileVariant) :
 // elle ne fait pas partie des données métier venant de Supabase. `start`
 // permet d'inverser l'ordre d'une section à l'autre (voir Figma).
@@ -136,18 +139,42 @@ useScrollReveal()
           </div>
         </template>
       </Carousel>
+      <Button
+        color="primary"
+        label="Voir plus"
+        variant="outlined"
+        size="large"
+        icon-right="arrow-right"
+        @click="() => { router.push('/billetterie') }"
+      >Voir plus</Button>
     </section>
 
     <section class="home__section">
       <h2>Infos pratiques</h2>
       <Loader v-if="infosPratiquesLoading" />
       <Carousel v-else :tiles="infosPratiquesTiles" />
+      <Button
+        color="primary"
+        variant="outlined"
+        size="large"
+        label="Voir plus"
+        icon-right="arrow-right"
+        @click="() => { router.push('/infos-pratiques') }"
+      >Voir plus</Button>
     </section>
 
     <section class="home__section">
       <h2>Actualités</h2>
       <Loader v-if="actualitesLoading" />
       <Carousel v-else :tiles="actualitesTiles" />
+      <Button
+        color="primary"
+        variant="outlined"
+        size="large"
+        label="Voir plus"
+        icon-right="arrow-right"
+        @click="() => { router.push('/actualites') }"
+      >Voir plus</Button>
     </section>
   </main>
 </template>
