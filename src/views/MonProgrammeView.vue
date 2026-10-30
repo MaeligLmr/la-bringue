@@ -4,8 +4,8 @@ import { useRouter } from 'vue-router'
 import { toast } from 'vue-sonner'
 import Hero from '../components/layout/Hero.vue'
 import Button from '../components/ui/Button.vue'
-import ContentCard from '../components/ui/ContentCard.vue'
 import Loader from '../components/ui/Loader.vue'
+import ProgrammeFrise from '../components/mon-programme/ProgrammeFrise.vue'
 import { useAuth } from '../composables/useAuth'
 import { useAuthModal } from '../composables/useAuthModal'
 import { useLikes } from '../composables/useLikes'
@@ -89,20 +89,7 @@ useScrollReveal()
           <h3 :id="`mon-programme-${jour.jour || 'a-confirmer'}`" class="mon-programme__jour-titre">
             {{ jour.label }}
           </h3>
-          <ul class="mon-programme__items">
-            <li v-for="item in jour.items" :key="item.key">
-              <ContentCard
-                :nom="item.nom"
-                :photo="item.photo"
-                :scene="item.lieu"
-                :date="item.heure"
-                :categorie="item.categorie"
-                likable
-                :target="item.target"
-                :on-click="() => router.push({ name: 'fiche', params: { type: item.target.type, id: item.target.id } })"
-              />
-            </li>
-          </ul>
+          <ProgrammeFrise :items="jour.items" />
         </section>
       </template>
     </div>
@@ -143,39 +130,9 @@ useScrollReveal()
   gap: var(--space-5);
 }
 
-.mon-programme__items {
-  display: grid;
-  grid-template-columns: 1fr;
-  gap: var(--space-8);
-  margin: 0;
-  padding: 0;
-  list-style: none;
-}
-
-.mon-programme :deep(.content-card) {
-  width: 100%;
-  max-width: none;
-}
-
-@media (min-width: 640px) {
-  .mon-programme__items {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-  }
-}
-
 @media (min-width: 1025px) {
   .mon-programme__content {
     padding: var(--space-8) var(--space-20) var(--space-10);
-  }
-
-  .mon-programme__items {
-    grid-template-columns: repeat(3, minmax(0, 1fr));
-  }
-}
-
-@media (min-width: 1440px) {
-  .mon-programme__items {
-    grid-template-columns: repeat(4, minmax(0, 1fr));
   }
 }
 </style>

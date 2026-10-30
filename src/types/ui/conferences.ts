@@ -6,6 +6,7 @@ export interface ConferenceCard {
   photo: string | null
   date: string
   heure: string
+  heureFin: string
   conferencieres: string
   theme: string
 }
