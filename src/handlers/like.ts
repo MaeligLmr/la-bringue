@@ -43,22 +43,4 @@ export const likeHandler = {
       await supabase.rpc('set_like', { p_type: target.type, p_id: target.id, p_liked: liked })
     )
   },
-
-  async countByArtiste(idArtiste: number): Promise<number> {
-    const { count, error } = await supabase
-      .from(TABLE)
-      .select('id_like', { count: 'exact', head: true })
-      .eq('id_artiste', idArtiste)
-    unwrap(TABLE, { data: null, error })
-    return count ?? 0
-  },
-
-  async countByConference(idConference: number): Promise<number> {
-    const { count, error } = await supabase
-      .from(TABLE)
-      .select('id_like', { count: 'exact', head: true })
-      .eq('id_conference', idConference)
-    unwrap(TABLE, { data: null, error })
-    return count ?? 0
-  },
 }

@@ -310,25 +310,11 @@ describe('likeHandler', () => {
     expect(rpc).toHaveBeenLastCalledWith('set_like', { p_type: 'conference', p_id: 9, p_liked: false })
   })
 
-  it('countByArtiste et countByConference renvoient le total, 0 si la base ne répond pas de nombre', async () => {
-    const { chain } = mockSupabase({ count: 5 })
-    const { likeHandler } = await import('./like')
-
-    expect(await likeHandler.countByArtiste(4)).toBe(5)
-    expect(chain.select).toHaveBeenCalledWith('id_like', { count: 'exact', head: true })
-    expect(await likeHandler.countByConference(9)).toBe(5)
-
-    vi.resetModules()
-    mockSupabase({ count: null })
-    const { likeHandler: sansCompte } = await import('./like')
-    expect(await sansCompte.countByArtiste(4)).toBe(0)
-  })
-
   it('une erreur Supabase est levée en HandlerError', async () => {
     mockSupabase({ error: { message: 'permission denied', code: '42501' } })
     const { likeHandler } = await import('./like')
 
-    await expect(likeHandler.countByArtiste(1)).rejects.toMatchObject({
+    await expect(likeHandler.getMine()).rejects.toMatchObject({
       name: 'HandlerError',
       code: '42501',
     })
