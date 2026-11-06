@@ -1,30 +1,33 @@
 <script setup lang="ts">
-import { onMounted, ref } from 'vue'
+import { ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { toast } from 'vue-sonner'
 import Hero from '../../components/layout/Hero/Hero.vue'
 import FilterableList from '../../components/ui/FilterableList/FilterableList.vue'
 import ContentCard from '../../components/ui/ContentCard/ContentCard.vue'
-import Loader from '../../components/ui/Loader/Loader.vue'
-import type { ActualiteCard } from '../../types/ui/actualites.ts'
 import { actualiteHandler } from '../../handlers/actualite'
 import { toActualiteCards } from '../../lib/cards/cards'
+import { usePaginatedList } from '../../composables/usePaginatedList/usePaginatedList'
 import { useScrollReveal } from '../../composables/useScrollReveal/useScrollReveal'
 
-// Déjà triées de la plus récente à la plus ancienne côté Supabase.
-const actualites = ref<ActualiteCard[]>([])
-const loading = ref(true)
 const router = useRouter()
+const search = ref('')
 
-onMounted(async () => {
-  try {
-    actualites.value = toActualiteCards(await actualiteHandler.getLatest())
-  } catch (error) {
-    console.error(error)
-    toast.error('Impossible de charger les actualités.')
-  } finally {
-    loading.value = false
-  }
+// La recherche est appliquée par Supabase ; la liste se charge par pages au fil
+// du défilement, de la plus récente à la plus ancienne.
+const {
+  items: actualites,
+  hasMore,
+  loading,
+  failed,
+  loadMore,
+} = usePaginatedList({
+  fetchPage: async (offset, { search }) => {
+    const page = await actualiteHandler.getPage({ offset, search })
+    return { ...page, rows: toActualiteCards(page.rows) }
+  },
+  search,
+  onError: () => toast.error('Impossible de charger les actualités.'),
 })
 
 // Apparition des titres, textes et cartes au défilement.
@@ -36,8 +39,16 @@ useScrollReveal()
     <Hero />
     <div class="actualites__content">
       <h1>Actualités</h1>
-      <Loader v-if="loading" />
-      <FilterableList v-else :items="actualites" search-placeholder="Rechercher une actualité">
+      <FilterableList
+        v-model:search="search"
+        :items="actualites"
+        search-placeholder="Rechercher une actualité"
+        server-side
+        :has-more="hasMore"
+        :loading="loading"
+        :failed="failed"
+        @load-more="loadMore"
+      >
         <template #item="{ item }">
           <ContentCard
             :nom="item.nom"

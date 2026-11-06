@@ -2,6 +2,8 @@
 import { computed, ref } from 'vue'
 import Button from '../Button/Button.vue'
 import Icon from '../Icon/Icon.vue'
+import Loader from '../Loader/Loader.vue'
+import { useInfiniteScroll } from '../../../composables/useInfiniteScroll/useInfiniteScroll'
 import { provideListSearch } from '../../../composables/useListSearch/useListSearch'
 import type { FilterConfig, FilterValues, FilterableItem } from '../../../types/ui/filterable-list.ts'
 
@@ -10,18 +12,34 @@ const props = withDefaults(
     items: T[]
     filters?: FilterConfig[]
     searchPlaceholder?: string
+    // Liste paginée côté serveur : `items` est déjà filtré par la recherche et
+    // les filtres (le parent les relit via v-model:search / v-model:selected),
+    // la liste n'applique donc aucun filtre elle-même.
+    serverSide?: boolean
+    // Reste-t-il des éléments à charger ? Le défilement émet alors `load-more`.
+    hasMore?: boolean
+    // Un chargement (première page ou suivante) est en cours.
+    loading?: boolean
+    // Le dernier chargement a échoué : « Réessayer » émet `load-more`.
+    failed?: boolean
   }>(),
   {
     filters: () => [],
     searchPlaceholder: 'Rechercher par nom',
+    serverSide: false,
+    hasMore: false,
+    loading: false,
+    failed: false,
   }
 )
+
+const emit = defineEmits<{ 'load-more': [] }>()
 
 defineSlots<{ item(props: { item: T }): unknown }>()
 
 const selected = defineModel<FilterValues>('selected', { default: () => ({}) })
 
-const search = ref('')
+const search = defineModel<string>('search', { default: '' })
 // Les ContentCard de la liste surlignent cette recherche dans leur nom.
 provideListSearch(search)
 
@@ -34,6 +52,7 @@ function normalize(value: string) {
 }
 
 const filteredItems = computed(() => {
+  if (props.serverSide) return props.items
   const query = normalize(search.value)
   return props.items.filter((item) => {
     if (query && !normalize(item.nom).includes(query)) return false
@@ -47,6 +66,14 @@ const filteredItems = computed(() => {
 function setFilter(key: string, value: string) {
   selected.value = { ...selected.value, [key]: value }
 }
+
+// Sentinelle sous la liste : la voir arriver charge la page suivante.
+const sentinel = ref<HTMLElement | null>(null)
+const { supported: canObserve } = useInfiniteScroll({
+  target: sentinel,
+  onLoadMore: () => emit('load-more'),
+  disabled: computed(() => !props.hasMore || props.loading || props.failed),
+})
 
 function reset() {
   search.value = ''
@@ -157,7 +184,9 @@ function onFilterClick(event: MouseEvent) {
     </div>
 
     <p class="filterable-list__count" aria-live="polite">
-      {{ filteredItems.length }} résultat{{ filteredItems.length > 1 ? 's' : '' }}
+      <template v-if="!loading || filteredItems.length">
+        {{ filteredItems.length }}{{ hasMore ? '+' : '' }} résultat{{ filteredItems.length > 1 ? 's' : '' }}
+      </template>
     </p>
 
     <ul v-if="filteredItems.length" class="filterable-list__items">
@@ -166,9 +195,21 @@ function onFilterClick(event: MouseEvent) {
       </li>
     </ul>
 
-    <div v-else class="filterable-list__empty">
+    <div v-else-if="!loading && !failed" class="filterable-list__empty">
       <p>Aucun résultat ne correspond à ta recherche.</p>
       <Button color="primary" variant="outlined" @click="reset">Réinitialiser les filtres</Button>
+    </div>
+
+    <Loader v-if="loading" />
+
+    <div v-else-if="failed" class="filterable-list__empty" role="alert">
+      <p>Impossible de charger la suite.</p>
+      <Button color="primary" variant="outlined" @click="emit('load-more')">Réessayer</Button>
+    </div>
+
+    <div v-else-if="hasMore" ref="sentinel" class="filterable-list__more">
+      <!-- Sans IntersectionObserver, le défilement ne peut rien déclencher. -->
+      <Button v-if="!canObserve" color="primary" variant="outlined" @click="emit('load-more')">Voir plus</Button>
     </div>
   </section>
 </template>
@@ -267,6 +308,13 @@ function onFilterClick(event: MouseEvent) {
 .filterable-list__item {
   display: flex;
   justify-content: center;
+}
+
+.filterable-list__more {
+  display: flex;
+  justify-content: center;
+  /* Hauteur non nulle : une sentinelle vide ne serait jamais « visible ». */
+  min-height: 1px;
 }
 
 .filterable-list__empty {

@@ -2,7 +2,7 @@
 import { useRouter } from 'vue-router'
 import Breadcrumb from '../Breadcrumb/Breadcrumb.vue'
 import Button from '../../ui/Button/Button.vue'
-import heroBg from '../../../assets/hero/hero-bg.png'
+import heroBg from '../../../assets/hero/hero-bg.webp'
 import starIcon from '../../../assets/hero/étoile top.svg'
 
 withDefaults(defineProps<{ homePage?: boolean }>(), { homePage: false })
@@ -13,7 +13,7 @@ function goToAbout() {
   router.push('/a-propos')
 }
 
-// Le motif (voir src/assets/hero/hero-bg.png) est en cover (pas en repeat,
+// Le motif (voir src/assets/hero/hero-bg.webp) est en cover (pas en repeat,
 // contrairement au footer — c'est une texture pleine, pas un carreau) et
 // teinté par --main-image-mask à ~40% d'opacité, même technique que le
 // footer (dégradé plat superposé à l'image). L'URL doit rester un style

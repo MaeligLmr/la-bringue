@@ -10,17 +10,6 @@ declare module 'vue-router' {
 import { useAuth } from '../composables/useAuth/useAuth'
 import { ADMIN_SECTIONS } from '../lib/admin-sections/admin-sections'
 import HomeView from '../views/HomeView/HomeView.vue'
-import ProfileView from '../views/ProfileView/ProfileView.vue'
-import ProgrammationView from '../views/ProgrammationView/ProgrammationView.vue'
-import BilletterieView from '../views/BilletterieView/BilletterieView.vue'
-import MonProgrammeView from '../views/MonProgrammeView/MonProgrammeView.vue'
-import ExposantsView from '../views/ExposantsView/ExposantsView.vue'
-import ConferencesView from '../views/ConferencesView/ConferencesView.vue'
-import AProposView from '../views/AProposView/AProposView.vue'
-import InfosPratiquesView from '../views/InfosPratiquesView/InfosPratiquesView.vue'
-import ActualitesView from '../views/ActualitesView/ActualitesView.vue'
-import ActualiteDetailView from '../views/ActualiteDetailView/ActualiteDetailView.vue'
-import FicheDetail from '../views/FicheDetail/FicheDetail.vue'
 
 export const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -30,25 +19,25 @@ export const router = createRouter({
     // affiche alors les boutons connexion/inscription à la place du
     // formulaire de profil.
     // hideSupport : pas de section « Ils nous soutiennent » sur le profil.
-    { path: '/profil', name: 'profil', component: ProfileView, meta: { hideSupport: true } },
-    { path: '/programmation', name: 'programmation', component: ProgrammationView },
-    { path: '/billetterie', name: 'billetterie', component: BilletterieView },
-    { path: '/mon-programme', name: 'mon-programme', component: MonProgrammeView },
-    { path: '/exposants', name: 'exposants', component: ExposantsView },
-    { path: '/conferences', name: 'conferences', component: ConferencesView },
-    { path: '/a-propos', name: 'a-propos', component: AProposView },
-    { path: '/infos-pratiques', name: 'infos-pratiques', component: InfosPratiquesView },
-    { path: '/actualites', name: 'actualites', component: ActualitesView },
+    { path: '/profil', name: 'profil', component: () => import('../views/ProfileView/ProfileView.vue'), meta: { hideSupport: true } },
+    { path: '/programmation', name: 'programmation', component: () => import('../views/ProgrammationView/ProgrammationView.vue') },
+    { path: '/billetterie', name: 'billetterie', component: () => import('../views/BilletterieView/BilletterieView.vue') },
+    { path: '/mon-programme', name: 'mon-programme', component: () => import('../views/MonProgrammeView/MonProgrammeView.vue') },
+    { path: '/exposants', name: 'exposants', component: () => import('../views/ExposantsView/ExposantsView.vue') },
+    { path: '/conferences', name: 'conferences', component: () => import('../views/ConferencesView/ConferencesView.vue') },
+    { path: '/a-propos', name: 'a-propos', component: () => import('../views/AProposView/AProposView.vue') },
+    { path: '/infos-pratiques', name: 'infos-pratiques', component: () => import('../views/InfosPratiquesView/InfosPratiquesView.vue') },
+    { path: '/actualites', name: 'actualites', component: () => import('../views/ActualitesView/ActualitesView.vue') },
     {
       path: '/actualites/:id(\\d+)',
       name: 'actualite',
-      component: ActualiteDetailView,
+      component: () => import('../views/ActualiteDetailView/ActualiteDetailView.vue'),
       props: (route) => ({ id: Number(route.params.id) }),
     },
     {
       path: '/:type(artiste|conference|exposant)/fiche/:id(\\d+)',
       name: 'fiche',
-      component: FicheDetail,
+      component: () => import('../views/FicheDetail/FicheDetail.vue'),
       props: (route) => ({ type: route.params.type, id: Number(route.params.id) }),
     },
     {

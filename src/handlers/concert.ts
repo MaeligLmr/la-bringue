@@ -1,9 +1,9 @@
 import { supabase } from '../supabase.js'
-import type { Artiste } from '../types/database/artiste'
 import type { Concert } from '../types/database/concert'
 import type { ConcertArtiste } from '../types/database/concert-artiste'
 import type { Scene } from '../types/database/scene'
-import { createCrudHandler, unwrap } from './crud'
+import type { ArtisteResume } from './artiste'
+import { containsPattern, createCrudHandler, pageRange, toPage, unwrap, type Page } from './crud'
 
 const TABLE = 'Concert'
 
@@ -12,29 +12,33 @@ const HEADLINER_SCENE = 'chrome'
 
 export interface ConcertDetail extends Concert {
   Scene: Scene | null
-  ConcertArtiste: (ConcertArtiste & { Artiste: Artiste | null })[]
+  ConcertArtiste: (ConcertArtiste & { Artiste: ArtisteResume | null })[]
 }
 
 // Concert + sa scène + ses artistes, en une seule requête via les clés étrangères.
-const DETAIL_SELECT = '*, Scene(*), ConcertArtiste(*, Artiste(*))'
+const DETAIL_SELECT = 'id_concert, id_scene, jour, heure_debut, heure_fin, Scene(id_scene, nom), ConcertArtiste(id_artiste, id_concert, artiste_annonce, featuring, Artiste(id_artiste, nom, photo, categorie))'
 
 export interface DayLineup {
-  headliner?: Artiste
-  others: Artiste[]
+  headliner?: ArtisteResume
+  others: ArtisteResume[]
 }
 
 // Artistes principaux d'un concert : les featurings ne figurent pas à l'affiche.
-function mainArtistes(concert: ConcertDetail): Artiste[] {
+function mainArtistes(concert: ConcertDetail): ArtisteResume[] {
   return concert.ConcertArtiste.filter((lien) => !lien.featuring).flatMap((lien) => (lien.Artiste ? [lien.Artiste] : []))
 }
 
 export const concertHandler = {
-  ...createCrudHandler<Concert, 'id_concert'>(TABLE, 'id_concert'),
+  ...createCrudHandler<Concert, 'id_concert'>(TABLE, 'id_concert', 'id_concert, id_scene, jour, heure_debut, heure_fin'),
 
-  async getAllDetailed(): Promise<ConcertDetail[]> {
+  // Concerts où joue au moins un des artistes donnés (Mon programme). !inner
+  // exclut les autres concerts et ne garde dans chacun que ces artistes.
+  async getByArtistes(idsArtistes: number[]): Promise<ConcertDetail[]> {
+    if (idsArtistes.length === 0) return []
+    const columns = DETAIL_SELECT.replace('ConcertArtiste(', 'ConcertArtiste!inner(')
     return unwrap<ConcertDetail[]>(
       TABLE,
-      await supabase.from(TABLE).select(DETAIL_SELECT).order('jour').order('heure_debut')
+      await supabase.from(TABLE).select(columns).in('ConcertArtiste.id_artiste', idsArtistes).order('jour').order('heure_debut')
     )
   },
 
@@ -53,10 +57,41 @@ export const concertHandler = {
     )
   },
 
+  // Une page de la programmation (page Programmation), par jour puis heure : la
+  // page compte des concerts, chacun avec ses artistes. `jour` (ISO
+  // "YYYY-MM-DD") filtre sur la colonne, `scene` sur le début du nom de la
+  // scène (« chrome », « soft »...), `search` sur le nom des artistes — dans ce
+  // cas seuls les artistes qui correspondent restent dans chaque concert.
+  async getPage({
+    offset,
+    search = '',
+    jour = '',
+    scene = '',
+  }: {
+    offset: number
+    search?: string
+    jour?: string
+    scene?: string
+  }): Promise<Page<ConcertDetail>> {
+    // !inner : un concert sans scène ou sans artiste correspondant est exclu,
+    // au lieu d'être renvoyé avec une jointure vide.
+    let columns = DETAIL_SELECT
+    if (scene) columns = columns.replace('Scene(', 'Scene!inner(')
+    if (search.trim()) columns = columns.replace('ConcertArtiste(', 'ConcertArtiste!inner(').replace('Artiste(', 'Artiste!inner(')
+
+    let query = supabase.from(TABLE).select(columns)
+    if (jour) query = query.eq('jour', jour)
+    if (scene) query = query.ilike('Scene.nom', `${scene}%`)
+    if (search.trim()) query = query.ilike('ConcertArtiste.Artiste.nom', containsPattern(search))
+    // id en second critère : un ordre stable évite doublons et trous entre les pages.
+    query = query.order('jour').order('heure_debut').order('id_concert').range(...pageRange(offset))
+    return toPage(unwrap<ConcertDetail[]>(TABLE, await query))
+  },
+
   async getByScene(idScene: number): Promise<Concert[]> {
     return unwrap<Concert[]>(
       TABLE,
-      await supabase.from(TABLE).select('*').eq('id_scene', idScene).order('jour').order('heure_debut')
+      await supabase.from(TABLE).select('id_concert, id_scene, jour, heure_debut, heure_fin').eq('id_scene', idScene).order('jour').order('heure_debut')
     )
   },
 

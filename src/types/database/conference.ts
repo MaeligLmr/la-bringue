@@ -1,6 +1,6 @@
 export interface Conference {
   id_conference: number
-  created_at: string
+  created_at?: string
   titre: string | null
   photo: string | null
   theme: string | null

@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
-import { loadFiche } from './fiche'
+import { loadFiche, SUGGESTIONS_COUNT } from './fiche'
 import { artisteHandler, type ArtisteDetail } from '../../handlers/artiste'
 import { concertHandler, type ConcertDetail } from '../../handlers/concert'
 import { conferenceHandler, type ConferenceDetail } from '../../handlers/conference'
@@ -117,7 +117,7 @@ describe('loadFiche — artiste', () => {
 
     const data = await loadFiche('artiste', 1)
 
-    expect(artisteHandler.getByCategorie).toHaveBeenCalledWith('Rap')
+    expect(artisteHandler.getByCategorie).toHaveBeenCalledWith('Rap', SUGGESTIONS_COUNT + 1)
     expect(data?.fiche.tags).toEqual([])
     expect(data?.suggestions.map((s) => s.nom)).toEqual(['Zed'])
   })
@@ -149,7 +149,7 @@ describe('loadFiche — conférence', () => {
 
     const data = await loadFiche('conference', 1)
 
-    expect(conferenceHandler.getByTheme).toHaveBeenCalledWith('Feminisme')
+    expect(conferenceHandler.getByTheme).toHaveBeenCalledWith('Feminisme', SUGGESTIONS_COUNT + 1)
     expect(data?.fiche.categorie).toEqual({
       label: 'Feminisme',
       to: { name: 'conferences', query: { theme: 'Feminisme' } },

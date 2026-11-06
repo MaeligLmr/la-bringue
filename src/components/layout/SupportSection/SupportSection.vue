@@ -3,8 +3,8 @@ import { computed } from 'vue'
 import { useTheme } from '../../../composables/useTheme/useTheme'
 import radioNovaBlanc from '../../../assets/sponsor/sponsor1.png'
 import radioNovaNoir from '../../../assets/sponsor/sponsor1-noir.png'
-import reporterre from '../../../assets/sponsor/sponsor2.png'
-import theSimones from '../../../assets/sponsor/sponsor3.png'
+import reporterre from '../../../assets/sponsor/sponsor2.webp'
+import theSimones from '../../../assets/sponsor/sponsor3.webp'
 
 const { resolvedTheme } = useTheme()
 

@@ -13,10 +13,10 @@ vi.mock('../../../composables/useAuth/useAuth', () => ({
 
 describe('ContentCard', () => {
   it("s'affiche avec nom et photo uniquement, sans date, catégorie ni scène", () => {
-    const wrapper = mount(ContentCard, { props: { nom: 'Aya Nakamura', photo: '/aya.jpg' } })
+    const wrapper = mount(ContentCard, { props: { nom: 'Aya Nakamura', photo: '/aya.webp' } })
 
     expect(wrapper.find('.content-card__nom').text()).toBe('Aya Nakamura')
-    expect(wrapper.find('.content-card__photo').attributes('src')).toBe('/aya.jpg')
+    expect(wrapper.find('.content-card__photo').attributes('src')).toBe('/aya.webp')
     expect(wrapper.find('.content-card__meta').exists()).toBe(false)
     expect(wrapper.findComponent(Tag).exists()).toBe(false)
   })
@@ -29,7 +29,7 @@ describe('ContentCard', () => {
   })
 
   it('bascule sur le placeholder si la photo est introuvable', async () => {
-    const wrapper = mount(ContentCard, { props: { nom: 'Charlotte de Witte', photo: '/introuvable.jpg' } })
+    const wrapper = mount(ContentCard, { props: { nom: 'Charlotte de Witte', photo: '/introuvable.webp' } })
 
     await wrapper.find('.content-card__photo').trigger('error')
 
@@ -38,7 +38,7 @@ describe('ContentCard', () => {
   })
 
   it('utilise telle quelle une URL complète (ex: Supabase Storage)', () => {
-    const url = 'https://exemple.supabase.co/storage/v1/object/public/photos/aya.jpg'
+    const url = 'https://exemple.supabase.co/storage/v1/object/public/photos/aya.webp'
     const wrapper = mount(ContentCard, { props: { nom: 'Aya Nakamura', photo: url } })
 
     expect(wrapper.find('.content-card__photo').attributes('src')).toBe(url)
@@ -46,7 +46,7 @@ describe('ContentCard', () => {
 
   it('affiche la scène et la date quand elles sont renseignées', () => {
     const wrapper = mount(ContentCard, {
-      props: { nom: 'Aya Nakamura', photo: '/aya.jpg', scene: 'Chrome', date: 'Samedi - 21h' },
+      props: { nom: 'Aya Nakamura', photo: '/aya.webp', scene: 'Chrome', date: 'Samedi - 21h' },
     })
 
     expect(wrapper.find('.content-card__scene').text()).toBe('Chrome')
@@ -55,7 +55,7 @@ describe('ContentCard', () => {
 
   it("n'affiche que la scène quand la date est absente", () => {
     const wrapper = mount(ContentCard, {
-      props: { nom: 'Aya Nakamura', photo: '/aya.jpg', scene: 'Chrome' },
+      props: { nom: 'Aya Nakamura', photo: '/aya.webp', scene: 'Chrome' },
     })
 
     expect(wrapper.find('.content-card__scene').text()).toBe('Chrome')
@@ -64,7 +64,7 @@ describe('ContentCard', () => {
 
   it('affiche la catégorie sous forme de Tag dès qu’elle est renseignée', () => {
     const wrapper = mount(ContentCard, {
-      props: { nom: 'Le féminisme en 2026', photo: '/conf.jpg', categorie: 'Tech' },
+      props: { nom: 'Le féminisme en 2026', photo: '/conf.webp', categorie: 'Tech' },
     })
 
     const tag = wrapper.findComponent(Tag)
@@ -74,7 +74,7 @@ describe('ContentCard', () => {
 
   it("exécute la prop onClick au clic sur la carte", async () => {
     const onClick = vi.fn()
-    const wrapper = mount(ContentCard, { props: { nom: 'Aya Nakamura', photo: '/aya.jpg', onClick } })
+    const wrapper = mount(ContentCard, { props: { nom: 'Aya Nakamura', photo: '/aya.webp', onClick } })
 
     await wrapper.find('.content-card__nom').trigger('click')
     expect(onClick).toHaveBeenCalledTimes(1)
@@ -84,7 +84,7 @@ describe('ContentCard', () => {
   })
 
   it("n'affiche aucun bouton like par défaut (ex. exposants)", () => {
-    const wrapper = mount(ContentCard, { props: { nom: 'Tatouage', photo: '/tatouage.jpg' } })
+    const wrapper = mount(ContentCard, { props: { nom: 'Tatouage', photo: '/tatouage.webp' } })
 
     expect(wrapper.findComponent(Like).exists()).toBe(false)
   })
@@ -94,7 +94,7 @@ describe('ContentCard', () => {
     const wrapper = mount(ContentCard, {
       props: {
         nom: 'Aya Nakamura',
-        photo: '/aya.jpg',
+        photo: '/aya.webp',
         likable: true,
         onClick,
         isLiked: false,

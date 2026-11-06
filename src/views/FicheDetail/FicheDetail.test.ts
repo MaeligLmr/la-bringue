@@ -83,14 +83,14 @@ describe('FicheDetail', () => {
     vi.mocked(loadFiche).mockResolvedValue({
       ...data('La parité sur scène'),
       intervenantes: [
-        { id: 1, nom: 'Inès Moreau', photo: '/conferencieres/ines.jpg', description: 'Programmatrice de festivals' },
+        { id: 1, nom: 'Inès Moreau', photo: '/conferencieres/ines.webp', description: 'Programmatrice de festivals' },
       ],
     })
 
     const { wrapper } = await mountFiche('/conference/fiche/1')
 
     const intervenante = wrapper.find('.intervenante-profil')
-    expect(intervenante.find('img').attributes('src')).toBe(photoUrl('/conferencieres/ines.jpg'))
+    expect(intervenante.find('img').attributes('src')).toBe(photoUrl('/conferencieres/ines.webp'))
     expect(intervenante.find('h3').text()).toBe('Inès Moreau')
     expect(intervenante.find('p').text()).toBe('Programmatrice de festivals')
     expect(intervenante.find('a').exists()).toBe(false)

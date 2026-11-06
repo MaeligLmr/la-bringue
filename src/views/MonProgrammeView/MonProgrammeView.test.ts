@@ -38,7 +38,7 @@ function concert(id: number, jour: string, heure: string, nom: string, heureFin:
         created_at: '',
         artiste_annonce: true,
         featuring: false,
-        Artiste: { id_artiste: id, created_at: '', nom, photo: null, description: null, categorie: 'Pop' },
+        Artiste: { id_artiste: id, nom, photo: null, categorie: 'Pop' },
       },
     ],
   }
@@ -60,8 +60,8 @@ function conference(id: number, jour: string, heure: string, titre: string, heur
 }
 
 const { concertHandler, conferenceHandler } = vi.hoisted(() => ({
-  concertHandler: { getAllDetailed: vi.fn() },
-  conferenceHandler: { getAllDetailed: vi.fn() },
+  concertHandler: { getByArtistes: vi.fn() },
+  conferenceHandler: { getByIds: vi.fn() },
 }))
 vi.mock('../../handlers/concert', () => ({ concertHandler }))
 vi.mock('../../handlers/conference', () => ({ conferenceHandler }))
@@ -93,12 +93,12 @@ beforeEach(async () => {
   vi.clearAllMocks()
   loggedIn.value = true
   useAuthModal().close()
-  concertHandler.getAllDetailed.mockResolvedValue([
+  concertHandler.getByArtistes.mockResolvedValue([
     concert(1, '2026-08-28', '22:15:00', 'Aya Nakamura'),
     concert(2, '2026-08-28', '17:00:00', 'Iliona'),
     concert(3, '2026-08-30', '19:00:00', 'Oklou'),
   ])
-  conferenceHandler.getAllDetailed.mockResolvedValue([conference(7, '2026-08-28', '14:00:00', 'Table ronde')])
+  conferenceHandler.getByIds.mockResolvedValue([conference(7, '2026-08-28', '14:00:00', 'Table ronde')])
   likeHandler.setLike.mockResolvedValue(undefined)
   likeHandler.getMine.mockResolvedValue([
     { id: 1, type: 'artiste' },
@@ -132,11 +132,11 @@ describe('MonProgrammeView', () => {
   })
 
   it('signale les deux éléments likés dont les horaires se chevauchent', async () => {
-    concertHandler.getAllDetailed.mockResolvedValue([
+    concertHandler.getByArtistes.mockResolvedValue([
       concert(1, '2026-08-28', '14:30:00', 'Aya Nakamura', '15:30:00'),
       concert(3, '2026-08-30', '19:00:00', 'Oklou', '20:00:00'),
     ])
-    conferenceHandler.getAllDetailed.mockResolvedValue([
+    conferenceHandler.getByIds.mockResolvedValue([
       conference(7, '2026-08-28', '14:00:00', 'Table ronde', '15:00:00'),
     ])
     const { wrapper } = await mountMonProgramme()
@@ -160,8 +160,8 @@ describe('MonProgrammeView', () => {
   })
 
   it("retire l'alerte quand on enlève le like d'un des deux éléments en conflit", async () => {
-    concertHandler.getAllDetailed.mockResolvedValue([concert(1, '2026-08-28', '14:30:00', 'Aya Nakamura', '15:30:00')])
-    conferenceHandler.getAllDetailed.mockResolvedValue([
+    concertHandler.getByArtistes.mockResolvedValue([concert(1, '2026-08-28', '14:30:00', 'Aya Nakamura', '15:30:00')])
+    conferenceHandler.getByIds.mockResolvedValue([
       conference(7, '2026-08-28', '14:00:00', 'Table ronde', '15:00:00'),
     ])
     const { wrapper } = await mountMonProgramme()
@@ -205,7 +205,7 @@ describe('MonProgrammeView', () => {
   })
 
   it("prévient quand la programmation n'a pas pu être chargée", async () => {
-    concertHandler.getAllDetailed.mockRejectedValue(new Error('réseau'))
+    concertHandler.getByArtistes.mockRejectedValue(new Error('réseau'))
     await mountMonProgramme()
 
     expect(toast.error).toHaveBeenCalledWith('Impossible de charger ton programme.')

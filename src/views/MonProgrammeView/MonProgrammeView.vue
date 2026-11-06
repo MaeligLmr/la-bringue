@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, onMounted, ref } from 'vue'
+import { computed, ref, watch } from 'vue'
 import { useRouter } from 'vue-router'
 import { toast } from 'vue-sonner'
 import Hero from '../../components/layout/Hero/Hero.vue'
@@ -20,7 +20,7 @@ import { useScrollReveal } from '../../composables/useScrollReveal/useScrollReve
 const router = useRouter()
 const { isLoggedIn, ready } = useAuth()
 const { open } = useAuthModal()
-const { isLiked, likesReady } = useLikes()
+const { isLiked, likedIds, likesReady } = useLikes()
 
 const artistes = ref<ArtisteCard[]>([])
 const conferences = ref<ConferenceCard[]>([])
@@ -31,18 +31,29 @@ const contentLoading = ref(true)
 const authChecked = ref(false)
 ready.then(() => (authChecked.value = true))
 
-onMounted(async () => {
-  try {
-    const [concerts, rows] = await Promise.all([concertHandler.getAllDetailed(), conferenceHandler.getAllDetailed()])
-    artistes.value = toArtisteCards(concerts)
-    conferences.value = toConferenceCards(rows)
-  } catch (error) {
-    console.error(error)
-    toast.error('Impossible de charger ton programme.')
-  } finally {
-    contentLoading.value = false
-  }
-})
+// On ne charge que les concerts et conférences likés, et seulement une fois
+// les likes connus : déconnectée, aucune requête n'est envoyée.
+watch(
+  () => isLoggedIn.value && likesReady.value,
+  async (shouldLoad) => {
+    if (!shouldLoad) return
+    contentLoading.value = true
+    try {
+      const [concerts, rows] = await Promise.all([
+        concertHandler.getByArtistes(likedIds('artiste')),
+        conferenceHandler.getByIds(likedIds('conference')),
+      ])
+      artistes.value = toArtisteCards(concerts)
+      conferences.value = toConferenceCards(rows)
+    } catch (error) {
+      console.error(error)
+      toast.error('Impossible de charger ton programme.')
+    } finally {
+      contentLoading.value = false
+    }
+  },
+  { immediate: true }
+)
 
 const loading = computed(
   () => !authChecked.value || (isLoggedIn.value && (contentLoading.value || !likesReady.value))

@@ -8,7 +8,8 @@ import type { ConferenceCard } from '../../types/ui/conferences'
 import type { ExposantCard } from '../../types/ui/exposants'
 import { formatHeure, labelOf, sceneValue, toArtisteCards, toConferenceCards, toExposantCards } from '../cards/cards'
 
-// Nombre de cartes « Ça peut aussi vous intéresser ».
+// Nombre de cartes « Ça peut aussi vous intéresser ». Les requêtes en demandent
+// une de plus : la fiche courante peut en faire partie et est filtrée ensuite.
 export const SUGGESTIONS_COUNT = 3
 
 function ficheRoute(type: FicheType, id: number) {
@@ -66,7 +67,7 @@ async function artistesDeLaScene(idScene: number, id: number): Promise<FicheSugg
 
 // Sans concert, les cartes n'ont ni date ni scène.
 async function artistesDeLaCategorie(categorie: string, id: number): Promise<FicheSuggestion[]> {
-  return (await artisteHandler.getByCategorie(categorie))
+  return (await artisteHandler.getByCategorie(categorie, SUGGESTIONS_COUNT + 1))
     .filter((artiste) => artiste.id_artiste !== id)
     .slice(0, SUGGESTIONS_COUNT)
     .map((artiste) => ({
@@ -121,7 +122,7 @@ async function loadConference(id: number): Promise<FicheData | null> {
   const conference = await conferenceHandler.getDetailById(id)
   if (!conference) return null
 
-  const voisines = conference.theme ? await conferenceHandler.getByTheme(conference.theme) : []
+  const voisines = conference.theme ? await conferenceHandler.getByTheme(conference.theme, SUGGESTIONS_COUNT + 1) : []
   const suggestions = toConferenceCards(voisines)
     .filter((card) => card.id !== id)
     .slice(0, SUGGESTIONS_COUNT)
@@ -162,7 +163,7 @@ async function loadExposant(id: number): Promise<FicheData | null> {
   const exposant = await exposantHandler.getById(id)
   if (!exposant) return null
 
-  const voisins = exposant.categorie ? await exposantHandler.getByCategorie(exposant.categorie) : []
+  const voisins = exposant.categorie ? await exposantHandler.getByCategorie(exposant.categorie, SUGGESTIONS_COUNT + 1) : []
   const suggestions = toExposantCards(voisins)
     .filter((card) => card.id !== id)
     .slice(0, SUGGESTIONS_COUNT)

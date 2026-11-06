@@ -36,6 +36,12 @@ function isLiked(target: LikeTarget) {
   return likedKeys.has(keyOf(target))
 }
 
+// Identifiants likés pour un type de contenu (ex. pour charger uniquement ceux-là).
+function likedIds(type: LikeTarget['type']): number[] {
+  const prefix = `${type}-`
+  return [...likedKeys].filter((key) => key.startsWith(prefix)).map((key) => Number(key.slice(prefix.length)))
+}
+
 // Met à jour l'affichage tout de suite, puis enregistre en base. En cas
 // d'échec, on revient à l'état précédent si aucun clic plus récent n'a eu lieu.
 async function setLiked(target: LikeTarget, liked: boolean) {
@@ -89,5 +95,5 @@ function clearLikes() {
 }
 
 export function useLikes() {
-  return { isLiked, setLiked, addLike, loadLikes, clearLikes, likesReady: readonly(likesReady) }
+  return { isLiked, likedIds, setLiked, addLike, loadLikes, clearLikes, likesReady: readonly(likesReady) }
 }

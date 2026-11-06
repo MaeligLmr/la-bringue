@@ -1,6 +1,6 @@
 export interface Formule {
   id_formule: number
-  created_at: string
+  created_at?: string
   titre: string | null
   description: string | null
   jour_debut: string | null

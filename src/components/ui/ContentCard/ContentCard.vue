@@ -6,7 +6,7 @@ import Like from '../Like/Like.vue'
 import type { LikeTarget } from '../../../types/ui/like'
 import { useListSearch } from '../../../composables/useListSearch/useListSearch'
 import { photoUrl } from '../../../lib/photo/photo'
-import cardBg from '../../../assets/card/card-bg.png'
+import cardBg from '../../../assets/card/card-bg.webp'
 // Importé en texte brut puis injecté via v-html (fichier statique du dépôt,
 // jamais de contenu utilisateur) : contrairement à un <img>, le SVG en ligne
 // hérite de `color` (fill="currentColor"), donc suit le thème clair/sombre.

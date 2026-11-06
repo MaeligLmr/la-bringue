@@ -2,7 +2,7 @@
 import Button from '../../ui/Button/Button.vue'
 import Icon from '../../ui/Icon/Icon.vue'
 import { SOCIALS } from '../../../lib/socials/socials'
-import footerBg from '../../../assets/footer/footer-bg.png'
+import footerBg from '../../../assets/footer/footer-bg.webp'
 
 // Le motif est carrelé en repeat et teinté par --footer-image-mask à ~35%
 // d'opacité — reproduit en CSS pur via un dégradé plat de cette même
