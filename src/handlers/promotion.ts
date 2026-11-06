@@ -5,10 +5,10 @@ import { createCrudHandler, unwrap } from './crud'
 const TABLE = 'Promotion'
 
 export const promotionHandler = {
-  ...createCrudHandler<Promotion, 'id_promotion'>(TABLE, 'id_promotion'),
+  ...createCrudHandler<Promotion, 'id_promotion'>(TABLE, 'id_promotion', 'id_promotion, id_formule, description, reduction_prc, date_debut, date_fin'),
 
   async getByFormule(idFormule: number): Promise<Promotion[]> {
-    return unwrap<Promotion[]>(TABLE, await supabase.from(TABLE).select('*').eq('id_formule', idFormule))
+    return unwrap<Promotion[]>(TABLE, await supabase.from(TABLE).select('id_promotion, id_formule, description, reduction_prc, date_debut, date_fin').eq('id_formule', idFormule))
   },
 
   // Promotions en cours à l'instant `now` (date_debut <= now <= date_fin).
@@ -17,7 +17,7 @@ export const promotionHandler = {
     const iso = now.toISOString().slice(0, 19)
     return unwrap<Promotion[]>(
       TABLE,
-      await supabase.from(TABLE).select('*').lte('date_debut', iso).gte('date_fin', iso)
+      await supabase.from(TABLE).select('id_promotion, id_formule, description, reduction_prc, date_debut, date_fin').lte('date_debut', iso).gte('date_fin', iso)
     )
   },
 }

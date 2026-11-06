@@ -38,7 +38,7 @@ function concert(id: number, jour: string, heure: string, nom: string, heureFin:
         created_at: '',
         artiste_annonce: true,
         featuring: false,
-        Artiste: { id_artiste: id, created_at: '', nom, photo: null, description: null, categorie: 'Pop' },
+        Artiste: { id_artiste: id, nom, photo: null, categorie: 'Pop' },
       },
     ],
   }

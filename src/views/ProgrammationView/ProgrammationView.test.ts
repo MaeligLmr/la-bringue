@@ -50,8 +50,20 @@ const CONCERTS = [
   concert('2026-08-30', '20:55:00', 'Chrome', [{ nom: 'Theodora', categorie: 'Rap' }]),
 ]
 
+// Reproduit côté mock le filtrage (jour, scène, nom d'artiste) de Supabase ; tout
+// tient sur une page.
+function pageOf({ search = '', jour = '', scene = '' }: { search?: string; jour?: string; scene?: string }) {
+  const rows = CONCERTS.filter(
+    (row) =>
+      (!jour || row.jour === jour) &&
+      (!scene || row.Scene!.nom!.toLowerCase().startsWith(scene)) &&
+      row.ConcertArtiste.some(({ Artiste }) => Artiste!.nom!.toLowerCase().includes(search.toLowerCase()))
+  )
+  return { rows, hasMore: false }
+}
+
 vi.mock('../../handlers/concert', () => ({
-  concertHandler: { getAllDetailed: vi.fn(async () => CONCERTS) },
+  concertHandler: { getPage: vi.fn(async (params) => pageOf(params)) },
 }))
 
 async function mountProgrammation(url = '/') {
@@ -122,6 +134,7 @@ describe('ProgrammationView', () => {
     const wrapper = await mountProgrammation()
 
     await filterButton(wrapper, 'Samedi 29 août').trigger('click')
+    await flushPromises()
 
     expect(displayedNames(wrapper)).toEqual(['Oklou', 'Addison Rae'])
 
@@ -132,6 +145,7 @@ describe('ProgrammationView', () => {
     const wrapper = await mountProgrammation()
 
     await filterButton(wrapper, '2000’').trigger('click')
+    await flushPromises()
 
     expect(displayedNames(wrapper)).toEqual(['Oklou'])
 
@@ -142,13 +156,33 @@ describe('ProgrammationView', () => {
     const wrapper = await mountProgrammation()
 
     await filterButton(wrapper, 'Dimanche 30 août').trigger('click')
+    await flushPromises()
     await filterButton(wrapper, 'Soft').trigger('click')
+    await flushPromises()
 
     expect(displayedNames(wrapper)).toEqual(['Marguerite', 'Ethel Cain'])
     expect(wrapper.findAll('.content-card__scene').map((node) => node.text())).toEqual([
       'Soft',
       'Soft',
     ])
+
+    wrapper.unmount()
+  })
+
+  it('demande à Supabase le jour et la scène choisis, depuis la première page', async () => {
+    const wrapper = await mountProgrammation()
+
+    await filterButton(wrapper, 'Dimanche 30 août').trigger('click')
+    await flushPromises()
+    await filterButton(wrapper, 'Soft').trigger('click')
+    await flushPromises()
+
+    expect(concertHandler.getPage).toHaveBeenLastCalledWith({
+      offset: 0,
+      search: '',
+      jour: '2026-08-30',
+      scene: 'soft',
+    })
 
     wrapper.unmount()
   })
@@ -163,7 +197,7 @@ describe('ProgrammationView', () => {
 
   it('affiche un toast si la programmation ne se charge pas', async () => {
     vi.spyOn(console, 'error').mockImplementation(() => {})
-    vi.mocked(concertHandler.getAllDetailed).mockRejectedValueOnce(new Error('[Concert] permission denied'))
+    vi.mocked(concertHandler.getPage).mockRejectedValueOnce(new Error('[Concert] permission denied'))
     vi.mocked(toast.error).mockClear()
 
     const wrapper = await mountProgrammation()
