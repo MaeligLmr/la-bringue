@@ -7,18 +7,24 @@ import { describe, it, expect, beforeEach, vi } from 'vitest'
 // between tests.
 function mockSupabase({
   session = null,
+  roles = {},
 }: {
   session?: { user: { id: string; email: string } } | null
+  roles?: Record<string, string>
 } = {}) {
   const onAuthStateChange = vi.fn()
   const signOut = vi.fn().mockResolvedValue({ error: null })
   const getSession = vi.fn().mockResolvedValue({ data: { session } })
+  const eq = vi.fn((_column: string, id: string) => ({
+    maybeSingle: vi.fn().mockResolvedValue({ data: roles[id] ? { role: roles[id] } : null, error: null }),
+  }))
+  const from = vi.fn(() => ({ select: vi.fn(() => ({ eq })) }))
 
   vi.doMock('../../supabase.js', () => ({
-    supabase: { auth: { getSession, onAuthStateChange, signOut } },
+    supabase: { from, auth: { getSession, onAuthStateChange, signOut } },
   }))
 
-  return { getSession, onAuthStateChange, signOut }
+  return { getSession, onAuthStateChange, signOut, from }
 }
 
 beforeEach(() => {
@@ -68,6 +74,57 @@ describe('useAuth', () => {
 
     expect(userRef.value).toBeNull()
     expect(isLoggedIn.value).toBe(false)
+  })
+
+  it('isAdmin vaut true dès ready pour une session admin persistée', async () => {
+    const user = { id: 'admin-1', email: 'orga@example.com' }
+    mockSupabase({ session: { user }, roles: { 'admin-1': 'admin' } })
+
+    const { useAuth } = await import('./useAuth')
+    const { isAdmin, ready } = useAuth()
+    await ready
+
+    expect(isAdmin.value).toBe(true)
+  })
+
+  it("isAdmin reste false pour une utilisatrice sans rôle admin", async () => {
+    const user = { id: 'user-1', email: 'alice@example.com' }
+    mockSupabase({ session: { user }, roles: { 'user-1': 'user' } })
+
+    const { useAuth } = await import('./useAuth')
+    const { isAdmin, ready } = useAuth()
+    await ready
+
+    expect(isAdmin.value).toBe(false)
+  })
+
+  it('isAdmin suit la connexion puis la déconnexion sans recharger la page', async () => {
+    const { onAuthStateChange } = mockSupabase({ session: null, roles: { 'admin-1': 'admin' } })
+
+    const { useAuth } = await import('./useAuth')
+    const { isAdmin, ready } = useAuth()
+    await ready
+    expect(isAdmin.value).toBe(false)
+
+    const listener = onAuthStateChange.mock.calls[0][0]
+    listener('SIGNED_IN', { user: { id: 'admin-1', email: 'orga@example.com' } })
+    await vi.waitFor(() => expect(isAdmin.value).toBe(true))
+
+    listener('SIGNED_OUT', null)
+    expect(isAdmin.value).toBe(false)
+  })
+
+  it('ne relit pas le rôle à un simple rafraîchissement du token', async () => {
+    const user = { id: 'admin-1', email: 'orga@example.com' }
+    const { onAuthStateChange, from } = mockSupabase({ session: { user }, roles: { 'admin-1': 'admin' } })
+
+    const { useAuth } = await import('./useAuth')
+    await useAuth().ready
+
+    const listener = onAuthStateChange.mock.calls[0][0]
+    listener('TOKEN_REFRESHED', { user: { ...user } })
+
+    expect(from).toHaveBeenCalledOnce()
   })
 
   it('signOut() appelle supabase.auth.signOut', async () => {
