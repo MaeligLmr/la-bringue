@@ -12,6 +12,10 @@ import { formatHeure, labelOf, sceneValue, toArtisteCards, toConferenceCards, to
 // une de plus : la fiche courante peut en faire partie et est filtrée ensuite.
 export const SUGGESTIONS_COUNT = 3
 
+// Concerts demandés pour les suggestions d'une scène : plus que nécessaire, car
+// la fiche courante, les featurings et les artistes déjà vus sont écartés.
+export const SCENE_CONCERTS_LIMIT = SUGGESTIONS_COUNT * 4
+
 function ficheRoute(type: FicheType, id: number) {
   return { name: 'fiche', params: { type, id } }
 }
@@ -58,7 +62,7 @@ function exposantSuggestion(card: ExposantCard): FicheSuggestion {
 // Artistes de la même scène (via Supabase), une seule carte par artiste : un
 // artiste peut y jouer plusieurs fois, et les featurings n'ont pas de carte.
 async function artistesDeLaScene(idScene: number, id: number): Promise<FicheSuggestion[]> {
-  const cards = toArtisteCards(await concertHandler.getDetailedByScene(idScene))
+  const cards = toArtisteCards(await concertHandler.getDetailedByScene(idScene, SCENE_CONCERTS_LIMIT))
   return cards
     .filter((card, index) => card.idArtiste !== id && cards.findIndex((c) => c.idArtiste === card.idArtiste) === index)
     .slice(0, SUGGESTIONS_COUNT)

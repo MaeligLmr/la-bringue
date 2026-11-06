@@ -103,11 +103,11 @@ export const concertHandler = {
     )
   },
 
-  async getDetailedByScene(idScene: number): Promise<ConcertDetail[]> {
-    return unwrap<ConcertDetail[]>(
-      TABLE,
-      await supabase.from(TABLE).select(DETAIL_SELECT).eq('id_scene', idScene).order('jour').order('heure_debut')
-    )
+  // `limit` : les suggestions n'ont besoin que de quelques concerts.
+  async getDetailedByScene(idScene: number, limit?: number): Promise<ConcertDetail[]> {
+    let query = supabase.from(TABLE).select(DETAIL_SELECT).eq('id_scene', idScene).order('jour').order('heure_debut')
+    if (limit) query = query.limit(limit)
+    return unwrap<ConcertDetail[]>(TABLE, await query)
   },
   // Affiche d'un jour pour la home (même principe que rockenseine.com) : la
   // tête d'affiche est le dernier concert de la scène Chrome, suivie des
