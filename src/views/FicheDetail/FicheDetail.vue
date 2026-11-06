@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, watch } from 'vue'
+import { onBeforeUnmount, ref, watch } from 'vue'
 import { useRouter } from 'vue-router'
 import { toast } from 'vue-sonner'
 import Hero from '../../components/layout/Hero/Hero.vue'
@@ -9,6 +9,7 @@ import ContentCard from '../../components/ui/ContentCard/ContentCard.vue'
 import Loader from '../../components/ui/Loader/Loader.vue'
 import { loadFiche } from '../../lib/fiche/fiche'
 import type { FicheData, FicheType } from '../../types/ui/fiche.ts'
+import { useBreadcrumbTitle } from '../../composables/useBreadcrumbTitle/useBreadcrumbTitle'
 import { useScrollReveal } from '../../composables/useScrollReveal/useScrollReveal'
 
 const props = defineProps<{
@@ -17,6 +18,7 @@ const props = defineProps<{
 }>()
 
 const router = useRouter()
+const { breadcrumbTitle } = useBreadcrumbTitle()
 
 const data = ref<FicheData | null>(null)
 const status = ref<'loading' | 'ready' | 'not-found' | 'error'>('loading')
@@ -30,10 +32,12 @@ watch(
   async ([type, id]) => {
     const current = ++requestId
     status.value = 'loading'
+    breadcrumbTitle.value = null
     try {
       const result = await loadFiche(type, id)
       if (current !== requestId) return
       data.value = result
+      breadcrumbTitle.value = result?.fiche.nom ?? null
       status.value = result ? 'ready' : 'not-found'
     } catch (error) {
       if (current !== requestId) return
@@ -44,6 +48,8 @@ watch(
   },
   { immediate: true }
 )
+
+onBeforeUnmount(() => (breadcrumbTitle.value = null))
 
 // Apparition des titres, textes et cartes au défilement.
 useScrollReveal()
