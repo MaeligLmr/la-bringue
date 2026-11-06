@@ -3,5 +3,6 @@ import { createCrudHandler } from './crud'
 
 export const conferenciereHandler = createCrudHandler<Conferenciere, 'id_conferenciere'>(
   'Conferenciere',
-  'id_conferenciere'
+  'id_conferenciere',
+  'id_conferenciere, nom, description, photo'
 )

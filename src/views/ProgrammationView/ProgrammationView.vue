@@ -1,27 +1,16 @@
 <script setup lang="ts">
-import { onMounted, ref, watch } from 'vue'
+import { ref, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { toast } from 'vue-sonner'
 import Hero from '../../components/layout/Hero/Hero.vue'
 import FilterableList from '../../components/ui/FilterableList/FilterableList.vue'
 import ContentCard from '../../components/ui/ContentCard/ContentCard.vue'
 import type { FilterConfig, FilterValues } from '../../types/ui/filterable-list.ts'
-import { JOURS, SCENES, type ArtisteCard } from '../../types/ui/programmation.ts'
+import { JOURS, SCENES } from '../../types/ui/programmation.ts'
 import { concertHandler } from '../../handlers/concert'
 import { labelOf, toArtisteCards } from '../../lib/cards/cards'
+import { usePaginatedList } from '../../composables/usePaginatedList/usePaginatedList'
 import { useScrollReveal } from '../../composables/useScrollReveal/useScrollReveal'
-
-// Déjà triés par jour puis heure côté Supabase.
-const artistes = ref<ArtisteCard[]>([])
-
-onMounted(async () => {
-  try {
-    artistes.value = toArtisteCards(await concertHandler.getAllDetailed())
-  } catch (error) {
-    console.error(error)
-    toast.error('Impossible de charger la programmation.')
-  }
-})
 
 const filters: FilterConfig[] = [
   { key: 'date', label: 'Jour', allLabel: 'Tous les jours', options: JOURS },
@@ -31,6 +20,25 @@ const filters: FilterConfig[] = [
 const router = useRouter()
 const { date, scene } = useRoute().query
 const selected = ref<FilterValues>({ date: String(date ?? ''), scene: String(scene ?? '') })
+const search = ref('')
+
+// Recherche, jour et scène sont appliqués par Supabase ; la programmation se
+// charge par pages de concerts au fil du défilement, déjà triée par jour puis heure.
+const {
+  items: artistes,
+  hasMore,
+  loading,
+  failed,
+  loadMore,
+} = usePaginatedList({
+  fetchPage: async (offset, { search, filters }) => {
+    const page = await concertHandler.getPage({ offset, search, jour: filters.date, scene: filters.scene })
+    return { ...page, rows: toArtisteCards(page.rows) }
+  },
+  search,
+  filters: selected,
+  onError: () => toast.error('Impossible de charger la programmation.'),
+})
 
 watch(selected, ({ date, scene }) => {
   router.replace({ query: { date: date || undefined, scene: scene || undefined } })
@@ -44,7 +52,17 @@ useScrollReveal()
   <main class="programmation">
     <Hero />
     <div class="programmation__content">
-      <FilterableList v-model:selected="selected" :items="artistes" :filters="filters">
+      <FilterableList
+        v-model:selected="selected"
+        v-model:search="search"
+        :items="artistes"
+        :filters="filters"
+        server-side
+        :has-more="hasMore"
+        :loading="loading"
+        :failed="failed"
+        @load-more="loadMore"
+      >
         <template #item="{ item }">
           <ContentCard
             :nom="item.nom"

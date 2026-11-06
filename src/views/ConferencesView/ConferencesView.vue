@@ -7,26 +7,17 @@ import FilterableList from '../../components/ui/FilterableList/FilterableList.vu
 import ContentCard from '../../components/ui/ContentCard/ContentCard.vue'
 import type { FilterConfig, FilterValues } from '../../types/ui/filterable-list.ts'
 import { JOURS } from '../../types/ui/programmation.ts'
-import type { ConferenceCard } from '../../types/ui/conferences.ts'
 import { conferenceHandler } from '../../handlers/conference'
 import { labelOf, toConferenceCards } from '../../lib/cards/cards'
+import { usePaginatedList } from '../../composables/usePaginatedList/usePaginatedList'
 import { useScrollReveal } from '../../composables/useScrollReveal/useScrollReveal'
 
-// Déjà triées par jour puis heure côté Supabase.
-const conferences = ref<ConferenceCard[]>([])
 // Valeurs de l'enum `themes_conferences`, dans l'ordre de la base.
 const themes = ref<string[]>([])
 
-// Chargements indépendants : si la fonction RPC échoue, la liste s'affiche
-// quand même (sans options de filtre thème).
+// Chargement indépendant de la liste : si la fonction RPC échoue, la liste
+// s'affiche quand même (sans options de filtre thème).
 onMounted(() => {
-  conferenceHandler
-    .getAllDetailed()
-    .then((rows) => (conferences.value = toConferenceCards(rows)))
-    .catch((error) => {
-      console.error(error)
-      toast.error('Impossible de charger les conférences.')
-    })
   conferenceHandler
     .getThemes()
     .then((values) => (themes.value = values))
@@ -49,6 +40,25 @@ const filters = computed<FilterConfig[]>(() => [
 const router = useRouter()
 const { date, theme } = useRoute().query
 const selected = ref<FilterValues>({ date: String(date ?? ''), theme: String(theme ?? '') })
+const search = ref('')
+
+// Recherche, jour et thème sont appliqués par Supabase ; la liste se charge par
+// pages au fil du défilement. Déjà triées par jour puis heure côté Supabase.
+const {
+  items: conferences,
+  hasMore,
+  loading,
+  failed,
+  loadMore,
+} = usePaginatedList({
+  fetchPage: async (offset, { search, filters }) => {
+    const page = await conferenceHandler.getPage({ offset, search, jour: filters.date, theme: filters.theme })
+    return { ...page, rows: toConferenceCards(page.rows) }
+  },
+  search,
+  filters: selected,
+  onError: () => toast.error('Impossible de charger les conférences.'),
+})
 
 watch(selected, ({ date, theme }) => {
   router.replace({ query: { date: date || undefined, theme: theme || undefined } })
@@ -64,9 +74,15 @@ useScrollReveal()
     <div class="conferences__content">
       <FilterableList
         v-model:selected="selected"
+        v-model:search="search"
         :items="conferences"
         :filters="filters"
         search-placeholder="Rechercher par titre"
+        server-side
+        :has-more="hasMore"
+        :loading="loading"
+        :failed="failed"
+        @load-more="loadMore"
       >
         <template #item="{ item }">
           <ContentCard

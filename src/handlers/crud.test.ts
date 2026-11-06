@@ -31,7 +31,7 @@ describe('createCrudHandler', () => {
     const { from, chain } = mockSupabase({ data: rows, error: null })
     const { createCrudHandler } = await import('./crud')
 
-    const result = await createCrudHandler<Row, 'id_row'>('Row', 'id_row').getAll()
+    const result = await createCrudHandler<Row, 'id_row'>('Row', 'id_row', 'id_row, nom').getAll()
 
     expect(from).toHaveBeenCalledWith('Row')
     expect(chain.order).toHaveBeenCalledWith('id_row')
@@ -42,7 +42,7 @@ describe('createCrudHandler', () => {
     const { chain } = mockSupabase({ data: null, error: null })
     const { createCrudHandler } = await import('./crud')
 
-    const result = await createCrudHandler<Row, 'id_row'>('Row', 'id_row').getById(42)
+    const result = await createCrudHandler<Row, 'id_row'>('Row', 'id_row', 'id_row, nom').getById(42)
 
     expect(chain.eq).toHaveBeenCalledWith('id_row', 42)
     expect(result).toBeNull()
@@ -53,7 +53,7 @@ describe('createCrudHandler', () => {
     const { chain } = mockSupabase({ data: updated, error: null })
     const { createCrudHandler } = await import('./crud')
 
-    const result = await createCrudHandler<Row, 'id_row'>('Row', 'id_row').update(3, { nom: 'B' })
+    const result = await createCrudHandler<Row, 'id_row'>('Row', 'id_row', 'id_row, nom').update(3, { nom: 'B' })
 
     expect(chain.update).toHaveBeenCalledWith({ nom: 'B' })
     expect(chain.eq).toHaveBeenCalledWith('id_row', 3)
@@ -64,7 +64,7 @@ describe('createCrudHandler', () => {
     mockSupabase({ data: null, error: { message: 'permission denied', code: '42501' } })
     const { createCrudHandler, HandlerError } = await import('./crud')
 
-    const promise = createCrudHandler<Row, 'id_row'>('Row', 'id_row').remove(1)
+    const promise = createCrudHandler<Row, 'id_row'>('Row', 'id_row', 'id_row, nom').remove(1)
 
     await expect(promise).rejects.toBeInstanceOf(HandlerError)
     await expect(promise).rejects.toMatchObject({ message: '[Row] permission denied', code: '42501' })

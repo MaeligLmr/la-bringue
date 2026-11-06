@@ -2,7 +2,7 @@ import { describe, it, expect, vi } from 'vitest'
 import { flushPromises, mount } from '@vue/test-utils'
 import { createRouter, createWebHistory } from 'vue-router'
 import ConferencesView from './ConferencesView.vue'
-import type { ConferenceDetail } from '../../handlers/conference'
+import type { ConferenceResume } from '../../handlers/conference'
 import { toast } from 'vue-sonner'
 import { conferenceHandler } from '../../handlers/conference'
 
@@ -16,24 +16,18 @@ function conference(
   titre: string,
   theme: string,
   conferencieres: string[]
-): ConferenceDetail {
+): ConferenceResume {
   const idConference = ++id
   return {
     id_conference: idConference,
-    created_at: '',
     titre,
     photo: null,
     theme,
-    description: null,
     jour,
     heure_debut: heure,
     heure_fin: null,
-    Participation: conferencieres.map((nom, index) => ({
-      id_participation: idConference * 10 + index,
-      created_at: '',
-      id_conferenciere: idConference * 10 + index,
-      id_conference: idConference,
-      Conferenciere: { id_conferenciere: idConference * 10 + index, created_at: '', nom, description: null, photo: null },
+    Participation: conferencieres.map((nom) => ({
+      Conferenciere: { nom },
     })),
   }
 }
@@ -49,9 +43,21 @@ const CONFERENCES = [
 // Valeurs de l'enum `themes_conferences` renvoyées par la fonction RPC.
 const THEMES = ['Feminisme', 'Écologie', 'Tolérance', 'Sante']
 
+// Reproduit côté mock le filtrage (jour, thème, recherche) de Supabase ; tout
+// tient sur une page.
+function pageOf({ search = '', jour = '', theme = '' }: { search?: string; jour?: string; theme?: string }) {
+  const rows = CONFERENCES.filter(
+    (row) =>
+      (!jour || row.jour === jour) &&
+      (!theme || row.theme === theme) &&
+      row.titre!.toLowerCase().includes(search.toLowerCase())
+  )
+  return { rows, hasMore: false }
+}
+
 vi.mock('../../handlers/conference', () => ({
   conferenceHandler: {
-    getAllDetailed: vi.fn(async () => CONFERENCES),
+    getPage: vi.fn(async (params) => pageOf(params)),
     getThemes: vi.fn(async () => THEMES),
   },
 }))
@@ -120,8 +126,27 @@ describe('ConferencesView', () => {
     const wrapper = await mountConferences()
 
     await filterButton(wrapper, 'Feminisme').trigger('click')
+    await flushPromises()
 
     expect(displayedNames(wrapper)).toEqual(['La fête au féminin', 'Rap et engagement'])
+
+    wrapper.unmount()
+  })
+
+  it('demande à Supabase le jour et le thème choisis', async () => {
+    const wrapper = await mountConferences()
+
+    await filterButton(wrapper, 'Samedi 29 août').trigger('click')
+    await flushPromises()
+    await filterButton(wrapper, 'Écologie').trigger('click')
+    await flushPromises()
+
+    expect(conferenceHandler.getPage).toHaveBeenLastCalledWith({
+      offset: 0,
+      search: '',
+      jour: '2026-08-29',
+      theme: 'Écologie',
+    })
 
     wrapper.unmount()
   })
@@ -130,7 +155,9 @@ describe('ConferencesView', () => {
     const wrapper = await mountConferences()
 
     await filterButton(wrapper, 'Samedi 29 août').trigger('click')
+    await flushPromises()
     await filterButton(wrapper, 'Écologie').trigger('click')
+    await flushPromises()
 
     expect(displayedNames(wrapper)).toEqual(['Festivals durables'])
 
@@ -141,6 +168,7 @@ describe('ConferencesView', () => {
     const wrapper = await mountConferences()
 
     await filterButton(wrapper, 'Samedi 29 août').trigger('click')
+    await flushPromises()
 
     expect(displayedNames(wrapper)).toEqual(['Produire sa musique', 'Festivals durables'])
 
@@ -158,7 +186,7 @@ describe('ConferencesView', () => {
 
   it('affiche un toast si les conférences ne se chargent pas', async () => {
     vi.spyOn(console, 'error').mockImplementation(() => {})
-    vi.mocked(conferenceHandler.getAllDetailed).mockRejectedValueOnce(new Error('[Conference] permission denied'))
+    vi.mocked(conferenceHandler.getPage).mockRejectedValueOnce(new Error('[Conference] permission denied'))
     vi.mocked(toast.error).mockClear()
 
     const wrapper = await mountConferences()

@@ -7,12 +7,18 @@ import { createCrudHandler, unwrap } from './crud'
 const TABLE = 'Participation'
 
 export const participationHandler = {
-  ...createCrudHandler<Participation, 'id_participation'>(TABLE, 'id_participation'),
+  ...createCrudHandler<Participation, 'id_participation'>(TABLE, 'id_participation', 'id_participation, id_conferenciere, id_conference'),
 
   async getConferencieresByConference(
     idConference: number
   ): Promise<(Participation & { Conferenciere: Conferenciere | null })[]> {
-    return unwrap(TABLE, await supabase.from(TABLE).select('*, Conferenciere(*)').eq('id_conference', idConference))
+    return unwrap(
+      TABLE,
+      await supabase
+        .from(TABLE)
+        .select('id_participation, id_conferenciere, id_conference, Conferenciere(id_conferenciere, nom, description, photo)')
+        .eq('id_conference', idConference)
+    )
   },
 
   async getConferencesByConferenciere(
@@ -20,7 +26,10 @@ export const participationHandler = {
   ): Promise<(Participation & { Conference: Conference | null })[]> {
     return unwrap(
       TABLE,
-      await supabase.from(TABLE).select('*, Conference(*)').eq('id_conferenciere', idConferenciere)
+      await supabase
+        .from(TABLE)
+        .select('id_participation, id_conferenciere, id_conference, Conference(id_conference, titre, photo, theme, description, jour, heure_debut, heure_fin)')
+        .eq('id_conferenciere', idConferenciere)
     )
   },
 }

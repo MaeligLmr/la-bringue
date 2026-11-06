@@ -1,7 +1,7 @@
 import type { ConcertDetail } from '../../handlers/concert'
-import type { ConferenceDetail } from '../../handlers/conference'
+import type { ConferenceResume } from '../../handlers/conference'
+import type { ExposantResume } from '../../handlers/exposant'
 import type { Actualite } from '../../types/database/actualite'
-import type { Exposant } from '../../types/database/exposant'
 import type { SelectOption } from '../../types/ui/select'
 import type { ArtisteCard } from '../../types/ui/programmation'
 import type { ConferenceCard } from '../../types/ui/conferences'
@@ -48,7 +48,7 @@ export function toArtisteCards(concerts: ConcertDetail[]): ArtisteCard[] {
   )
 }
 
-export function toConferenceCards(conferences: ConferenceDetail[]): ConferenceCard[] {
+export function toConferenceCards(conferences: ConferenceResume[]): ConferenceCard[] {
   return conferences.map((conference) => ({
     id: conference.id_conference,
     nom: conference.titre ?? '',
@@ -63,7 +63,7 @@ export function toConferenceCards(conferences: ConferenceDetail[]): ConferenceCa
   }))
 }
 
-export function toExposantCards(exposants: Exposant[]): ExposantCard[] {
+export function toExposantCards(exposants: ExposantResume[]): ExposantCard[] {
   return exposants.map((exposant) => ({
     id: exposant.id_exposant,
     nom: exposant.nom ?? '',

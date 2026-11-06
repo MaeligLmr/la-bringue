@@ -1,15 +1,15 @@
 import { supabase } from '../supabase.js'
-import type { Artiste } from '../types/database/artiste'
-import type { Conference } from '../types/database/conference'
 import type { Like } from '../types/database/like'
 import type { LikeTarget } from '../types/ui/like'
+import type { ArtisteResume } from './artiste'
+import type { ConferenceResume } from './conference'
 import { unwrap } from './crud'
 
 const TABLE = 'Like'
 
 export interface LikeDetail extends Like {
-  Artiste: Artiste | null
-  Conference: Conference | null
+  Artiste: ArtisteResume | null
+  Conference: ConferenceResume | null
 }
 
 // Les écritures et la lecture des likes de l'utilisatrice connectée passent
@@ -21,7 +21,7 @@ export const likeHandler = {
       TABLE,
       await supabase
         .from(TABLE)
-        .select('*, Artiste(*), Conference(*)')
+        .select('id_like, id_utilisatrice, id_conference, id_artiste, Artiste(id_artiste, nom, photo, categorie), Conference(id_conference, titre, photo, theme, jour, heure_debut, heure_fin)')
         .eq('id_utilisatrice', idUtilisatrice)
         .order('created_at', { ascending: false })
     )
@@ -47,7 +47,7 @@ export const likeHandler = {
   async countByArtiste(idArtiste: number): Promise<number> {
     const { count, error } = await supabase
       .from(TABLE)
-      .select('*', { count: 'exact', head: true })
+      .select('id_like', { count: 'exact', head: true })
       .eq('id_artiste', idArtiste)
     unwrap(TABLE, { data: null, error })
     return count ?? 0
@@ -56,7 +56,7 @@ export const likeHandler = {
   async countByConference(idConference: number): Promise<number> {
     const { count, error } = await supabase
       .from(TABLE)
-      .select('*', { count: 'exact', head: true })
+      .select('id_like', { count: 'exact', head: true })
       .eq('id_conference', idConference)
     unwrap(TABLE, { data: null, error })
     return count ?? 0

@@ -56,7 +56,7 @@ describe('artisteHandler', () => {
     const result = await artisteHandler.getDetailById(4)
 
     expect(from).toHaveBeenCalledWith('Artiste')
-    expect(chain.select).toHaveBeenCalledWith('*, ConcertArtiste(*, Concert(*, Scene(*)))')
+    expect(chain.select).toHaveBeenCalledWith(expect.stringContaining('Scene(id_scene, nom)'))
     expect(chain.eq).toHaveBeenCalledWith('id_artiste', 4)
     expect(result).toEqual({ id_artiste: 4 })
   })
@@ -80,7 +80,7 @@ describe('concertArtisteHandler', () => {
     await concertArtisteHandler.getAll()
 
     expect(from).toHaveBeenCalledWith('ConcertArtiste')
-    expect(chain.select).toHaveBeenCalledWith('*')
+    expect(chain.select).toHaveBeenCalledWith('id_artiste, id_concert, artiste_annonce, featuring')
   })
 
   it('getArtistesByConcert et getConcertsByArtiste joignent l’autre table', async () => {
@@ -88,11 +88,11 @@ describe('concertArtisteHandler', () => {
     const { concertArtisteHandler } = await import('./concert-artiste')
 
     await concertArtisteHandler.getArtistesByConcert(2)
-    expect(chain.select).toHaveBeenCalledWith('*, Artiste(*)')
+    expect(chain.select).toHaveBeenCalledWith(expect.stringContaining('Artiste(id_artiste, nom, photo, categorie)'))
     expect(chain.eq).toHaveBeenCalledWith('id_concert', 2)
 
     await concertArtisteHandler.getConcertsByArtiste(5)
-    expect(chain.select).toHaveBeenCalledWith('*, Concert(*)')
+    expect(chain.select).toHaveBeenCalledWith(expect.stringContaining('Concert(id_concert, id_scene, jour, heure_debut, heure_fin)'))
     expect(chain.eq).toHaveBeenCalledWith('id_artiste', 5)
   })
 
@@ -139,7 +139,7 @@ describe('conferenceHandler', () => {
     await conferenceHandler.getAllDetailed()
 
     expect(from).toHaveBeenCalledWith('Conference')
-    expect(chain.select).toHaveBeenCalledWith('*, Participation(*, Conferenciere(*))')
+    expect(chain.select).toHaveBeenCalledWith(expect.stringContaining('Participation(Conferenciere(nom))'))
     expect(chain.order).toHaveBeenNthCalledWith(1, 'jour')
     expect(chain.order).toHaveBeenNthCalledWith(2, 'heure_debut')
   })
@@ -206,7 +206,7 @@ describe('formuleHandler et promotionHandler', () => {
     await formuleHandler.getAllWithPromotions()
 
     expect(from).toHaveBeenCalledWith('Formule')
-    expect(chain.select).toHaveBeenCalledWith('*, Promotion(*)')
+    expect(chain.select).toHaveBeenCalledWith(expect.stringContaining('Promotion(id_promotion, id_formule'))
     expect(chain.order).toHaveBeenCalledWith('jour_debut')
   })
 
@@ -218,7 +218,7 @@ describe('formuleHandler et promotionHandler', () => {
     const result = await formuleHandler.getAllHomepage()
 
     expect(from).toHaveBeenCalledWith('Formule')
-    expect(chain.select).toHaveBeenCalledWith('*, Promotion(*)')
+    expect(chain.select).toHaveBeenCalledWith(expect.stringContaining('Promotion(id_promotion, id_formule'))
     expect(chain.eq).toHaveBeenCalledWith('homepage', true)
     expect(chain.order).toHaveBeenCalledWith('jour_debut')
     expect(result).toEqual(rows)
@@ -261,11 +261,11 @@ describe('participationHandler', () => {
 
     await participationHandler.getConferencieresByConference(1)
     expect(from).toHaveBeenCalledWith('Participation')
-    expect(chain.select).toHaveBeenCalledWith('*, Conferenciere(*)')
+    expect(chain.select).toHaveBeenCalledWith(expect.stringContaining('Conferenciere(id_conferenciere, nom, description, photo)'))
     expect(chain.eq).toHaveBeenCalledWith('id_conference', 1)
 
     await participationHandler.getConferencesByConferenciere(2)
-    expect(chain.select).toHaveBeenCalledWith('*, Conference(*)')
+    expect(chain.select).toHaveBeenCalledWith(expect.stringContaining('Conference(id_conference, titre'))
     expect(chain.eq).toHaveBeenCalledWith('id_conferenciere', 2)
   })
 })
@@ -278,7 +278,7 @@ describe('likeHandler', () => {
     await likeHandler.getByUtilisatrice('user-1')
 
     expect(from).toHaveBeenCalledWith('Like')
-    expect(chain.select).toHaveBeenCalledWith('*, Artiste(*), Conference(*)')
+    expect(chain.select).toHaveBeenCalledWith(expect.stringContaining('Conference(id_conference, titre'))
     expect(chain.eq).toHaveBeenCalledWith('id_utilisatrice', 'user-1')
     expect(chain.order).toHaveBeenCalledWith('created_at', { ascending: false })
   })
@@ -315,7 +315,7 @@ describe('likeHandler', () => {
     const { likeHandler } = await import('./like')
 
     expect(await likeHandler.countByArtiste(4)).toBe(5)
-    expect(chain.select).toHaveBeenCalledWith('*', { count: 'exact', head: true })
+    expect(chain.select).toHaveBeenCalledWith('id_like', { count: 'exact', head: true })
     expect(await likeHandler.countByConference(9)).toBe(5)
 
     vi.resetModules()

@@ -6,26 +6,17 @@ import Hero from '../../components/layout/Hero/Hero.vue'
 import FilterableList from '../../components/ui/FilterableList/FilterableList.vue'
 import ContentCard from '../../components/ui/ContentCard/ContentCard.vue'
 import type { FilterConfig, FilterValues } from '../../types/ui/filterable-list.ts'
-import type { ExposantCard } from '../../types/ui/exposants.ts'
 import { exposantHandler } from '../../handlers/exposant'
 import { toExposantCards } from '../../lib/cards/cards'
+import { usePaginatedList } from '../../composables/usePaginatedList/usePaginatedList'
 import { useScrollReveal } from '../../composables/useScrollReveal/useScrollReveal'
 
-// Déjà triés par nom côté Supabase.
-const exposants = ref<ExposantCard[]>([])
 // Valeurs de l'enum `categories_exposants`, dans l'ordre de la base.
 const categories = ref<string[]>([])
 
-// Chargements indépendants : si la fonction RPC échoue, la liste s'affiche
-// quand même (sans options de filtre).
+// Chargement indépendant de la liste : si la fonction RPC échoue, la liste
+// s'affiche quand même (sans options de filtre).
 onMounted(() => {
-  exposantHandler
-    .getAllByNom()
-    .then((rows) => (exposants.value = toExposantCards(rows)))
-    .catch((error) => {
-      console.error(error)
-      toast.error('Impossible de charger les exposants.')
-    })
   exposantHandler
     .getCategories()
     .then((values) => (categories.value = values))
@@ -47,6 +38,25 @@ const filters = computed<FilterConfig[]>(() => [
 const router = useRouter()
 const { categorie } = useRoute().query
 const selected = ref<FilterValues>({ categorie: String(categorie ?? '') })
+const search = ref('')
+
+// Recherche et catégorie sont appliquées par Supabase ; la liste se charge par
+// pages au fil du défilement. Déjà triés par nom côté Supabase.
+const {
+  items: exposants,
+  hasMore,
+  loading,
+  failed,
+  loadMore,
+} = usePaginatedList({
+  fetchPage: async (offset, { search, filters }) => {
+    const page = await exposantHandler.getPage({ offset, search, categorie: filters.categorie })
+    return { ...page, rows: toExposantCards(page.rows) }
+  },
+  search,
+  filters: selected,
+  onError: () => toast.error('Impossible de charger les exposants.'),
+})
 
 watch(selected, ({ categorie }) => {
   router.replace({ query: { categorie: categorie || undefined } })
@@ -60,7 +70,17 @@ useScrollReveal()
   <main class="exposants">
     <Hero />
     <div class="exposants__content">
-      <FilterableList v-model:selected="selected" :items="exposants" :filters="filters">
+      <FilterableList
+        v-model:selected="selected"
+        v-model:search="search"
+        :items="exposants"
+        :filters="filters"
+        server-side
+        :has-more="hasMore"
+        :loading="loading"
+        :failed="failed"
+        @load-more="loadMore"
+      >
         <template #item="{ item }">
           <ContentCard
             :nom="item.nom"
