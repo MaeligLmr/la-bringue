@@ -13,9 +13,11 @@ async function loadRole(id: string | undefined) {
     return
   }
   try {
-    const { data } = await supabase.from('Profil').select('role').eq('id', id).maybeSingle()
-    if (user.value?.id === id) role.value = data?.role ?? null
-  } catch {
+    const { data, error } = await supabase.from('Profil').select('role').eq('id', id).maybeSingle()
+    if (error) console.error('[useAuth] lecture du rôle impossible', error)
+    if (user.value?.id === id) role.value = error ? null : (data?.role ?? null)
+  } catch (error) {
+    console.error('[useAuth] lecture du rôle impossible', error)
     if (user.value?.id === id) role.value = null
   }
 }
@@ -36,11 +38,19 @@ const ready = new Promise<void>((resolve) => {
   resolveReady = resolve
 })
 
-supabase.auth.getSession().then(async ({ data }) => {
-  user.value = data.session?.user ?? null
-  await roleLoaded
-  resolveReady()
-})
+// ready doit toujours se résoudre, même si getSession échoue : sinon les
+// consommateurs (Like, MonProgrammeView) restent bloqués indéfiniment.
+supabase.auth
+  .getSession()
+  .then(async ({ data }) => {
+    user.value = data.session?.user ?? null
+    await roleLoaded
+  })
+  .catch((error) => {
+    console.error('[useAuth] lecture de la session impossible', error)
+    user.value = null
+  })
+  .finally(resolveReady)
 
 // Keeps `user` in sync with every future auth event (sign in, sign out,
 // token refresh) — regardless of which part of the app triggered it.
