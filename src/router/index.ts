@@ -6,18 +6,18 @@ declare module 'vue-router' {
     hideSupport?: boolean
   }
 }
-import HomeView from '../views/HomeView.vue'
-import ProfileView from '../views/ProfileView.vue'
-import ProgrammationView from '../views/ProgrammationView.vue'
-import BilletterieView from '../views/BilletterieView.vue'
-import MonProgrammeView from '../views/MonProgrammeView.vue'
-import ExposantsView from '../views/ExposantsView.vue'
-import ConferencesView from '../views/ConferencesView.vue'
-import AProposView from '../views/AProposView.vue'
-import InfosPratiquesView from '../views/InfosPratiquesView.vue'
-import ActualitesView from '../views/ActualitesView.vue'
-import ActualiteDetailView from '../views/ActualiteDetailView.vue'
-import FicheDetail from '../views/FicheDetail.vue'
+import HomeView from '../views/HomeView/HomeView.vue'
+import ProfileView from '../views/ProfileView/ProfileView.vue'
+import ProgrammationView from '../views/ProgrammationView/ProgrammationView.vue'
+import BilletterieView from '../views/BilletterieView/BilletterieView.vue'
+import MonProgrammeView from '../views/MonProgrammeView/MonProgrammeView.vue'
+import ExposantsView from '../views/ExposantsView/ExposantsView.vue'
+import ConferencesView from '../views/ConferencesView/ConferencesView.vue'
+import AProposView from '../views/AProposView/AProposView.vue'
+import InfosPratiquesView from '../views/InfosPratiquesView/InfosPratiquesView.vue'
+import ActualitesView from '../views/ActualitesView/ActualitesView.vue'
+import ActualiteDetailView from '../views/ActualiteDetailView/ActualiteDetailView.vue'
+import FicheDetail from '../views/FicheDetail/FicheDetail.vue'
 
 export const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),

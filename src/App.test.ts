@@ -3,10 +3,10 @@ import { flushPromises, mount, type VueWrapper } from '@vue/test-utils'
 import { nextTick } from 'vue'
 import { createRouter, createWebHistory } from 'vue-router'
 import App from './App.vue'
-import { useAuthModal } from './composables/useAuthModal'
-import { useLikes } from './composables/useLikes'
-import LoginForm from './components/auth/LoginForm.vue'
-import SignUpForm from './components/auth/SignUpForm.vue'
+import { useAuthModal } from './composables/useAuthModal/useAuthModal'
+import { useLikes } from './composables/useLikes/useLikes'
+import LoginForm from './components/auth/LoginForm/LoginForm.vue'
+import SignUpForm from './components/auth/SignUpForm/SignUpForm.vue'
 
 const { toast } = vi.hoisted(() => ({ toast: { success: vi.fn() } }))
 

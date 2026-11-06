@@ -4,7 +4,7 @@ import './style.css'
 import './supabase'
 import App from './App.vue'
 import { router } from './router'
-import { useTheme } from './composables/useTheme'
+import { useTheme } from './composables/useTheme/useTheme'
 
 // Initialize as early as possible so <html data-theme> is set (from the
 // device's light/dark preference, unless the user has overridden it via
