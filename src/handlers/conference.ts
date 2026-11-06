@@ -22,10 +22,12 @@ export interface ConferenceResume extends Omit<Conference, 'description' | 'crea
 export const conferenceHandler = {
   ...createCrudHandler<Conference, 'id_conference'>(TABLE, 'id_conference', 'id_conference, titre, photo, theme, description, jour, heure_debut, heure_fin'),
 
-  async getAllDetailed(): Promise<ConferenceResume[]> {
+  // Conférences données par identifiant (Mon programme).
+  async getByIds(ids: number[]): Promise<ConferenceResume[]> {
+    if (ids.length === 0) return []
     return unwrap<ConferenceResume[]>(
       TABLE,
-      await supabase.from(TABLE).select(LIST_SELECT).order('jour').order('heure_debut')
+      await supabase.from(TABLE).select(LIST_SELECT).in('id_conference', ids).order('jour').order('heure_debut')
     )
   },
 

@@ -8,7 +8,7 @@ type Response = { data?: unknown; error?: unknown; count?: number | null }
 function mockSupabase(response: Response = { data: [], error: null }) {
   const chain: Record<string, ReturnType<typeof vi.fn>> & { then?: unknown } = {}
   for (const method of [
-    'select', 'insert', 'update', 'delete', 'eq', 'order', 'limit', 'lte', 'gte', 'single', 'maybeSingle',
+    'select', 'insert', 'update', 'delete', 'eq', 'in', 'order', 'limit', 'lte', 'gte', 'single', 'maybeSingle',
   ]) {
     chain[method] = vi.fn(() => chain)
   }
@@ -131,17 +131,49 @@ describe('concertArtisteHandler', () => {
   })
 })
 
+describe('concertHandler', () => {
+  it('getByArtistes ne garde que les concerts des artistes demandés, par jour puis heure', async () => {
+    const { from, chain } = mockSupabase()
+    const { concertHandler } = await import('./concert')
+
+    await concertHandler.getByArtistes([1, 3])
+
+    expect(from).toHaveBeenCalledWith('Concert')
+    expect(chain.select).toHaveBeenCalledWith(expect.stringContaining('ConcertArtiste!inner('))
+    expect(chain.in).toHaveBeenCalledWith('ConcertArtiste.id_artiste', [1, 3])
+    expect(chain.order).toHaveBeenNthCalledWith(1, 'jour')
+    expect(chain.order).toHaveBeenNthCalledWith(2, 'heure_debut')
+  })
+
+  it('getByArtistes n’interroge pas la base sans identifiant', async () => {
+    const { from } = mockSupabase()
+    const { concertHandler } = await import('./concert')
+
+    expect(await concertHandler.getByArtistes([])).toEqual([])
+    expect(from).not.toHaveBeenCalled()
+  })
+})
+
 describe('conferenceHandler', () => {
-  it('getAllDetailed joint les conférencières et trie par jour puis heure', async () => {
+  it('getByIds ne charge que les conférences demandées, par jour puis heure', async () => {
     const { from, chain } = mockSupabase()
     const { conferenceHandler } = await import('./conference')
 
-    await conferenceHandler.getAllDetailed()
+    await conferenceHandler.getByIds([7, 9])
 
     expect(from).toHaveBeenCalledWith('Conference')
     expect(chain.select).toHaveBeenCalledWith(expect.stringContaining('Participation(Conferenciere(nom))'))
+    expect(chain.in).toHaveBeenCalledWith('id_conference', [7, 9])
     expect(chain.order).toHaveBeenNthCalledWith(1, 'jour')
     expect(chain.order).toHaveBeenNthCalledWith(2, 'heure_debut')
+  })
+
+  it('getByIds n’interroge pas la base sans identifiant', async () => {
+    const { from } = mockSupabase()
+    const { conferenceHandler } = await import('./conference')
+
+    expect(await conferenceHandler.getByIds([])).toEqual([])
+    expect(from).not.toHaveBeenCalled()
   })
 
   it('getDetailById, getByJour et getByTheme filtrent sur la bonne colonne', async () => {
@@ -271,15 +303,15 @@ describe('participationHandler', () => {
 })
 
 describe('likeHandler', () => {
-  it('getByUtilisatrice joint artiste et conférence, du plus récent au plus ancien', async () => {
+  it('getMyDetails joint artiste et conférence sans filtrer par utilisatrice (RLS), du plus récent au plus ancien', async () => {
     const { from, chain } = mockSupabase()
     const { likeHandler } = await import('./like')
 
-    await likeHandler.getByUtilisatrice('user-1')
+    await likeHandler.getMyDetails()
 
     expect(from).toHaveBeenCalledWith('Like')
     expect(chain.select).toHaveBeenCalledWith(expect.stringContaining('Conference(id_conference, titre'))
-    expect(chain.eq).toHaveBeenCalledWith('id_utilisatrice', 'user-1')
+    expect(chain.eq).not.toHaveBeenCalled()
     expect(chain.order).toHaveBeenCalledWith('created_at', { ascending: false })
   })
 
@@ -310,25 +342,11 @@ describe('likeHandler', () => {
     expect(rpc).toHaveBeenLastCalledWith('set_like', { p_type: 'conference', p_id: 9, p_liked: false })
   })
 
-  it('countByArtiste et countByConference renvoient le total, 0 si la base ne répond pas de nombre', async () => {
-    const { chain } = mockSupabase({ count: 5 })
-    const { likeHandler } = await import('./like')
-
-    expect(await likeHandler.countByArtiste(4)).toBe(5)
-    expect(chain.select).toHaveBeenCalledWith('id_like', { count: 'exact', head: true })
-    expect(await likeHandler.countByConference(9)).toBe(5)
-
-    vi.resetModules()
-    mockSupabase({ count: null })
-    const { likeHandler: sansCompte } = await import('./like')
-    expect(await sansCompte.countByArtiste(4)).toBe(0)
-  })
-
   it('une erreur Supabase est levée en HandlerError', async () => {
     mockSupabase({ error: { message: 'permission denied', code: '42501' } })
     const { likeHandler } = await import('./like')
 
-    await expect(likeHandler.countByArtiste(1)).rejects.toMatchObject({
+    await expect(likeHandler.getMine()).rejects.toMatchObject({
       name: 'HandlerError',
       code: '42501',
     })

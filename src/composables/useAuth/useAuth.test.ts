@@ -127,6 +127,47 @@ describe('useAuth', () => {
     expect(from).toHaveBeenCalledOnce()
   })
 
+  it('ready se résout même si getSession rejette, et reste déconnecté', async () => {
+    const { getSession } = mockSupabase()
+    getSession.mockRejectedValue(new Error('réseau'))
+    const error = vi.spyOn(console, 'error').mockImplementation(() => {})
+
+    const { useAuth } = await import('./useAuth')
+    const { user, ready } = useAuth()
+    await ready
+
+    expect(user.value).toBeNull()
+    expect(error).toHaveBeenCalled()
+    error.mockRestore()
+  })
+
+  it('journalise une erreur de lecture du rôle et laisse isAdmin à false', async () => {
+    const user = { id: 'admin-1', email: 'orga@example.com' }
+    mockSupabase({ session: { user } })
+    vi.doMock('../../supabase.js', () => ({
+      supabase: {
+        from: () => ({
+          select: () => ({
+            eq: () => ({ maybeSingle: async () => ({ data: null, error: { message: 'permission denied' } }) }),
+          }),
+        }),
+        auth: {
+          getSession: async () => ({ data: { session: { user } } }),
+          onAuthStateChange: vi.fn(),
+        },
+      },
+    }))
+    const error = vi.spyOn(console, 'error').mockImplementation(() => {})
+
+    const { useAuth } = await import('./useAuth')
+    const { isAdmin, ready } = useAuth()
+    await ready
+
+    expect(isAdmin.value).toBe(false)
+    expect(error).toHaveBeenCalledWith('[useAuth] lecture du rôle impossible', { message: 'permission denied' })
+    error.mockRestore()
+  })
+
   it('signOut() appelle supabase.auth.signOut', async () => {
     const { signOut } = mockSupabase({ session: null })
 
