@@ -19,16 +19,13 @@ const normalize = (text: string) => text.replace(/\s/g, ' ')
 function formule(overrides: Partial<FormuleAvecPromotions>): FormuleAvecPromotions {
   return {
     id_formule: 1,
-    created_at: '',
     titre: 'Pass 1 jour',
     description: 'Un jour au choix',
     jour_debut: '2026-08-28',
     jour_fin: '2026-08-28',
     prix: 45,
     lien_shotgun: 'https://shotgun.live/pass-1-jour',
-    nbr_places_total: 100,
     nbr_places_restantes: 80,
-    homepage: true,
     nb_jours: '1 jour',
     Promotion: [],
     ...overrides,
@@ -44,9 +41,6 @@ const FORMULES = [
     nb_jours: '3 jours',
     Promotion: [
       {
-        id_promotion: 1,
-        created_at: '',
-        id_formule: 2,
         description: 'Early bird',
         reduction_prc: 20,
         date_debut: dans(-10),

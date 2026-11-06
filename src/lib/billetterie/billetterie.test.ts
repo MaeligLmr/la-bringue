@@ -25,16 +25,13 @@ function promotion(overrides: Partial<Promotion> = {}): Promotion {
 function formule(overrides: Partial<FormuleAvecPromotions> = {}): FormuleAvecPromotions {
   return {
     id_formule: 1,
-    created_at: '',
     titre: 'Pass 3 jours',
     description: 'Accès aux trois jours',
     jour_debut: '2026-08-28',
     jour_fin: '2026-08-30',
     prix: 90,
     lien_shotgun: 'https://shotgun.live/pass',
-    nbr_places_total: 500,
     nbr_places_restantes: 300,
-    homepage: true,
     nb_jours: '3 jours',
     Promotion: [],
     ...overrides,

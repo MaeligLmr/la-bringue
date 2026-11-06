@@ -251,7 +251,7 @@ describe('formuleHandler et promotionHandler', () => {
     await formuleHandler.getAllWithPromotions()
 
     expect(from).toHaveBeenCalledWith('Formule')
-    expect(chain.select).toHaveBeenCalledWith(expect.stringContaining('Promotion(id_promotion, id_formule'))
+    expect(chain.select).toHaveBeenCalledWith(expect.stringContaining('Promotion(description, reduction_prc, date_debut, date_fin)'))
     expect(chain.order).toHaveBeenCalledWith('jour_debut')
   })
 
@@ -263,7 +263,7 @@ describe('formuleHandler et promotionHandler', () => {
     const result = await formuleHandler.getAllHomepage()
 
     expect(from).toHaveBeenCalledWith('Formule')
-    expect(chain.select).toHaveBeenCalledWith(expect.stringContaining('Promotion(id_promotion, id_formule'))
+    expect(chain.select).toHaveBeenCalledWith(expect.stringContaining('Promotion(description, reduction_prc, date_debut, date_fin)'))
     expect(chain.eq).toHaveBeenCalledWith('homepage', true)
     expect(chain.order).toHaveBeenCalledWith('jour_debut')
     expect(result).toEqual(rows)
