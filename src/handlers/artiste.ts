@@ -9,6 +9,9 @@ const TABLE = 'Artiste'
 
 export type ArtisteResume = Pick<Artiste, 'id_artiste' | 'nom' | 'photo' | 'categorie'>
 
+// Juste de quoi afficher un nom cliquable (affiche de la home).
+export type ArtisteNom = Pick<Artiste, 'id_artiste' | 'nom'>
+
 export interface ArtisteDetail extends Artiste {
   ConcertArtiste: (ConcertArtiste & { Concert: (Concert & { Scene: Scene | null }) | null })[]
 }

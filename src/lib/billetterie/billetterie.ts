@@ -1,5 +1,4 @@
-import type { FormuleAvecPromotions } from '../../handlers/formule'
-import type { Promotion } from '../../types/database/promotion'
+import type { FormuleAvecPromotions, PromotionResume } from '../../handlers/formule'
 import type { FormuleCard, FormulePromo } from '../../types/ui/billetterie'
 
 // En dessous de ce nombre de places restantes, on le signale sur la carte.
@@ -48,14 +47,14 @@ export function formatPrix(prix: number) {
 
 // Les dates des promotions sont des « timestamp without time zone » : on les lit
 // à l'heure locale, comme elles ont été saisies.
-function isActive(promotion: Promotion, now: Date) {
+function isActive(promotion: PromotionResume, now: Date) {
   const debut = promotion.date_debut ? new Date(promotion.date_debut) : null
   const fin = promotion.date_fin ? new Date(promotion.date_fin) : null
   return !!promotion.reduction_prc && (!debut || debut <= now) && (!fin || fin >= now)
 }
 
 // La promotion en cours la plus avantageuse, avec sa date limite mise en forme.
-export function activePromo(promotions: Promotion[], now: Date): FormulePromo | null {
+export function activePromo(promotions: PromotionResume[], now: Date): FormulePromo | null {
   const best = promotions
     .filter((promotion) => isActive(promotion, now))
     .sort((a, b) => (b.reduction_prc ?? 0) - (a.reduction_prc ?? 0))[0]

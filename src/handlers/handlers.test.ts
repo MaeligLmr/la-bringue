@@ -145,6 +145,19 @@ describe('concertHandler', () => {
     expect(chain.order).toHaveBeenNthCalledWith(2, 'heure_debut')
   })
 
+  it('getDetailedByScene filtre sur la scène et applique la limite demandée', async () => {
+    const { chain } = mockSupabase()
+    const { concertHandler } = await import('./concert')
+
+    await concertHandler.getDetailedByScene(2, 12)
+    expect(chain.eq).toHaveBeenCalledWith('id_scene', 2)
+    expect(chain.limit).toHaveBeenCalledWith(12)
+
+    chain.limit.mockClear()
+    await concertHandler.getDetailedByScene(2)
+    expect(chain.limit).not.toHaveBeenCalled()
+  })
+
   it('getByArtistes n’interroge pas la base sans identifiant', async () => {
     const { from } = mockSupabase()
     const { concertHandler } = await import('./concert')
@@ -238,7 +251,7 @@ describe('formuleHandler et promotionHandler', () => {
     await formuleHandler.getAllWithPromotions()
 
     expect(from).toHaveBeenCalledWith('Formule')
-    expect(chain.select).toHaveBeenCalledWith(expect.stringContaining('Promotion(id_promotion, id_formule'))
+    expect(chain.select).toHaveBeenCalledWith(expect.stringContaining('Promotion(description, reduction_prc, date_debut, date_fin)'))
     expect(chain.order).toHaveBeenCalledWith('jour_debut')
   })
 
@@ -250,7 +263,7 @@ describe('formuleHandler et promotionHandler', () => {
     const result = await formuleHandler.getAllHomepage()
 
     expect(from).toHaveBeenCalledWith('Formule')
-    expect(chain.select).toHaveBeenCalledWith(expect.stringContaining('Promotion(id_promotion, id_formule'))
+    expect(chain.select).toHaveBeenCalledWith(expect.stringContaining('Promotion(description, reduction_prc, date_debut, date_fin)'))
     expect(chain.eq).toHaveBeenCalledWith('homepage', true)
     expect(chain.order).toHaveBeenCalledWith('jour_debut')
     expect(result).toEqual(rows)

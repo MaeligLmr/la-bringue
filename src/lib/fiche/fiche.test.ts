@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
-import { loadFiche, SUGGESTIONS_COUNT } from './fiche'
+import { loadFiche, SCENE_CONCERTS_LIMIT, SUGGESTIONS_COUNT } from './fiche'
 import { artisteHandler, type ArtisteDetail } from '../../handlers/artiste'
 import { concertHandler, type ConcertDetail } from '../../handlers/concert'
 import { conferenceHandler, type ConferenceDetail } from '../../handlers/conference'
@@ -106,7 +106,7 @@ describe('loadFiche — artiste', () => {
 
     const data = await loadFiche('artiste', 1)
 
-    expect(concertHandler.getDetailedByScene).toHaveBeenCalledWith(CHROME.id_scene)
+    expect(concertHandler.getDetailedByScene).toHaveBeenCalledWith(CHROME.id_scene, SCENE_CONCERTS_LIMIT)
     expect(data?.suggestions.map((s) => s.nom)).toEqual(['DJ', 'Noa'])
     expect(data?.suggestions[0].to).toEqual({ name: 'fiche', params: { type: 'artiste', id: 2 } })
   })

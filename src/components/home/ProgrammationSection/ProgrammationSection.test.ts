@@ -2,15 +2,15 @@ import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { flushPromises, mount } from '@vue/test-utils'
 import { createRouter, createWebHistory } from 'vue-router'
 import ProgrammationSection from './ProgrammationSection.vue'
-import type { Artiste } from '../../../types/database/artiste'
+import type { ArtisteNom } from '../../../handlers/artiste'
 import type { DayLineup } from '../../../handlers/concert'
 
 const { getDayLineup } = vi.hoisted(() => ({ getDayLineup: vi.fn() }))
 vi.mock('../../../handlers/concert', () => ({ concertHandler: { getDayLineup } }))
 
 let id = 0
-function artiste(nom: string): Artiste {
-  return { id_artiste: ++id, nom, created_at: '', photo: null, description: null, categorie: null }
+function artiste(nom: string): ArtisteNom {
+  return { id_artiste: ++id, nom }
 }
 
 const LINEUPS: Record<string, DayLineup> = {
