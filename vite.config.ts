@@ -6,6 +6,6 @@ export default defineConfig({
   plugins: [vue()],
   base: '/la-bringue/',
   build: {
-    outDir: 'docs'
+    outDir: 'dist'
   }
 })
