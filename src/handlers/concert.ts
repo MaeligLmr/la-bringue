@@ -31,10 +31,14 @@ function mainArtistes(concert: ConcertDetail): ArtisteResume[] {
 export const concertHandler = {
   ...createCrudHandler<Concert, 'id_concert'>(TABLE, 'id_concert', 'id_concert, id_scene, jour, heure_debut, heure_fin'),
 
-  async getAllDetailed(): Promise<ConcertDetail[]> {
+  // Concerts où joue au moins un des artistes donnés (Mon programme). !inner
+  // exclut les autres concerts et ne garde dans chacun que ces artistes.
+  async getByArtistes(idsArtistes: number[]): Promise<ConcertDetail[]> {
+    if (idsArtistes.length === 0) return []
+    const columns = DETAIL_SELECT.replace('ConcertArtiste(', 'ConcertArtiste!inner(')
     return unwrap<ConcertDetail[]>(
       TABLE,
-      await supabase.from(TABLE).select(DETAIL_SELECT).order('jour').order('heure_debut')
+      await supabase.from(TABLE).select(columns).in('ConcertArtiste.id_artiste', idsArtistes).order('jour').order('heure_debut')
     )
   },
 
