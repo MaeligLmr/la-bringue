@@ -2,7 +2,7 @@
 import { computed, ref, watch } from 'vue'
 import { photoUrl } from '../../../lib/photo/photo'
 import type { FicheIntervenante } from '../../../types/ui/fiche'
-import placeholder from '../../../assets/conferenciere/placeholder.jpg'
+import placeholder from '../../../assets/conferenciere/placeholder.webp'
 
 // Mini-profil d'une conférencière sur la fiche conférence : photo, nom, bio.
 // Pas de lien : les conférencières n'ont pas de page individuelle.
