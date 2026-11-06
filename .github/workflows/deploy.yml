@@ -23,7 +23,13 @@ jobs:
           node-version: 22
           cache: npm
       - run: npm ci
+      # Certains tests importent le vrai client Supabase, qui exige ces
+      # variables au chargement. Valeurs factices : aucun test ne contacte
+      # la vraie base, et les secrets restent hors de portée des PR.
       - run: npm test
+        env:
+          VITE_SUPABASE_URL: https://example.supabase.co
+          VITE_SUPABASE_PUBLISHABLE_KEY: test-key
 
   build:
     needs: test

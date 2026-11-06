@@ -37,7 +37,12 @@ describe('src/supabase.js - configuration', () => {
 // Test d'intégration : vérifie que src/supabase.js parvient réellement à
 // joindre le projet Supabase configuré dans .env.local (vrai appel réseau,
 // contrairement aux tests ci-dessus qui sont mockés).
-const hasEnv = Boolean(process.env.VITE_SUPABASE_URL && process.env.VITE_SUPABASE_PUBLISHABLE_KEY)
+// Ignoré aussi avec l'URL factice injectée par la CI (example.supabase.co).
+const hasEnv = Boolean(
+  process.env.VITE_SUPABASE_URL &&
+    process.env.VITE_SUPABASE_PUBLISHABLE_KEY &&
+    !process.env.VITE_SUPABASE_URL.includes('example.supabase.co')
+)
 
 describe.skipIf(!hasEnv)('src/supabase.js - connexion réelle', () => {
   it(
