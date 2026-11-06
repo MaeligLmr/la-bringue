@@ -100,7 +100,7 @@ function delai(joursRestants: number) {
   position: absolute;
   inset: 0;
   z-index: -1;
-  background: url('../../../assets/carrousel-tile/carrousel-tile-bg.png') center / cover no-repeat;
+  background: url('../../../assets/carrousel-tile/carrousel-tile-bg.webp') center / cover no-repeat;
   opacity: 0.4;
   pointer-events: none;
 }

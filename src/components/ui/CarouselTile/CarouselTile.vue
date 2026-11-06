@@ -3,7 +3,7 @@ import { useRouter } from 'vue-router'
 import Button from '../Button/Button.vue'
 import type { IconName } from '../../../types/ui/icon.ts'
 import type { CarouselTileVariant } from '../../../types/ui/carousel-tile.ts'
-import carrouselTileBg from '../../../assets/carrousel-tile/carrousel-tile-bg.png'
+import carrouselTileBg from '../../../assets/carrousel-tile/carrousel-tile-bg.webp'
 
 const props = withDefaults(
   defineProps<{

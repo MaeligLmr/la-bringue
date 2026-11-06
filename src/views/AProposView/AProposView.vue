@@ -3,14 +3,14 @@ import { useScrollReveal } from '../../composables/useScrollReveal/useScrollReve
 import Hero from '../../components/layout/Hero/Hero.vue'
 import Button from '../../components/ui/Button/Button.vue'
 import { SOCIALS } from '../../lib/socials/socials'
-import diceChrome from '../../assets/scenes/chrome/dice.png'
-import starChrome from '../../assets/scenes/chrome/star.png'
-import flowerSummer from '../../assets/scenes/summer/flower.png'
-import shellSummer from '../../assets/scenes/summer/shell.png'
-import stars2000 from '../../assets/scenes/2000/stars.png'
-import pa2000 from '../../assets/scenes/2000/pa.png'
-import kittySoft from '../../assets/scenes/soft/hellokitty.png'
-import cherriesSoft from '../../assets/scenes/soft/cherries.png'
+import diceChrome from '../../assets/scenes/chrome/dice.webp'
+import starChrome from '../../assets/scenes/chrome/star.webp'
+import flowerSummer from '../../assets/scenes/summer/flower.webp'
+import shellSummer from '../../assets/scenes/summer/shell.webp'
+import stars2000 from '../../assets/scenes/2000/stars.webp'
+import pa2000 from '../../assets/scenes/2000/pa.webp'
+import kittySoft from '../../assets/scenes/soft/hellokitty.webp'
+import cherriesSoft from '../../assets/scenes/soft/cherries.webp'
 
 // Apparition au défilement (voir composables/useScrollReveal.ts), sur les blocs de la page.
 useScrollReveal(

@@ -3,8 +3,8 @@ import { nextTick } from 'vue'
 import { mount } from '@vue/test-utils'
 import SupportSection from './SupportSection.vue'
 import { useTheme } from '../../../composables/useTheme/useTheme'
-import radioNovaBlanc from '../../../assets/sponsor/sponsor1.png'
-import radioNovaNoir from '../../../assets/sponsor/sponsor1-noir.png'
+import radioNovaBlanc from '../../../assets/sponsor/sponsor1.webp'
+import radioNovaNoir from '../../../assets/sponsor/sponsor1-noir.webp'
 
 afterEach(() => {
   useTheme().setPreference('system')
