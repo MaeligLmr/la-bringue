@@ -1,8 +1,8 @@
 <script setup lang="ts">
 import { computed } from 'vue'
 import { useTheme } from '../../../composables/useTheme/useTheme'
-import radioNovaBlanc from '../../../assets/sponsor/sponsor1.webp'
-import radioNovaNoir from '../../../assets/sponsor/sponsor1-noir.webp'
+import radioNovaBlanc from '../../../assets/sponsor/sponsor1.png'
+import radioNovaNoir from '../../../assets/sponsor/sponsor1-noir.png'
 import reporterre from '../../../assets/sponsor/sponsor2.webp'
 import theSimones from '../../../assets/sponsor/sponsor3.webp'
 
