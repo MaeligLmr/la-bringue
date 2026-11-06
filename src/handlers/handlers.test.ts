@@ -271,15 +271,15 @@ describe('participationHandler', () => {
 })
 
 describe('likeHandler', () => {
-  it('getByUtilisatrice joint artiste et conférence, du plus récent au plus ancien', async () => {
+  it('getMyDetails joint artiste et conférence sans filtrer par utilisatrice (RLS), du plus récent au plus ancien', async () => {
     const { from, chain } = mockSupabase()
     const { likeHandler } = await import('./like')
 
-    await likeHandler.getByUtilisatrice('user-1')
+    await likeHandler.getMyDetails()
 
     expect(from).toHaveBeenCalledWith('Like')
     expect(chain.select).toHaveBeenCalledWith(expect.stringContaining('Conference(id_conference, titre'))
-    expect(chain.eq).toHaveBeenCalledWith('id_utilisatrice', 'user-1')
+    expect(chain.eq).not.toHaveBeenCalled()
     expect(chain.order).toHaveBeenCalledWith('created_at', { ascending: false })
   })
 

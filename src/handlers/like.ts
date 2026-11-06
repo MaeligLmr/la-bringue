@@ -15,14 +15,14 @@ export interface LikeDetail extends Like {
 // Les écritures et la lecture des likes de l'utilisatrice connectée passent
 // par les fonctions Postgres set_like / get_my_likes : elles utilisent
 // auth.uid() côté base, on n'envoie donc jamais l'id de l'utilisatrice.
+// getMyDetails n'a pas besoin de filtrer : les RLS ne renvoient que ses likes.
 export const likeHandler = {
-  async getByUtilisatrice(idUtilisatrice: string): Promise<LikeDetail[]> {
+  async getMyDetails(): Promise<LikeDetail[]> {
     return unwrap<LikeDetail[]>(
       TABLE,
       await supabase
         .from(TABLE)
         .select('id_like, id_utilisatrice, id_conference, id_artiste, Artiste(id_artiste, nom, photo, categorie), Conference(id_conference, titre, photo, theme, jour, heure_debut, heure_fin)')
-        .eq('id_utilisatrice', idUtilisatrice)
         .order('created_at', { ascending: false })
     )
   },
