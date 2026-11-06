@@ -11,7 +11,7 @@ import { supabase } from '../../supabase.js'
 import Button from '../../components/ui/Button/Button.vue'
 
 const router = useRouter()
-const { user, isLoggedIn, signOut } = useAuth()
+const { user, isLoggedIn, isAdmin, signOut } = useAuth()
 const { open } = useAuthModal()
 
 const firstName = ref('')
@@ -142,6 +142,16 @@ async function handleSignOut() {
         {{ isSaving ? 'Enregistrement…' : 'Enregistrer' }}
       </Button>
     </form>
+
+    <Button
+      v-if="isAdmin"
+      color="primary"
+      variant="outlined"
+      icon-left="settings"
+      @click="router.push('/admin')"
+    >
+      Back office
+    </Button>
 
     <Button
       v-if="isLoggedIn"

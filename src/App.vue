@@ -49,13 +49,13 @@ watch(isOpen, async (open) => {
 <template>
   <Toaster rich-colors position="top-right" :theme="resolvedTheme" />
 
-  <Navbar />
+  <Navbar v-if="!route.meta.requiresAdmin" />
 
   <RouterView />
 
-  <SupportSection v-if="!route.meta.hideSupport" />
+  <SupportSection v-if="!route.meta.requiresAdmin && !route.meta.hideSupport" />
 
-  <Footer />
+  <Footer v-if="!route.meta.requiresAdmin" />
 
   <Modal
     :open="isOpen"

@@ -17,10 +17,13 @@ vi.mock('vue-sonner', () => ({ toast }))
 // module registry and re-mock supabase before each dynamic re-import, same
 // as Navbar.test.ts.
 function mockSupabase(
-  session: { user: { id: string; email: string; user_metadata?: Record<string, string> } } | null
+  session: { user: { id: string; email: string; user_metadata?: Record<string, string> } } | null,
+  role: string | null = null
 ) {
+  const maybeSingle = vi.fn().mockResolvedValue({ data: role ? { role } : null, error: null })
   vi.doMock('../../supabase.js', () => ({
     supabase: {
+      from: vi.fn(() => ({ select: () => ({ eq: () => ({ maybeSingle }) }) })),
       auth: {
         getSession: vi.fn().mockResolvedValue({ data: { session } }),
         onAuthStateChange: vi.fn(),
@@ -46,6 +49,7 @@ async function mountProfileView() {
     routes: [
       { path: '/', component: { template: '<div />' } },
       { path: '/profil', component: ProfileView },
+      { path: '/admin', component: { template: '<div />' } },
     ],
   })
   router.push('/profil')
@@ -142,6 +146,28 @@ describe('ProfileView', () => {
     const { isOpen, activeView } = useAuthModal()
     expect(isOpen.value).toBe(true)
     expect(activeView.value).toBe('login')
+
+    wrapper.unmount()
+  })
+
+  it('affiche le lien « Back office » aux admins et y mène au clic', async () => {
+    mockSupabase(LOGGED_IN_SESSION, 'admin')
+    const { wrapper, router } = await mountProfileView()
+
+    const backOffice = wrapper.findAll('button').find((button) => button.text() === 'Back office')
+    expect(backOffice).toBeDefined()
+
+    await backOffice?.trigger('click')
+    await vi.waitFor(() => expect(router.currentRoute.value.path).toBe('/admin'))
+
+    wrapper.unmount()
+  })
+
+  it("n'affiche pas le lien « Back office » aux utilisatrices non admin", async () => {
+    mockSupabase(LOGGED_IN_SESSION, 'user')
+    const { wrapper } = await mountProfileView()
+
+    expect(wrapper.findAll('button').some((button) => button.text() === 'Back office')).toBe(false)
 
     wrapper.unmount()
   })
