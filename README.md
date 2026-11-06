@@ -296,6 +296,19 @@ npm run test:watch
 npm run test:coverage
 ```
 
+## Déploiement
+
+Le site est déployé sur GitHub Pages par le workflow [`deploy.yml`](.github/workflows/deploy.yml).
+
+- **Push sur `main`** : tests, build puis déploiement automatiques. Si un test ou le build échoue, rien n'est publié.
+- **Pull request** : seuls les tests tournent.
+- **Relance manuelle** : onglet *Actions* → *Déploiement* → *Run workflow*.
+- **Secrets requis** (Settings → Secrets and variables → Actions) : `VITE_SUPABASE_URL` et `VITE_SUPABASE_PUBLISHABLE_KEY`.
+- **Pages** : Settings → Pages → Source : *GitHub Actions*.
+- Le build sort dans `dist/` (non versionné). `404.html` est une copie d'`index.html` pour que les routes de la SPA fonctionnent au rechargement.
+
+URL : https://maeliglmr.github.io/la-bringue/
+
 ## Structure du contenu
 
 Le contenu vit dans Supabase et est lu via les handlers de `src/handlers/` (un par table, construits sur `createCrudHandler`). Les composants ne parlent jamais directement à Supabase : ils appellent un handler, qui renvoie les données ou lève une `HandlerError`.
