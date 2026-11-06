@@ -1,28 +1,18 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest'
-import type { ConcertDetail } from './concert'
+import type { LineupConcert } from './concert'
 
 let id = 0
 
 function concert(
-  heure: string,
+  _heure: string,
   scene: string,
   artistes: { nom: string; featuring?: boolean }[]
-): ConcertDetail {
+): LineupConcert {
   return {
-    id_concert: ++id,
-    created_at: '',
-    id_scene: null,
-    jour: '2026-08-28',
-    heure_debut: heure,
-    heure_fin: null,
-    Scene: { id_scene: 0, created_at: '', nom: scene },
-    ConcertArtiste: artistes.map(({ nom, featuring = false }, index) => ({
-      id_artiste: id * 10 + index,
-      id_concert: id,
-      created_at: '',
-      artiste_annonce: true,
+    Scene: { nom: scene },
+    ConcertArtiste: artistes.map(({ nom, featuring = false }) => ({
       featuring,
-      Artiste: { id_artiste: id * 10 + index, created_at: '', nom, photo: null, description: null, categorie: null },
+      Artiste: { id_artiste: ++id, nom },
     })),
   }
 }
@@ -38,7 +28,7 @@ const CONCERTS = [
 
 // Chaîne Postgrest factice : chaque méthode renvoie la chaîne elle-même, et
 // `await` résout sur la réponse (comme un vrai PostgrestBuilder thenable).
-function mockSupabase(data: ConcertDetail[]) {
+function mockSupabase(data: LineupConcert[]) {
   const chain: Record<string, ReturnType<typeof vi.fn>> & { then?: unknown } = {}
   for (const method of ['select', 'eq', 'order']) {
     chain[method] = vi.fn(() => chain)
@@ -51,7 +41,7 @@ function mockSupabase(data: ConcertDetail[]) {
   return { from, chain }
 }
 
-async function getDayLineup(data: ConcertDetail[], count?: number) {
+async function getDayLineup(data: LineupConcert[], count?: number) {
   const mock = mockSupabase(data)
   const { concertHandler } = await import('./concert')
   return { lineup: await concertHandler.getDayLineup('2026-08-28', count), ...mock }
@@ -66,6 +56,7 @@ describe('concertHandler.getDayLineup', () => {
     const { from, chain } = await getDayLineup(CONCERTS)
 
     expect(from).toHaveBeenCalledWith('Concert')
+    expect(chain.select).toHaveBeenCalledWith('Scene(nom), ConcertArtiste(featuring, Artiste(id_artiste, nom))')
     expect(chain.eq).toHaveBeenCalledWith('jour', '2026-08-28')
     expect(chain.order).toHaveBeenCalledWith('heure_debut', { ascending: false, nullsFirst: false })
   })

@@ -2,7 +2,7 @@ import { supabase } from '../supabase.js'
 import type { Concert } from '../types/database/concert'
 import type { ConcertArtiste } from '../types/database/concert-artiste'
 import type { Scene } from '../types/database/scene'
-import type { ArtisteResume } from './artiste'
+import type { ArtisteNom, ArtisteResume } from './artiste'
 import { containsPattern, createCrudHandler, pageRange, toPage, unwrap, type Page } from './crud'
 
 const TABLE = 'Concert'
@@ -18,13 +18,21 @@ export interface ConcertDetail extends Concert {
 // Concert + sa scène + ses artistes, en une seule requête via les clés étrangères.
 const DETAIL_SELECT = 'id_concert, id_scene, jour, heure_debut, heure_fin, Scene(id_scene, nom), ConcertArtiste(id_artiste, id_concert, artiste_annonce, featuring, Artiste(id_artiste, nom, photo, categorie))'
 
+// Affiche de la home : seuls la scène et les noms d'artistes sont utiles.
+const LINEUP_SELECT = 'Scene(nom), ConcertArtiste(featuring, Artiste(id_artiste, nom))'
+
 export interface DayLineup {
-  headliner?: ArtisteResume
-  others: ArtisteResume[]
+  headliner?: ArtisteNom
+  others: ArtisteNom[]
+}
+
+export interface LineupConcert {
+  Scene: Pick<Scene, 'nom'> | null
+  ConcertArtiste: (Pick<ConcertArtiste, 'featuring'> & { Artiste: ArtisteNom | null })[]
 }
 
 // Artistes principaux d'un concert : les featurings ne figurent pas à l'affiche.
-function mainArtistes(concert: ConcertDetail): ArtisteResume[] {
+function mainArtistes(concert: LineupConcert): ArtisteNom[] {
   return concert.ConcertArtiste.filter((lien) => !lien.featuring).flatMap((lien) => (lien.Artiste ? [lien.Artiste] : []))
 }
 
@@ -107,11 +115,11 @@ export const concertHandler = {
   // filtre les concerts du jour et les récupère déjà triés du plus tardif au
   // plus tôt, avec leur scène et leurs artistes.
   async getDayLineup(jour: string, count = 4): Promise<DayLineup> {
-    const concerts = unwrap<ConcertDetail[]>(
+    const concerts = unwrap<LineupConcert[]>(
       TABLE,
       await supabase
         .from(TABLE)
-        .select(DETAIL_SELECT)
+        .select(LINEUP_SELECT)
         .eq('jour', jour)
         .order('heure_debut', { ascending: false, nullsFirst: false })
     )

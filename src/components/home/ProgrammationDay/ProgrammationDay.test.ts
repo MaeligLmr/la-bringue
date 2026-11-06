@@ -2,11 +2,11 @@ import { describe, it, expect } from 'vitest'
 import { mount } from '@vue/test-utils'
 import { createRouter, createWebHistory } from 'vue-router'
 import ProgrammationDay from './ProgrammationDay.vue'
-import type { Artiste } from '../../../types/database/artiste'
+import type { ArtisteNom } from '../../../handlers/artiste'
 import type { DayLineup } from '../../../handlers/concert'
 
-function artiste(id_artiste: number, nom: string): Artiste {
-  return { id_artiste, nom, created_at: '', photo: null, description: null, categorie: 'Rock' }
+function artiste(id_artiste: number, nom: string): ArtisteNom {
+  return { id_artiste, nom }
 }
 
 const LINEUP: DayLineup = {
