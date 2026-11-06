@@ -4,10 +4,11 @@ declare module 'vue-router' {
   interface RouteMeta {
     // Masque la section Support (SupportSection, au-dessus du footer).
     hideSupport?: boolean
+    requiresAdmin?: boolean
   }
 }
-// HomeView reste importée statiquement (page d'arrivée) ; les autres vues sont
-// chargées à la demande pour alléger le bundle initial.
+import { useAuth } from '../composables/useAuth/useAuth'
+import { ADMIN_SECTIONS } from '../lib/admin-sections/admin-sections'
 import HomeView from '../views/HomeView/HomeView.vue'
 
 export const router = createRouter({
@@ -39,6 +40,20 @@ export const router = createRouter({
       component: () => import('../views/FicheDetail/FicheDetail.vue'),
       props: (route) => ({ type: route.params.type, id: Number(route.params.id) }),
     },
+    {
+      path: '/admin',
+      component: () => import('../components/layout/AdminLayout/AdminLayout.vue'),
+      meta: { requiresAdmin: true },
+      children: [
+        { path: '', name: 'admin', redirect: { name: ADMIN_SECTIONS[0].name } },
+        ...ADMIN_SECTIONS.map((section) => ({
+          path: section.path,
+          name: section.name,
+          component: () => import('../views/admin/AdminSectionView/AdminSectionView.vue'),
+          props: { title: section.label },
+        })),
+      ],
+    },
   ],
   // Fiche ouverte depuis le bas d'une liste : on repart du haut de page.
   // Un simple changement de query (filtres) ne fait pas défiler.
@@ -50,4 +65,11 @@ export const router = createRouter({
     if (to.path === from.path) return false
     return { top: 0 }
   },
+})
+
+router.beforeEach(async (to) => {
+  if (!to.meta.requiresAdmin) return
+  const { ready, isAdmin } = useAuth()
+  await ready
+  if (!isAdmin.value) return { name: 'home' }
 })

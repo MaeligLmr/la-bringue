@@ -13,6 +13,12 @@ vi.mock('../supabase.js', () => ({
   },
 }))
 
+const { auth } = vi.hoisted(() => ({ auth: { isAdmin: { value: false } } }))
+
+vi.mock('../composables/useAuth/useAuth', () => ({
+  useAuth: () => ({ ready: Promise.resolve(), isAdmin: auth.isAdmin }),
+}))
+
 import { router } from './index'
 
 
@@ -53,6 +59,31 @@ describe('router', () => {
   it('refuse un type de fiche inconnu ou un identifiant non numérique', () => {
     expect(router.resolve('/festival/fiche/1').name).toBeUndefined()
     expect(router.resolve('/artiste/fiche/abc').name).toBeUndefined()
+  })
+
+  describe('back office', () => {
+    it('résout les sections sous /admin, réservées aux admins', () => {
+      expect(router.resolve('/admin/artistes').name).toBe('admin-artistes')
+      expect(router.resolve('/admin/intervenantes').meta.requiresAdmin).toBe(true)
+    })
+
+    it('renvoie une non-admin qui tape /admin vers la home', async () => {
+      auth.isAdmin.value = false
+      await router.push('/programmation')
+
+      await router.push('/admin/artistes')
+
+      expect(router.currentRoute.value.name).toBe('home')
+    })
+
+    it('laisse une admin accéder au back office', async () => {
+      auth.isAdmin.value = true
+      await router.push('/programmation')
+
+      await router.push('/admin')
+
+      expect(router.currentRoute.value.name).toBe('admin-artistes')
+    })
   })
 
   describe('scrollBehavior', () => {

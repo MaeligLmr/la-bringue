@@ -45,6 +45,7 @@ async function mountApp(url = '/') {
     routes: [
       { path: '/', component: { template: '<div />' } },
       { path: '/profil', component: { template: '<div />' }, meta: { hideSupport: true } },
+      { path: '/admin', component: { template: '<div />' }, meta: { requiresAdmin: true } },
     ],
   })
   router.push(url)
@@ -257,5 +258,21 @@ describe('App (section Support)', () => {
 
     expect(wrapper.find('.support').exists()).toBe(false)
     expect(wrapper.find('footer').exists()).toBe(true)
+  })
+})
+
+describe('App (back office)', () => {
+  afterEach(() => {
+    wrapper?.unmount()
+    wrapper = null
+    document.body.innerHTML = ''
+  })
+
+  it("n'affiche ni navbar, ni sponsors, ni footer sur les pages /admin", async () => {
+    wrapper = await mountApp('/admin')
+
+    expect(wrapper.find('.navbar').exists()).toBe(false)
+    expect(wrapper.find('.support').exists()).toBe(false)
+    expect(wrapper.find('footer').exists()).toBe(false)
   })
 })
