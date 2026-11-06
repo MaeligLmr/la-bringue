@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { useRouter } from 'vue-router'
+import Breadcrumb from '../Breadcrumb/Breadcrumb.vue'
 import Button from '../../ui/Button/Button.vue'
 import heroBg from '../../../assets/hero/hero-bg.png'
 import starIcon from '../../../assets/hero/étoile top.svg'
@@ -46,6 +47,9 @@ const heroBackgroundStyle = {
       </div>
     </div>
   </section>
+
+  <!-- Juste sous le Hero (masqué sur l'accueil par Breadcrumb lui-même). -->
+  <Breadcrumb />
 </template>
 
 <style scoped>
