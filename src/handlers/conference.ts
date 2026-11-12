@@ -53,6 +53,13 @@ export const conferenceHandler = {
     return toPage(unwrap<ConferenceResume[]>(TABLE, await query))
   },
 
+  async getAllDetailed(): Promise<ConferenceDetail[]> {
+    return unwrap<ConferenceDetail[]>(
+      TABLE,
+      await supabase.from(TABLE).select(DETAIL_SELECT).order('jour').order('heure_debut')
+    )
+  },
+
   async getDetailById(id: number): Promise<ConferenceDetail | null> {
     return unwrap<ConferenceDetail | null>(
       TABLE,

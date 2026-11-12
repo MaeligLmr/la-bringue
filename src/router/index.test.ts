@@ -67,6 +67,17 @@ describe('router', () => {
       expect(router.resolve('/admin/intervenantes').meta.requiresAdmin).toBe(true)
     })
 
+    it('résout la liste, la création et la modification d’une conférence', () => {
+      expect(router.resolve('/admin/conferences').name).toBe('admin-conferences')
+      expect(router.resolve('/admin/conferences/nouvelle').name).toBe('admin-conference-nouvelle')
+
+      const route = router.resolve('/admin/conferences/5')
+      expect(route.name).toBe('admin-conference')
+      expect(route.meta.requiresAdmin).toBe(true)
+      const props = (route.matched.at(-1)!.props.default as (r: typeof route) => unknown)(route)
+      expect(props).toEqual({ id: 5 })
+    })
+
     it('résout la liste, la création et la modification d’une intervenante', () => {
       expect(router.resolve('/admin/intervenantes').name).toBe('admin-intervenantes')
       expect(router.resolve('/admin/intervenantes/nouvelle').name).toBe('admin-intervenante-nouvelle')

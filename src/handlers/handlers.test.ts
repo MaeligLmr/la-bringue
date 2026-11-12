@@ -216,6 +216,19 @@ describe('conferenceHandler', () => {
     expect(chain.eq).toHaveBeenCalledWith('theme', 'Écologie')
   })
 
+  it('getAllDetailed charge toutes les conférences avec leurs intervenantes, par jour puis heure', async () => {
+    const { from, chain } = mockSupabase()
+    const { conferenceHandler } = await import('./conference')
+
+    await conferenceHandler.getAllDetailed()
+
+    expect(from).toHaveBeenCalledWith('Conference')
+    expect(chain.select).toHaveBeenCalledWith(expect.stringContaining('Participation(id_participation'))
+    expect(chain.eq).not.toHaveBeenCalled()
+    expect(chain.order).toHaveBeenNthCalledWith(1, 'jour')
+    expect(chain.order).toHaveBeenNthCalledWith(2, 'heure_debut')
+  })
+
   it('getThemes appelle la fonction SQL get_themes_conferences', async () => {
     const { rpc } = mockSupabase({ data: ['Feminisme', 'Écologie'] })
     const { conferenceHandler } = await import('./conference')

@@ -9,8 +9,8 @@ import { concertHandler, type ConcertDetail } from '../../../handlers/concert'
 import { concertArtisteHandler } from '../../../handlers/concert-artiste'
 import { sceneHandler } from '../../../handlers/scene'
 import { formatHeure } from '../../../lib/cards/cards'
-import { chevauchements, heureFinError, type Creneau } from '../../../lib/concert-checks/concert-checks'
-import { diffLineup, type LineupEntry } from '../../../lib/lineup/lineup'
+import { chevauchements, heureFinError } from '../../../lib/concert-checks/concert-checks'
+import { diffLinks, type LineupEntry } from '../../../lib/links/links'
 import type { Concert } from '../../../types/database/concert'
 import type { AdminFormField } from '../../../types/ui/admin-form'
 import type { SelectOption } from '../../../types/ui/select'
@@ -29,7 +29,7 @@ const ready = ref(false)
 async function loadLineup(idConcert: number) {
   const liens = await concertArtisteHandler.getArtistesByConcert(idConcert)
   return liens.map((lien) => ({
-    id_artiste: lien.id_artiste,
+    id: lien.id_artiste,
     nom: lien.Artiste?.nom ?? '',
     artiste_annonce: !!lien.artiste_annonce,
     featuring: !!lien.featuring,
@@ -66,8 +66,15 @@ function rules(values: Record<string, unknown>) {
 }
 
 function overlapWarning(values: Record<string, unknown>) {
-  const concert = { ...(values as unknown as Creneau), id_concert: props.id }
-  const conflits = chevauchements(concert, concerts.value)
+  const concert = {
+    id: props.id,
+    lieu: values.id_scene as string,
+    jour: values.jour as string,
+    heure_debut: values.heure_debut as string,
+    heure_fin: values.heure_fin as string,
+  }
+  const autres = concerts.value.map((autre) => ({ ...autre, id: autre.id_concert, lieu: autre.id_scene }))
+  const conflits = chevauchements(concert, autres)
   if (!conflits.length) return ''
   const details = conflits.map((autre) => {
     const noms = autre.ConcertArtiste.flatMap((lien) => (lien.Artiste?.nom ? [lien.Artiste.nom] : [])).join(', ') || 'sans artiste'
@@ -78,12 +85,16 @@ function overlapWarning(values: Record<string, unknown>) {
 }
 
 async function saveLineup(idConcert: number) {
-  const { added, updated, removed } = diffLineup(savedLineup.value, lineup.value)
+  const { added, updated, removed } = diffLinks(
+    savedLineup.value,
+    lineup.value,
+    (before, after) => before.artiste_annonce !== after.artiste_annonce || before.featuring !== after.featuring
+  )
   const options = ({ artiste_annonce, featuring }: LineupEntry) => ({ artiste_annonce, featuring })
   await Promise.all([
-    ...added.map((entry) => concertArtisteHandler.create(entry.id_artiste, idConcert, options(entry))),
-    ...updated.map((entry) => concertArtisteHandler.update(entry.id_artiste, idConcert, options(entry))),
-    ...removed.map((entry) => concertArtisteHandler.remove(entry.id_artiste, idConcert)),
+    ...added.map((entry) => concertArtisteHandler.create(entry.id, idConcert, options(entry))),
+    ...updated.map((entry) => concertArtisteHandler.update(entry.id, idConcert, options(entry))),
+    ...removed.map((entry) => concertArtisteHandler.remove(entry.id, idConcert)),
   ])
 }
 

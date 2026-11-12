@@ -15,17 +15,17 @@ describe('heureFinError', () => {
 })
 
 describe('chevauchements', () => {
-  const CHROME_SAMEDI_21H = { id_concert: 1, id_scene: 1, jour: '2026-08-29', heure_debut: '21:00:00', heure_fin: '22:30:00' }
+  const CHROME_SAMEDI_21H = { id: 1, lieu: 1, jour: '2026-08-29', heure_debut: '21:00:00', heure_fin: '22:30:00' }
 
   it('repère un concert de la même scène, le même jour, sur un créneau commun', () => {
-    const nouveau = { id_scene: '1', jour: '2026-08-29', heure_debut: '22:00', heure_fin: '23:00' }
+    const nouveau = { lieu: '1', jour: '2026-08-29', heure_debut: '22:00', heure_fin: '23:00' }
     expect(chevauchements(nouveau, [CHROME_SAMEDI_21H])).toEqual([CHROME_SAMEDI_21H])
   })
 
   it('ignore les concerts qui se suivent, d’une autre scène ou d’un autre jour', () => {
-    const suivant = { id_scene: 1, jour: '2026-08-29', heure_debut: '22:30', heure_fin: '23:30' }
-    const autreScene = { id_scene: 2, jour: '2026-08-29', heure_debut: '21:30', heure_fin: '22:00' }
-    const autreJour = { id_scene: 1, jour: '2026-08-30', heure_debut: '21:30', heure_fin: '22:00' }
+    const suivant = { lieu: 1, jour: '2026-08-29', heure_debut: '22:30', heure_fin: '23:30' }
+    const autreScene = { lieu: 2, jour: '2026-08-29', heure_debut: '21:30', heure_fin: '22:00' }
+    const autreJour = { lieu: 1, jour: '2026-08-30', heure_debut: '21:30', heure_fin: '22:00' }
 
     expect(chevauchements(suivant, [CHROME_SAMEDI_21H])).toEqual([])
     expect(chevauchements(autreScene, [CHROME_SAMEDI_21H])).toEqual([])
@@ -37,12 +37,18 @@ describe('chevauchements', () => {
   })
 
   it('compte une heure de fin absente comme une durée par défaut', () => {
-    const sansFin = { id_concert: 2, id_scene: 1, jour: '2026-08-29', heure_debut: '20:30', heure_fin: null }
+    const sansFin = { id: 2, lieu: 1, jour: '2026-08-29', heure_debut: '20:30', heure_fin: null }
     expect(chevauchements(sansFin, [CHROME_SAMEDI_21H])).toEqual([CHROME_SAMEDI_21H])
   })
 
-  it('ne signale rien tant que jour, scène ou heure de début manquent', () => {
-    expect(chevauchements({ id_scene: '', jour: '2026-08-29', heure_debut: '21:00', heure_fin: null }, [CHROME_SAMEDI_21H])).toEqual([])
-    expect(chevauchements({ id_scene: 1, jour: '', heure_debut: '21:00', heure_fin: null }, [CHROME_SAMEDI_21H])).toEqual([])
+  it('s’applique aussi aux conférences, qui partagent le même lieu', () => {
+    const table = { id: 1, lieu: 'conferences', jour: '2026-08-29', heure_debut: '14:00', heure_fin: '15:00' }
+    const atelier = { lieu: 'conferences', jour: '2026-08-29', heure_debut: '14:30', heure_fin: '15:30' }
+    expect(chevauchements(atelier, [table])).toEqual([table])
+  })
+
+  it('ne signale rien tant que jour, lieu ou heure de début manquent', () => {
+    expect(chevauchements({ lieu: '', jour: '2026-08-29', heure_debut: '21:00', heure_fin: null }, [CHROME_SAMEDI_21H])).toEqual([])
+    expect(chevauchements({ lieu: 1, jour: '', heure_debut: '21:00', heure_fin: null }, [CHROME_SAMEDI_21H])).toEqual([])
   })
 })
