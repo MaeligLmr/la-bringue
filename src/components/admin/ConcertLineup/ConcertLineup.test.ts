@@ -2,14 +2,14 @@ import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { flushPromises, mount } from '@vue/test-utils'
 import ConcertLineup from './ConcertLineup.vue'
 import Select from '../../ui/Select/Select.vue'
-import type { LineupEntry } from '../../../lib/lineup/lineup'
+import type { LineupEntry } from '../../../lib/links/links'
 
 const { artisteHandler } = vi.hoisted(() => ({ artisteHandler: { getAll: vi.fn() } }))
 
 vi.mock('../../../handlers/artiste', () => ({ artisteHandler }))
 vi.mock('vue-sonner', () => ({ toast: { error: vi.fn() } }))
 
-const AYA: LineupEntry = { id_artiste: 1, nom: 'Aya Nakamura', artiste_annonce: true, featuring: false }
+const AYA: LineupEntry = { id: 1, nom: 'Aya Nakamura', artiste_annonce: true, featuring: false }
 
 async function mountLineup(lineup: LineupEntry[] = [AYA]) {
   const wrapper = mount(ConcertLineup, {
@@ -27,11 +27,11 @@ function current(wrapper: Awaited<ReturnType<typeof mountLineup>>) {
 }
 
 function addButton(wrapper: Awaited<ReturnType<typeof mountLineup>>) {
-  return wrapper.findAll('.concert-lineup__add button').find((button) => button.text() === 'Ajouter')!
+  return wrapper.findAll('.admin-links__add button').find((button) => button.text() === 'Ajouter')!
 }
 
 function checkboxes(wrapper: Awaited<ReturnType<typeof mountLineup>>) {
-  return wrapper.findAll('.concert-lineup__item input[type="checkbox"]')
+  return wrapper.findAll('.admin-links__item input[type="checkbox"]')
 }
 
 beforeEach(() => {
@@ -46,7 +46,7 @@ describe('ConcertLineup', () => {
   it('affiche les artistes du line-up avec leurs cases Annoncée et Featuring', async () => {
     const wrapper = await mountLineup()
 
-    expect(wrapper.find('.concert-lineup__nom').text()).toBe('Aya Nakamura')
+    expect(wrapper.find('.admin-links__nom').text()).toBe('Aya Nakamura')
     expect(checkboxes(wrapper).map((box) => (box.element as HTMLInputElement).checked)).toEqual([true, false])
   })
 
@@ -60,10 +60,10 @@ describe('ConcertLineup', () => {
     const wrapper = await mountLineup()
 
     wrapper.findComponent(Select).vm.$emit('update:modelValue', '2')
-    await wrapper.findAll('.concert-lineup__add input[type="checkbox"]')[1].setValue(true)
+    await wrapper.findAll('.admin-links__add input[type="checkbox"]')[1].setValue(true)
     await addButton(wrapper).trigger('click')
 
-    expect(current(wrapper)).toEqual([AYA, { id_artiste: 2, nom: 'Angèle', artiste_annonce: true, featuring: true }])
+    expect(current(wrapper)).toEqual([AYA, { id: 2, nom: 'Angèle', artiste_annonce: true, featuring: true }])
   })
 
   it('met à jour les cases d’une artiste du line-up', async () => {

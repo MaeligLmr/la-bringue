@@ -1,10 +1,10 @@
 import { DUREE_PAR_DEFAUT } from '../mon-programme/mon-programme'
 
-// Contrôles de cohérence du formulaire de concert (back office).
+// Contrôles horaires des formulaires de concert et de conférence (back office).
 
 export interface Creneau {
-  id_concert?: number
-  id_scene: number | string | null
+  id?: number
+  lieu: number | string | null
   jour: string | null
   heure_debut: string | null
   heure_fin: string | null
@@ -23,19 +23,19 @@ export function heureFinError(heureDebut: string | null, heureFin: string | null
   return "L'heure de fin doit être après l'heure de début."
 }
 
-function plage(concert: Creneau) {
-  const debut = minutes(concert.heure_debut)
+function plage(creneau: Creneau) {
+  const debut = minutes(creneau.heure_debut)
   if (debut === null) return null
-  return { debut, fin: minutes(concert.heure_fin) ?? debut + DUREE_PAR_DEFAUT }
+  return { debut, fin: minutes(creneau.heure_fin) ?? debut + DUREE_PAR_DEFAUT }
 }
 
-export function chevauchements<C extends Creneau>(concert: Creneau, autres: C[]): C[] {
-  const lui = plage(concert)
-  if (!lui || !concert.jour || concert.id_scene == null || concert.id_scene === '') return []
+export function chevauchements<C extends Creneau>(creneau: Creneau, autres: C[]): C[] {
+  const lui = plage(creneau)
+  if (!lui || !creneau.jour || creneau.lieu == null || creneau.lieu === '') return []
 
   return autres.filter((autre) => {
-    if (autre.id_concert !== undefined && autre.id_concert === concert.id_concert) return false
-    if (autre.jour !== concert.jour || String(autre.id_scene) !== String(concert.id_scene)) return false
+    if (autre.id !== undefined && autre.id === creneau.id) return false
+    if (autre.jour !== creneau.jour || String(autre.lieu) !== String(creneau.lieu)) return false
     const sienne = plage(autre)
     return !!sienne && lui.debut < sienne.fin && sienne.debut < lui.fin
   })

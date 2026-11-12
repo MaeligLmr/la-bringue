@@ -35,6 +35,13 @@ const CRUD_SECTIONS: CrudSection[] = [
     form: () => import('../views/admin/AdminConcertFormView/AdminConcertFormView.vue'),
   },
   {
+    path: 'conferences',
+    names: { list: 'admin-conferences', create: 'admin-conference-nouvelle', edit: 'admin-conference' },
+    createPath: 'nouvelle',
+    list: () => import('../views/admin/AdminConferencesView/AdminConferencesView.vue'),
+    form: () => import('../views/admin/AdminConferenceFormView/AdminConferenceFormView.vue'),
+  },
+  {
     path: 'intervenantes',
     names: { list: 'admin-intervenantes', create: 'admin-intervenante-nouvelle', edit: 'admin-intervenante' },
     createPath: 'nouvelle',

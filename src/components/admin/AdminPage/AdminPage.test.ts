@@ -1,9 +1,9 @@
 import { describe, it, expect } from 'vitest'
 import { mount } from '@vue/test-utils'
-import { createRouter, createWebHistory } from 'vue-router'
+import { createRouter, createWebHistory, type RouteLocationRaw } from 'vue-router'
 import AdminPage from './AdminPage.vue'
 
-async function mountPage(props: Record<string, unknown>) {
+async function mountPage(props: { title: string; back?: { to: RouteLocationRaw; label: string }; width?: 'full' | 'form' | 'wide' }) {
   const router = createRouter({
     history: createWebHistory(),
     routes: [

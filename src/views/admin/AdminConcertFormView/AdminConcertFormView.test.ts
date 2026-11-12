@@ -6,7 +6,7 @@ import AdminForm from '../../../components/admin/AdminForm/AdminForm.vue'
 import ConcertLineup from '../../../components/admin/ConcertLineup/ConcertLineup.vue'
 import type { Concert } from '../../../types/database/concert'
 import type { AdminFormField } from '../../../types/ui/admin-form'
-import type { LineupEntry } from '../../../lib/lineup/lineup'
+import type { LineupEntry } from '../../../lib/links/links'
 import { JOURS } from '../../../types/ui/programmation'
 
 const { concertHandler, concertArtisteHandler, sceneHandler, toast } = vi.hoisted(() => ({
@@ -27,8 +27,8 @@ vi.mock('../../../components/admin/ConcertLineup/ConcertLineup.vue', () => ({
 
 const CONCERT: Concert = { id_concert: 7, id_scene: 1, jour: '2026-08-29', heure_debut: '21:00:00', heure_fin: null }
 
-const AYA = { id_artiste: 1, nom: 'Aya Nakamura', artiste_annonce: true, featuring: false }
-const ANGELE = { id_artiste: 2, nom: 'Angèle', artiste_annonce: true, featuring: false }
+const AYA = { id: 1, nom: 'Aya Nakamura', artiste_annonce: true, featuring: false }
+const ANGELE = { id: 2, nom: 'Angèle', artiste_annonce: true, featuring: false }
 
 async function mountView(id?: number) {
   const router = createRouter({
