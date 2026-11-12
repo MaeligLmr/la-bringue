@@ -13,6 +13,7 @@ const props = withDefaults(
     columns: AdminTableColumn<T>[]
     rowKey: keyof T & string
     loading?: boolean
+    deleteImpact?: (item: T) => Promise<string[]>
   }>(),
   {
     loading: false,
@@ -39,17 +40,35 @@ const filteredItems = computed(() => {
 
 const pendingDelete = shallowRef<T | null>(null)
 
-function askDelete(item: T) {
+const impact = ref<string[]>([])
+const impactLoading = ref(false)
+const impactFailed = ref(false)
+
+async function askDelete(item: T) {
   pendingDelete.value = item
+  impact.value = []
+  impactFailed.value = false
+  if (!props.deleteImpact) return
+
+  impactLoading.value = true
+  try {
+    const lines = await props.deleteImpact(item)
+    if (pendingDelete.value === item) impact.value = lines
+  } catch {
+    if (pendingDelete.value === item) impactFailed.value = true
+  } finally {
+    if (pendingDelete.value === item) impactLoading.value = false
+  }
 }
 
 function cancelDelete() {
   pendingDelete.value = null
+  impactLoading.value = false
 }
 
 function confirmDelete() {
   if (pendingDelete.value) emit('delete', pendingDelete.value)
-  pendingDelete.value = null
+  cancelDelete()
 }
 
 function cellValue(column: AdminTableColumn<T>, item: T) {
@@ -102,6 +121,11 @@ function cellValue(column: AdminTableColumn<T>, item: T) {
       <p v-if="pendingDelete" class="admin-table__confirm-text">
         Supprimer « {{ nameOf(pendingDelete) }} » ? Cette action est définitive.
       </p>
+      <p v-if="impactLoading" class="admin-table__impact" aria-live="polite">Calcul de l'impact…</p>
+      <p v-else-if="impactFailed" class="admin-table__impact">Impossible de calculer l'impact de la suppression.</p>
+      <ul v-else-if="impact.length" class="admin-table__impact">
+        <li v-for="line in impact" :key="line">{{ line }}</li>
+      </ul>
       <div class="admin-table__confirm-actions">
         <Button color="secondary" variant="outlined" @click="cancelDelete">Annuler</Button>
         <Button color="danger" @click="confirmDelete">Supprimer</Button>
@@ -184,6 +208,15 @@ function cellValue(column: AdminTableColumn<T>, item: T) {
 
 .admin-table__confirm-text {
   margin: 0 0 var(--space-6);
+}
+
+.admin-table__impact {
+  margin: 0 0 var(--space-6);
+  color: var(--alert-danger-text);
+}
+
+ul.admin-table__impact {
+  padding-left: var(--space-5);
 }
 
 .admin-table__confirm-actions {
