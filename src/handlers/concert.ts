@@ -50,6 +50,13 @@ export const concertHandler = {
     )
   },
 
+  async getAllDetailed(): Promise<ConcertDetail[]> {
+    return unwrap<ConcertDetail[]>(
+      TABLE,
+      await supabase.from(TABLE).select(DETAIL_SELECT).order('jour').order('heure_debut')
+    )
+  },
+
   async getDetailById(id: number): Promise<ConcertDetail | null> {
     return unwrap<ConcertDetail | null>(
       TABLE,
