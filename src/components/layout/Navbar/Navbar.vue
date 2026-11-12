@@ -2,6 +2,7 @@
 import { computed, onMounted, onUnmounted, ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { useAuth } from '../../../composables/useAuth/useAuth'
+import { useNotifications } from '../../../composables/useNotifications/useNotifications'
 import { useTheme, type ThemePreference } from '../../../composables/useTheme/useTheme'
 import Button from '../../ui/Button/Button.vue'
 import Select from '../../ui/Select/Select.vue'
@@ -12,6 +13,13 @@ import logoDark from '../../../assets/logo/Logo-Dark.svg'
 
 const router = useRouter()
 const { user, isLoggedIn } = useAuth()
+const { unreadCount } = useNotifications()
+
+const programmeLabel = computed(() =>
+  unreadCount.value
+    ? `Mon programme, ${unreadCount.value} changement${unreadCount.value > 1 ? 's' : ''} non lu${unreadCount.value > 1 ? 's' : ''}`
+    : 'Mon programme'
+)
 const { resolvedTheme, preference, setPreference } = useTheme()
 
 const THEME_OPTIONS: { value: ThemePreference; label: string }[] = [
@@ -103,14 +111,16 @@ function goToAndCloseMenu(path: string) {
           Programmation
         </Button>
 
-        <Button
-          v-if="isLoggedIn"
-          color="primary"
-          variant="ghost"
-          icon-only="heart"
-          label="Mon programme"
-          @click="goTo('/mon-programme')"
-        />
+        <span v-if="isLoggedIn" class="navbar__programme">
+          <Button
+            color="primary"
+            variant="ghost"
+            icon-only="heart"
+            :label="programmeLabel"
+            @click="goTo('/mon-programme')"
+          />
+          <span v-if="unreadCount" class="navbar__badge-count" aria-hidden="true">{{ unreadCount }}</span>
+        </span>
 
         <Button
           v-if="isLoggedIn"
@@ -241,6 +251,29 @@ function goToAndCloseMenu(path: string) {
 
 .navbar__nav-link {
   display: none;
+}
+
+.navbar__programme {
+  position: relative;
+  display: inline-flex;
+}
+
+.navbar__badge-count {
+  position: absolute;
+  top: 0;
+  right: 0;
+  min-width: 1.125rem;
+  height: 1.125rem;
+  padding: 0 var(--space-1);
+  box-sizing: border-box;
+  border-radius: var(--radius-full);
+  background: var(--accent);
+  color: var(--button-primary-full-idle-text);
+  font-size: var(--font-size-label);
+  font-weight: var(--font-weight-medium);
+  line-height: 1.125rem;
+  text-align: center;
+  pointer-events: none;
 }
 
 .navbar__socials {

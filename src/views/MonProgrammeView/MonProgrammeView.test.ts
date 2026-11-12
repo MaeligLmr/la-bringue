@@ -5,6 +5,7 @@ import { createRouter, createWebHistory } from 'vue-router'
 import MonProgrammeView from './MonProgrammeView.vue'
 import { useAuthModal } from '../../composables/useAuthModal/useAuthModal'
 import { useLikes } from '../../composables/useLikes/useLikes'
+import { useNotifications } from '../../composables/useNotifications/useNotifications'
 import { EMPTY_MESSAGE } from '../../lib/mon-programme/mon-programme'
 import type { ConcertDetail } from '../../handlers/concert'
 import type { ConferenceDetail } from '../../handlers/conference'
@@ -21,6 +22,11 @@ const { likeHandler } = vi.hoisted(() => ({
   likeHandler: { setLike: vi.fn(), getMine: vi.fn() },
 }))
 vi.mock('../../handlers/like', () => ({ likeHandler }))
+
+const { notificationHandler } = vi.hoisted(() => ({
+  notificationHandler: { getUnread: vi.fn(), markAllRead: vi.fn(), subscribe: vi.fn() },
+}))
+vi.mock('../../handlers/notification', () => ({ notificationHandler }))
 
 function concert(id: number, jour: string, heure: string, nom: string, heureFin: string | null = null): ConcertDetail {
   return {
@@ -107,6 +113,10 @@ beforeEach(async () => {
   ])
   useLikes().clearLikes()
   await useLikes().loadLikes()
+  notificationHandler.getUnread.mockResolvedValue([])
+  notificationHandler.markAllRead.mockResolvedValue(undefined)
+  notificationHandler.subscribe.mockReturnValue(() => {})
+  useNotifications().stopNotifications()
 })
 
 describe('MonProgrammeView', () => {
@@ -220,5 +230,28 @@ describe('MonProgrammeView', () => {
 
     expect(useAuthModal().isOpen.value).toBe(true)
     expect(useAuthModal().activeView.value).toBe('login')
+  })
+
+  it('affiche les changements de concerts non lus et permet de les marquer comme lus', async () => {
+    notificationHandler.getUnread.mockResolvedValue([
+      { id_notification: 1, created_at: '', id_utilisatrice: 'u1', id_concert: 1, message: 'Le concert de Aya Nakamura a changé.', lue: false },
+    ])
+    await useNotifications().startNotifications('u1')
+    const { wrapper } = await mountMonProgramme()
+
+    const changements = wrapper.find('.mon-programme__changements')
+    expect(changements.text()).toContain('Le concert de Aya Nakamura a changé.')
+
+    await changements.find('button').trigger('click')
+    await flushPromises()
+
+    expect(notificationHandler.markAllRead).toHaveBeenCalledOnce()
+    expect(wrapper.find('.mon-programme__changements').exists()).toBe(false)
+  })
+
+  it('n’affiche pas de bloc de changements quand tout est lu', async () => {
+    const { wrapper } = await mountMonProgramme()
+
+    expect(wrapper.find('.mon-programme__changements').exists()).toBe(false)
   })
 })

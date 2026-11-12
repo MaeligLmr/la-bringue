@@ -399,6 +399,52 @@ describe('likeHandler', () => {
   })
 })
 
+describe('notificationHandler', () => {
+  it('getUnread lit les notifications non lues, de la plus récente à la plus ancienne (RLS : les siennes)', async () => {
+    const { from, chain } = mockSupabase()
+    const { notificationHandler } = await import('./notification')
+
+    await notificationHandler.getUnread()
+
+    expect(from).toHaveBeenCalledWith('Notification')
+    expect(chain.eq).toHaveBeenCalledWith('lue', false)
+    expect(chain.order).toHaveBeenCalledWith('created_at', { ascending: false })
+  })
+
+  it('markAllRead passe les notifications non lues à lues', async () => {
+    const { chain } = mockSupabase()
+    const { notificationHandler } = await import('./notification')
+
+    await notificationHandler.markAllRead()
+
+    expect(chain.update).toHaveBeenCalledWith({ lue: true })
+    expect(chain.eq).toHaveBeenCalledWith('lue', false)
+  })
+
+  it('subscribe écoute les insertions de l’utilisatrice et se désabonne', async () => {
+    const channel = { on: vi.fn(), subscribe: vi.fn() }
+    channel.on.mockReturnValue(channel)
+    channel.subscribe.mockReturnValue(channel)
+    const supabase = { channel: vi.fn(() => channel), removeChannel: vi.fn() }
+    vi.doMock('../supabase.js', () => ({ supabase }))
+    const { notificationHandler } = await import('./notification')
+    const onInsert = vi.fn()
+
+    const unsubscribe = notificationHandler.subscribe('u1', onInsert)
+
+    expect(channel.on).toHaveBeenCalledWith(
+      'postgres_changes',
+      { event: 'INSERT', schema: 'public', table: 'Notification', filter: 'id_utilisatrice=eq.u1' },
+      expect.any(Function)
+    )
+    channel.on.mock.calls[0][2]({ new: { id_notification: 3 } })
+    expect(onInsert).toHaveBeenCalledWith({ id_notification: 3 })
+
+    unsubscribe()
+    expect(supabase.removeChannel).toHaveBeenCalledWith(channel)
+  })
+})
+
 describe('infoPratiqueHandler', () => {
   it('getAllHomepage ne garde que les infos marquées pour l’accueil, dans l’ordre', async () => {
     const rows = [{ id_info: 1, titre: 'Accès' }]
