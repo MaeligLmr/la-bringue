@@ -1,8 +1,8 @@
 <script setup lang="ts">
-import { onMounted, ref } from 'vue'
 import { useRouter } from 'vue-router'
-import { toast } from 'vue-sonner'
+import AdminPage from '../../../components/admin/AdminPage/AdminPage.vue'
 import AdminTable from '../../../components/admin/AdminTable/AdminTable.vue'
+import { useAdminList } from '../../../composables/useAdminList/useAdminList'
 import { concertHandler, type ConcertDetail } from '../../../handlers/concert'
 import { formatHeure, labelOf } from '../../../lib/cards/cards'
 import { JOURS } from '../../../types/ui/programmation'
@@ -36,38 +36,21 @@ function toRow(concert: ConcertDetail): ConcertRow {
   }
 }
 
-const concerts = ref<ConcertRow[]>([])
-const loading = ref(true)
-
-onMounted(async () => {
-  try {
-    concerts.value = (await concertHandler.getAllDetailed()).map(toRow)
-  } catch {
-    toast.error('Impossible de charger les concerts.')
-  } finally {
-    loading.value = false
-  }
+const { items: concerts, loading, remove } = useAdminList({
+  load: async () => (await concertHandler.getAllDetailed()).map(toRow),
+  remove: (concert: ConcertRow) => concertHandler.remove(concert.id_concert),
+  idOf: (concert) => concert.id_concert,
+  loadError: 'Impossible de charger les concerts.',
+  removed: () => 'Le concert a été supprimé.',
 })
 
 async function deleteImpact(concert: ConcertRow) {
   return [`Concert du ${concert.jour.toLowerCase()}, ${concert.horaire}, scène ${concert.scene}.`, 'Les artistes restent dans la liste des artistes.']
 }
-
-async function remove(concert: ConcertRow) {
-  try {
-    await concertHandler.remove(concert.id_concert)
-    concerts.value = concerts.value.filter((item) => item.id_concert !== concert.id_concert)
-    toast.success('Le concert a été supprimé.')
-  } catch {
-    toast.error('La suppression a échoué. Réessaie plus tard.')
-  }
-}
 </script>
 
 <template>
-  <div class="admin-concerts">
-    <h1>Concerts</h1>
-
+  <AdminPage title="Concerts">
     <AdminTable
       :items="concerts"
       :columns="COLUMNS"
@@ -78,17 +61,6 @@ async function remove(concert: ConcertRow) {
       @edit="(concert) => router.push({ name: 'admin-concert', params: { id: concert.id_concert } })"
       @delete="remove"
     />
-  </div>
+  </AdminPage>
 </template>
 
-<style scoped>
-.admin-concerts {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-6);
-}
-
-.admin-concerts h1 {
-  margin: 0;
-}
-</style>
