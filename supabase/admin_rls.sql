@@ -97,3 +97,10 @@ create policy "Lecture des promos actives" on public."Promotion"
     (date_debut is null or date_debut <= now())
     and (date_fin is null or date_fin >= now())
   );
+
+-- 4. Envoi d'images (Task 02 #150) -------------------------------------------
+-- Le champ « image » d'AdminForm envoie les photos dans le bucket « images ».
+drop policy if exists "Admins envoient des images" on storage.objects;
+create policy "Admins envoient des images" on storage.objects
+  for insert to authenticated
+  with check (bucket_id = 'images' and (select public.is_admin()));
