@@ -1,5 +1,5 @@
-import { describe, it, expect, afterEach } from 'vitest'
-import { mount } from '@vue/test-utils'
+import { describe, it, expect, afterEach, vi } from 'vitest'
+import { flushPromises, mount } from '@vue/test-utils'
 import AdminTable from './AdminTable.vue'
 import type { Artiste } from '../../../types/database/artiste'
 import type { AdminTableColumn } from '../../../types/ui/admin-table'
@@ -113,6 +113,32 @@ describe('AdminTable (confirmation de suppression)', () => {
 
     expect(wrapper.emitted('delete')).toEqual([[ARTISTES[2]]])
     expect(dialog()).toBeNull()
+    wrapper.unmount()
+  })
+
+  it('affiche l’impact de la suppression calculé pour la ligne', async () => {
+    const deleteImpact = vi.fn(async (artiste: Artiste) => [`12 personnes ont liké ${artiste.nom}`, 'Programmée sur 2 concerts'])
+    const wrapper = mountArtistes({ deleteImpact })
+
+    await button(wrapper, 'Supprimer', 2).trigger('click')
+    await flushPromises()
+
+    expect(deleteImpact).toHaveBeenCalledWith(ARTISTES[2])
+    expect(dialog()?.textContent).toContain('12 personnes ont liké Angèle')
+    expect(dialog()?.textContent).toContain('Programmée sur 2 concerts')
+    wrapper.unmount()
+  })
+
+  it('signale un impact impossible à calculer sans bloquer la suppression', async () => {
+    const wrapper = mountArtistes({ deleteImpact: vi.fn().mockRejectedValue(new Error('boom')) })
+
+    await button(wrapper, 'Supprimer', 2).trigger('click')
+    await flushPromises()
+    expect(dialog()?.textContent).toContain("Impossible de calculer l'impact")
+
+    dialogButton('Supprimer').click()
+    await wrapper.vm.$nextTick()
+    expect(wrapper.emitted('delete')).toEqual([[ARTISTES[2]]])
     wrapper.unmount()
   })
 

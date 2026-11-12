@@ -3,7 +3,7 @@ import type { Like } from '../types/database/like'
 import type { LikeTarget } from '../types/ui/like'
 import type { ArtisteResume } from './artiste'
 import type { ConferenceResume } from './conference'
-import { unwrap } from './crud'
+import { HandlerError, unwrap } from './crud'
 
 const TABLE = 'Like'
 
@@ -35,6 +35,19 @@ export const likeHandler = {
       throw new Error(`[get_my_likes] réponse inattendue : ${JSON.stringify(targets)}, la fonction doit renvoyer jsonb`)
     }
     return targets as LikeTarget[]
+  },
+
+  // Nombre de personnes ayant liké un artiste ou une conférence (impact
+  // affiché avant une suppression dans le back office). head : on ne
+  // récupère que le total, pas les lignes.
+  async countFor(target: LikeTarget): Promise<number> {
+    const column = target.type === 'artiste' ? 'id_artiste' : 'id_conference'
+    const { count, error } = await supabase
+      .from(TABLE)
+      .select('id_like', { count: 'exact', head: true })
+      .eq(column, target.id)
+    if (error) throw new HandlerError(TABLE, error)
+    return count ?? 0
   },
 
   async setLike(target: LikeTarget, liked: boolean): Promise<void> {
