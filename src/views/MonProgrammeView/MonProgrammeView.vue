@@ -9,6 +9,7 @@ import ProgrammeFrise from '../../components/mon-programme/ProgrammeFrise/Progra
 import { useAuth } from '../../composables/useAuth/useAuth'
 import { useAuthModal } from '../../composables/useAuthModal/useAuthModal'
 import { useLikes } from '../../composables/useLikes/useLikes'
+import { useNotifications } from '../../composables/useNotifications/useNotifications'
 import { concertHandler } from '../../handlers/concert'
 import { conferenceHandler } from '../../handlers/conference'
 import { toArtisteCards, toConferenceCards } from '../../lib/cards/cards'
@@ -21,6 +22,7 @@ const router = useRouter()
 const { isLoggedIn, ready } = useAuth()
 const { open } = useAuthModal()
 const { isLiked, likedIds, likesReady } = useLikes()
+const { unread, markAllRead } = useNotifications()
 
 const artistes = ref<ArtisteCard[]>([])
 const conferences = ref<ConferenceCard[]>([])
@@ -76,6 +78,18 @@ useScrollReveal()
     <div class="mon-programme__content">
       <h2 class="mon-programme__title">Mon programme</h2>
 
+      <section
+        v-if="isLoggedIn && unread.length"
+        class="mon-programme__changements"
+        aria-labelledby="mon-programme-changements"
+      >
+        <h3 id="mon-programme-changements">Changements récents</h3>
+        <ul>
+          <li v-for="notification in unread" :key="notification.id_notification">{{ notification.message }}</li>
+        </ul>
+        <Button color="primary" variant="outlined" @click="markAllRead">Marquer comme lu</Button>
+      </section>
+
       <Loader v-if="loading" />
 
       <div v-else-if="!isLoggedIn" class="mon-programme__message">
@@ -108,6 +122,29 @@ useScrollReveal()
 </template>
 
 <style scoped>
+.mon-programme__changements {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--space-3);
+  padding: var(--space-4) var(--space-5);
+  border: 1px solid var(--accent-border);
+  border-radius: var(--radius-medium);
+  background: var(--accent-bg);
+}
+
+.mon-programme__changements h3,
+.mon-programme__changements ul {
+  margin: 0;
+}
+
+.mon-programme__changements ul {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  padding-left: var(--space-5);
+}
+
 .mon-programme__content {
   display: flex;
   flex-direction: column;

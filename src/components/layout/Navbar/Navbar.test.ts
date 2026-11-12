@@ -136,6 +136,27 @@ describe('Navbar', () => {
     wrapper.unmount()
   })
 
+  it('signale sur le cœur le nombre de changements de concerts non lus', async () => {
+    mockSupabase({ user: { id: '1', email: 'alice@example.com' } })
+    vi.doMock('../../../handlers/notification', () => ({
+      notificationHandler: {
+        getUnread: vi.fn().mockResolvedValue([{ id_notification: 1 }, { id_notification: 2 }]),
+        subscribe: vi.fn(() => () => {}),
+      },
+    }))
+    const { wrapper } = await mountNavbar()
+    const { useAuth } = await import('../../../composables/useAuth/useAuth')
+    await useAuth().ready
+    const { useNotifications } = await import('../../../composables/useNotifications/useNotifications')
+    await useNotifications().startNotifications('1')
+    await wrapper.vm.$nextTick()
+
+    expect(wrapper.find('button[aria-label="Mon programme, 2 changements non lus"]').exists()).toBe(true)
+    expect(wrapper.find('.navbar__badge-count').text()).toBe('2')
+
+    wrapper.unmount()
+  })
+
   it('le cœur "Mon programme" navigue vers /mon-programme une fois connectée', async () => {
     mockSupabase({ user: { id: '1', email: 'alice@example.com' } })
     const { wrapper, router } = await mountNavbar()

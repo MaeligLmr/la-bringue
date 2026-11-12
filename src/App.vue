@@ -11,10 +11,12 @@ import SignUpForm from './components/auth/SignUpForm/SignUpForm.vue'
 import { useAuth } from './composables/useAuth/useAuth'
 import { useAuthModal } from './composables/useAuthModal/useAuthModal'
 import { useLikes } from './composables/useLikes/useLikes'
+import { useNotifications } from './composables/useNotifications/useNotifications'
 import { useTheme } from './composables/useTheme/useTheme'
 
 const { isOpen, activeView, close, complete, takePendingLike, switchTo } = useAuthModal()
 const { addLike, loadLikes, clearLikes } = useLikes()
+const { startNotifications, stopNotifications } = useNotifications()
 const { user } = useAuth()
 const { resolvedTheme } = useTheme()
 const route = useRoute()
@@ -27,14 +29,19 @@ function onAuthSuccess() {
   if (likeTarget) addLike(likeTarget)
 }
 
-// Recharge les likes depuis la base à chaque connexion (ou au chargement d'une
-// session existante) et les vide à la déconnexion. On surveille l'id plutôt
+// Recharge les likes et les notifications depuis la base à chaque connexion
+// (ou au chargement d'une session existante) et les vide à la déconnexion. On surveille l'id plutôt
 // que l'objet user, qui change aussi à chaque rafraîchissement du token.
 watch(
   () => user.value?.id,
   (id) => {
-    if (id) loadLikes()
-    else clearLikes()
+    if (id) {
+      loadLikes()
+      startNotifications(id)
+    } else {
+      clearLikes()
+      stopNotifications()
+    }
   },
   { immediate: true }
 )
