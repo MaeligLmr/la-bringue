@@ -4,9 +4,11 @@ import { useRouter } from 'vue-router'
 import { toast } from 'vue-sonner'
 import AdminForm from '../../../components/admin/AdminForm/AdminForm.vue'
 import ConcertLineup from '../../../components/admin/ConcertLineup/ConcertLineup.vue'
-import { concertHandler } from '../../../handlers/concert'
+import { concertHandler, type ConcertDetail } from '../../../handlers/concert'
 import { concertArtisteHandler } from '../../../handlers/concert-artiste'
 import { sceneHandler } from '../../../handlers/scene'
+import { formatHeure } from '../../../lib/cards/cards'
+import { chevauchements, heureFinError, type Creneau } from '../../../lib/concert-checks/concert-checks'
 import { diffLineup, type LineupEntry } from '../../../lib/lineup/lineup'
 import type { Concert } from '../../../types/database/concert'
 import type { AdminFormField } from '../../../types/ui/admin-form'
@@ -20,6 +22,7 @@ const router = useRouter()
 const scenes = ref<SelectOption[]>([])
 const savedLineup = ref<LineupEntry[]>([])
 const lineup = ref<LineupEntry[]>([])
+const concerts = ref<ConcertDetail[]>([])
 const ready = ref(false)
 
 async function loadLineup(idConcert: number) {
@@ -34,13 +37,15 @@ async function loadLineup(idConcert: number) {
 
 onMounted(async () => {
   try {
-    const [toutes, liens] = await Promise.all([
+    const [toutes, liens, tous] = await Promise.all([
       sceneHandler.getAll(),
       props.id === undefined ? Promise.resolve([]) : loadLineup(props.id),
+      concertHandler.getAllDetailed(),
     ])
     scenes.value = toutes.map((scene) => ({ value: String(scene.id_scene), label: scene.nom ?? '' }))
     savedLineup.value = liens
     lineup.value = liens
+    concerts.value = tous
   } catch {
     toast.error('Impossible de charger le concert.')
   } finally {
@@ -54,6 +59,22 @@ const fields = computed<AdminFormField<Concert>[]>(() => [
   { key: 'heure_fin', label: 'Heure de fin', type: 'time' },
   { key: 'id_scene', label: 'Scène', type: 'select', required: true, options: scenes.value },
 ])
+
+function rules(values: Record<string, unknown>) {
+  return { heure_fin: heureFinError(values.heure_debut as string | null, values.heure_fin as string | null) }
+}
+
+function overlapWarning(values: Record<string, unknown>) {
+  const concert = { ...(values as unknown as Creneau), id_concert: props.id }
+  const conflits = chevauchements(concert, concerts.value)
+  if (!conflits.length) return ''
+  const details = conflits.map((autre) => {
+    const noms = autre.ConcertArtiste.flatMap((lien) => (lien.Artiste?.nom ? [lien.Artiste.nom] : [])).join(', ') || 'sans artiste'
+    const horaire = [formatHeure(autre.heure_debut), formatHeure(autre.heure_fin)].filter(Boolean).join(' – ')
+    return `${noms} (${horaire})`
+  })
+  return `Ce concert chevauche sur la même scène : ${details.join(' ; ')}.`
+}
 
 async function saveLineup(idConcert: number) {
   const { added, updated, removed } = diffLineup(savedLineup.value, lineup.value)
@@ -82,8 +103,21 @@ async function onSaved(concert: Concert) {
     <RouterLink :to="{ name: 'admin-concerts' }" class="admin-concert-form__back">← Concerts</RouterLink>
     <h1>{{ id === undefined ? 'Nouveau concert' : 'Modifier le concert' }}</h1>
 
-    <AdminForm v-if="ready" :key="id ?? 'nouveau'" :fields="fields" :handler="concertHandler" :id="id" @saved="onSaved">
-      <ConcertLineup v-model="lineup" />
+    <AdminForm
+      v-if="ready"
+      :key="id ?? 'nouveau'"
+      :fields="fields"
+      :handler="concertHandler"
+      :id="id"
+      :rules="rules"
+      @saved="onSaved"
+    >
+      <template #default="{ values }">
+        <p v-if="overlapWarning(values)" class="admin-concert-form__warning" role="status">
+          {{ overlapWarning(values) }}
+        </p>
+        <ConcertLineup v-model="lineup" />
+      </template>
     </AdminForm>
   </div>
 </template>
@@ -98,6 +132,15 @@ async function onSaved(concert: Concert) {
 
 .admin-concert-form h1 {
   margin: 0;
+}
+
+.admin-concert-form__warning {
+  margin: 0;
+  padding: var(--space-3) var(--space-4);
+  border: 1px solid var(--alert-danger-border);
+  border-radius: var(--radius-medium);
+  background: var(--alert-danger-background);
+  color: var(--alert-danger-text);
 }
 
 .admin-concert-form__back {
