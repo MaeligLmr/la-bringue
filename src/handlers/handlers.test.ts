@@ -132,6 +132,19 @@ describe('concertArtisteHandler', () => {
 })
 
 describe('concertHandler', () => {
+  it('getAllDetailed charge tous les concerts avec scène et artistes, par jour puis heure', async () => {
+    const { from, chain } = mockSupabase()
+    const { concertHandler } = await import('./concert')
+
+    await concertHandler.getAllDetailed()
+
+    expect(from).toHaveBeenCalledWith('Concert')
+    expect(chain.select).toHaveBeenCalledWith(expect.stringContaining('Scene(id_scene, nom), ConcertArtiste('))
+    expect(chain.eq).not.toHaveBeenCalled()
+    expect(chain.order).toHaveBeenNthCalledWith(1, 'jour')
+    expect(chain.order).toHaveBeenNthCalledWith(2, 'heure_debut')
+  })
+
   it('getByArtistes ne garde que les concerts des artistes demandés, par jour puis heure', async () => {
     const { from, chain } = mockSupabase()
     const { concertHandler } = await import('./concert')

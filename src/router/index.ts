@@ -67,7 +67,28 @@ export const router = createRouter({
             },
           ],
         },
-        ...ADMIN_SECTIONS.filter((section) => section.name !== 'admin-artistes').map((section) => ({
+        {
+          path: 'concerts',
+          children: [
+            {
+              path: '',
+              name: 'admin-concerts',
+              component: () => import('../views/admin/AdminConcertsView/AdminConcertsView.vue'),
+            },
+            {
+              path: 'nouveau',
+              name: 'admin-concert-nouveau',
+              component: () => import('../views/admin/AdminConcertFormView/AdminConcertFormView.vue'),
+            },
+            {
+              path: ':id(\\d+)',
+              name: 'admin-concert',
+              component: () => import('../views/admin/AdminConcertFormView/AdminConcertFormView.vue'),
+              props: (route) => ({ id: Number(route.params.id) }),
+            },
+          ],
+        },
+        ...ADMIN_SECTIONS.filter((section) => !['admin-artistes', 'admin-concerts'].includes(section.name)).map((section) => ({
           path: section.path,
           name: section.name,
           component: () => import('../views/admin/AdminSectionView/AdminSectionView.vue'),

@@ -133,6 +133,8 @@ async function submit() {
       <p v-if="errors[field.key]" class="admin-form__error">{{ errors[field.key] }}</p>
     </div>
 
+    <slot />
+
     <Button type="submit" :disabled="submitting">
       {{ submitting ? 'Enregistrement…' : 'Enregistrer' }}
     </Button>
