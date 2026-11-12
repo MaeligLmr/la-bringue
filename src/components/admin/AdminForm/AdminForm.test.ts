@@ -141,4 +141,30 @@ describe('AdminForm', () => {
     expect(toast.error).toHaveBeenCalledWith('L’enregistrement a échoué. Réessaie plus tard.')
     expect(wrapper.emitted('saved')).toBeUndefined()
   })
+
+  it('bloque l’envoi sur une règle de la page et affiche son message sous le champ', async () => {
+    const handler = makeHandler()
+    const rules = vi.fn((values: Record<string, unknown>) => ({
+      description: values.description === 'interdit' ? 'Description refusée.' : undefined,
+    }))
+    const wrapper = mount(AdminForm<Artiste>, { props: { fields: FIELDS, handler, rules } })
+
+    await wrapper.find('#admin-nom').setValue('Angèle')
+    await wrapper.find('#admin-description').setValue('interdit')
+    await wrapper.find('form').trigger('submit')
+
+    expect(wrapper.find('.admin-form__error').text()).toBe('Description refusée.')
+    expect(handler.create).not.toHaveBeenCalled()
+  })
+
+  it('donne les valeurs en cours de saisie au contenu ajouté par la page', async () => {
+    const wrapper = mount(AdminForm<Artiste>, {
+      props: { fields: FIELDS, handler: makeHandler() },
+      slots: { default: `<template #default="{ values }"><p class="apercu">{{ values.nom }}</p></template>` },
+    })
+
+    await wrapper.find('#admin-nom').setValue('Angèle')
+
+    expect(wrapper.find('.apercu').text()).toBe('Angèle')
+  })
 })

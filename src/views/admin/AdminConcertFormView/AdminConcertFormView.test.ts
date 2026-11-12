@@ -10,7 +10,7 @@ import type { LineupEntry } from '../../../lib/lineup/lineup'
 import { JOURS } from '../../../types/ui/programmation'
 
 const { concertHandler, concertArtisteHandler, sceneHandler, toast } = vi.hoisted(() => ({
-  concertHandler: { getById: vi.fn(), create: vi.fn(), update: vi.fn() },
+  concertHandler: { getById: vi.fn(), create: vi.fn(), update: vi.fn(), getAllDetailed: vi.fn() },
   concertArtisteHandler: { getArtistesByConcert: vi.fn(), create: vi.fn(), update: vi.fn(), remove: vi.fn() },
   sceneHandler: { getAll: vi.fn() },
   toast: { success: vi.fn(), error: vi.fn() },
@@ -47,7 +47,11 @@ async function mountView(id?: number) {
 }
 
 function formProps(wrapper: Awaited<ReturnType<typeof mountView>>['wrapper']) {
-  return wrapper.findComponent(AdminForm).props() as { fields: AdminFormField<Concert>[]; id?: number }
+  return wrapper.findComponent(AdminForm).props() as {
+    fields: AdminFormField<Concert>[]
+    id?: number
+    rules: (values: Record<string, unknown>) => Partial<Record<string, string>>
+  }
 }
 
 async function editLineup(wrapper: Awaited<ReturnType<typeof mountView>>['wrapper'], lineup: LineupEntry[]) {
@@ -67,6 +71,7 @@ beforeEach(() => {
     { id_scene: 2, nom: 'Summer' },
   ])
   concertHandler.getById.mockResolvedValue(CONCERT)
+  concertHandler.getAllDetailed.mockResolvedValue([])
   concertArtisteHandler.getArtistesByConcert.mockResolvedValue([
     { id_artiste: 1, id_concert: 7, artiste_annonce: true, featuring: false, Artiste: { id_artiste: 1, nom: 'Aya Nakamura' } },
   ])
@@ -134,5 +139,38 @@ describe('AdminConcertFormView', () => {
 
     expect(toast.error).toHaveBeenCalled()
     expect(router.currentRoute.value.fullPath).toBe('/admin/concerts/7')
+  })
+
+  it('bloque une heure de fin avant l’heure de début', async () => {
+    const { wrapper } = await mountView()
+    const { rules } = formProps(wrapper)
+
+    expect(rules({ heure_debut: '21:00', heure_fin: '20:00' }).heure_fin).toBe("L'heure de fin doit être après l'heure de début.")
+    expect(rules({ heure_debut: '21:00', heure_fin: '22:00' }).heure_fin).toBeUndefined()
+  })
+
+  it('avertit, sans bloquer, d’un autre concert sur la même scène au même moment', async () => {
+    concertHandler.getAllDetailed.mockResolvedValue([
+      { ...CONCERT, ConcertArtiste: [] },
+      {
+        id_concert: 8,
+        id_scene: 1,
+        jour: '2026-08-29',
+        heure_debut: '20:30:00',
+        heure_fin: '21:30:00',
+        ConcertArtiste: [{ Artiste: { nom: 'Angèle' } }],
+      },
+    ])
+    const { wrapper } = await mountView(7)
+
+    const warning = wrapper.find('.admin-concert-form__warning')
+    expect(warning.text()).toBe('Ce concert chevauche sur la même scène : Angèle (20h30 – 21h30).')
+    expect(wrapper.find('button[type="submit"]').attributes('disabled')).toBeUndefined()
+  })
+
+  it('n’avertit pas quand la scène est libre', async () => {
+    const { wrapper } = await mountView(7)
+
+    expect(wrapper.find('.admin-concert-form__warning').exists()).toBe(false)
   })
 })

@@ -10,6 +10,7 @@ const props = defineProps<{
   fields: AdminFormField<T>[]
   handler: AdminFormHandler<T>
   id?: string | number
+  rules?: (values: Record<string, unknown>) => Partial<Record<string, string>>
 }>()
 
 const emit = defineEmits<{ saved: [item: T] }>()
@@ -52,8 +53,9 @@ function isEmpty(field: AdminFormField<T>) {
 }
 
 function validate() {
+  const ruleErrors = props.rules?.(values) ?? {}
   for (const field of props.fields) {
-    errors[field.key] = field.required && isEmpty(field) ? 'Ce champ est obligatoire.' : undefined
+    errors[field.key] = field.required && isEmpty(field) ? 'Ce champ est obligatoire.' : ruleErrors[field.key]
   }
   return props.fields.every((field) => !errors[field.key])
 }
@@ -133,7 +135,7 @@ async function submit() {
       <p v-if="errors[field.key]" class="admin-form__error">{{ errors[field.key] }}</p>
     </div>
 
-    <slot />
+    <slot :values="values" />
 
     <Button type="submit" :disabled="submitting">
       {{ submitting ? 'Enregistrement…' : 'Enregistrer' }}
