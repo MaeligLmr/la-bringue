@@ -3,6 +3,7 @@ import { computed, onMounted, ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { toast } from 'vue-sonner'
 import AdminForm from '../../../components/admin/AdminForm/AdminForm.vue'
+import AdminPage from '../../../components/admin/AdminPage/AdminPage.vue'
 import ConcertLineup from '../../../components/admin/ConcertLineup/ConcertLineup.vue'
 import { concertHandler, type ConcertDetail } from '../../../handlers/concert'
 import { concertArtisteHandler } from '../../../handlers/concert-artiste'
@@ -99,10 +100,11 @@ async function onSaved(concert: Concert) {
 </script>
 
 <template>
-  <div class="admin-concert-form">
-    <RouterLink :to="{ name: 'admin-concerts' }" class="admin-concert-form__back">← Concerts</RouterLink>
-    <h1>{{ id === undefined ? 'Nouveau concert' : 'Modifier le concert' }}</h1>
-
+  <AdminPage
+    :title="id === undefined ? 'Nouveau concert' : 'Modifier le concert'"
+    :back="{ to: { name: 'admin-concerts' }, label: 'Concerts' }"
+    width="wide"
+  >
     <AdminForm
       v-if="ready"
       :key="id ?? 'nouveau'"
@@ -119,21 +121,10 @@ async function onSaved(concert: Concert) {
         <ConcertLineup v-model="lineup" />
       </template>
     </AdminForm>
-  </div>
+  </AdminPage>
 </template>
 
 <style scoped>
-.admin-concert-form {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-6);
-  max-width: 48rem;
-}
-
-.admin-concert-form h1 {
-  margin: 0;
-}
-
 .admin-concert-form__warning {
   margin: 0;
   padding: var(--space-3) var(--space-4);
@@ -141,11 +132,5 @@ async function onSaved(concert: Concert) {
   border-radius: var(--radius-medium);
   background: var(--alert-danger-background);
   color: var(--alert-danger-text);
-}
-
-.admin-concert-form__back {
-  align-self: flex-start;
-  color: var(--text-h);
-  font-size: var(--font-size-small);
 }
 </style>

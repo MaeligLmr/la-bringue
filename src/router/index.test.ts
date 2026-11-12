@@ -67,6 +67,17 @@ describe('router', () => {
       expect(router.resolve('/admin/intervenantes').meta.requiresAdmin).toBe(true)
     })
 
+    it('résout la liste, la création et la modification d’une intervenante', () => {
+      expect(router.resolve('/admin/intervenantes').name).toBe('admin-intervenantes')
+      expect(router.resolve('/admin/intervenantes/nouvelle').name).toBe('admin-intervenante-nouvelle')
+
+      const route = router.resolve('/admin/intervenantes/4')
+      expect(route.name).toBe('admin-intervenante')
+      expect(route.meta.requiresAdmin).toBe(true)
+      const props = (route.matched.at(-1)!.props.default as (r: typeof route) => unknown)(route)
+      expect(props).toEqual({ id: 4 })
+    })
+
     it('résout la liste, la création et la modification d’un concert', () => {
       expect(router.resolve('/admin/concerts').name).toBe('admin-concerts')
       expect(router.resolve('/admin/concerts/nouveau').name).toBe('admin-concert-nouveau')

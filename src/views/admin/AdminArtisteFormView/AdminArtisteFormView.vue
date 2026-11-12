@@ -3,6 +3,7 @@ import { computed, onMounted, ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { toast } from 'vue-sonner'
 import AdminForm from '../../../components/admin/AdminForm/AdminForm.vue'
+import AdminPage from '../../../components/admin/AdminPage/AdminPage.vue'
 import { artisteHandler } from '../../../handlers/artiste'
 import type { Artiste } from '../../../types/database/artiste'
 import type { AdminFormField } from '../../../types/ui/admin-form'
@@ -45,29 +46,12 @@ function backToList() {
 </script>
 
 <template>
-  <div class="admin-artiste-form">
-    <RouterLink :to="{ name: 'admin-artistes' }" class="admin-artiste-form__back">← Artistes</RouterLink>
-    <h1>{{ id === undefined ? 'Nouvelle artiste' : 'Modifier l’artiste' }}</h1>
-
+  <AdminPage
+    :title="id === undefined ? 'Nouvelle artiste' : 'Modifier l’artiste'"
+    :back="{ to: { name: 'admin-artistes' }, label: 'Artistes' }"
+    width="form"
+  >
     <AdminForm v-if="ready" :key="id ?? 'nouvelle'" :fields="fields" :handler="artisteHandler" :id="id" @saved="backToList" />
-  </div>
+  </AdminPage>
 </template>
 
-<style scoped>
-.admin-artiste-form {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-6);
-  max-width: 36rem;
-}
-
-.admin-artiste-form h1 {
-  margin: 0;
-}
-
-.admin-artiste-form__back {
-  align-self: flex-start;
-  color: var(--text-h);
-  font-size: var(--font-size-small);
-}
-</style>

@@ -1,4 +1,4 @@
-import { createRouter, createWebHistory } from 'vue-router'
+import { createRouter, createWebHistory, type RouteComponent, type RouteRecordRaw } from 'vue-router'
 
 declare module 'vue-router' {
   interface RouteMeta {
@@ -10,6 +10,49 @@ declare module 'vue-router' {
 import { useAuth } from '../composables/useAuth/useAuth'
 import { ADMIN_SECTIONS } from '../lib/admin-sections/admin-sections'
 import HomeView from '../views/HomeView/HomeView.vue'
+
+interface CrudSection {
+  path: string
+  names: { list: string; create: string; edit: string }
+  createPath: string
+  list: () => Promise<{ default: RouteComponent }>
+  form: () => Promise<{ default: RouteComponent }>
+}
+
+const CRUD_SECTIONS: CrudSection[] = [
+  {
+    path: 'artistes',
+    names: { list: 'admin-artistes', create: 'admin-artiste-nouvelle', edit: 'admin-artiste' },
+    createPath: 'nouvelle',
+    list: () => import('../views/admin/AdminArtistesView/AdminArtistesView.vue'),
+    form: () => import('../views/admin/AdminArtisteFormView/AdminArtisteFormView.vue'),
+  },
+  {
+    path: 'concerts',
+    names: { list: 'admin-concerts', create: 'admin-concert-nouveau', edit: 'admin-concert' },
+    createPath: 'nouveau',
+    list: () => import('../views/admin/AdminConcertsView/AdminConcertsView.vue'),
+    form: () => import('../views/admin/AdminConcertFormView/AdminConcertFormView.vue'),
+  },
+  {
+    path: 'intervenantes',
+    names: { list: 'admin-intervenantes', create: 'admin-intervenante-nouvelle', edit: 'admin-intervenante' },
+    createPath: 'nouvelle',
+    list: () => import('../views/admin/AdminIntervenantesView/AdminIntervenantesView.vue'),
+    form: () => import('../views/admin/AdminIntervenanteFormView/AdminIntervenanteFormView.vue'),
+  },
+]
+
+function crudRoutes({ path, names, createPath, list, form }: CrudSection): RouteRecordRaw {
+  return {
+    path,
+    children: [
+      { path: '', name: names.list, component: list },
+      { path: createPath, name: names.create, component: form },
+      { path: ':id(\\d+)', name: names.edit, component: form, props: (route) => ({ id: Number(route.params.id) }) },
+    ],
+  }
+}
 
 export const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -46,49 +89,8 @@ export const router = createRouter({
       meta: { requiresAdmin: true },
       children: [
         { path: '', name: 'admin', redirect: { name: ADMIN_SECTIONS[0].name } },
-        {
-          path: 'artistes',
-          children: [
-            {
-              path: '',
-              name: 'admin-artistes',
-              component: () => import('../views/admin/AdminArtistesView/AdminArtistesView.vue'),
-            },
-            {
-              path: 'nouvelle',
-              name: 'admin-artiste-nouvelle',
-              component: () => import('../views/admin/AdminArtisteFormView/AdminArtisteFormView.vue'),
-            },
-            {
-              path: ':id(\\d+)',
-              name: 'admin-artiste',
-              component: () => import('../views/admin/AdminArtisteFormView/AdminArtisteFormView.vue'),
-              props: (route) => ({ id: Number(route.params.id) }),
-            },
-          ],
-        },
-        {
-          path: 'concerts',
-          children: [
-            {
-              path: '',
-              name: 'admin-concerts',
-              component: () => import('../views/admin/AdminConcertsView/AdminConcertsView.vue'),
-            },
-            {
-              path: 'nouveau',
-              name: 'admin-concert-nouveau',
-              component: () => import('../views/admin/AdminConcertFormView/AdminConcertFormView.vue'),
-            },
-            {
-              path: ':id(\\d+)',
-              name: 'admin-concert',
-              component: () => import('../views/admin/AdminConcertFormView/AdminConcertFormView.vue'),
-              props: (route) => ({ id: Number(route.params.id) }),
-            },
-          ],
-        },
-        ...ADMIN_SECTIONS.filter((section) => !['admin-artistes', 'admin-concerts'].includes(section.name)).map((section) => ({
+        ...CRUD_SECTIONS.map(crudRoutes),
+        ...ADMIN_SECTIONS.filter((section) => !CRUD_SECTIONS.some((crud) => crud.names.list === section.name)).map((section) => ({
           path: section.path,
           name: section.name,
           component: () => import('../views/admin/AdminSectionView/AdminSectionView.vue'),
