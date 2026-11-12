@@ -1,5 +1,6 @@
 <script setup lang="ts" generic="T extends object">
-import { computed, ref } from 'vue'
+import { computed, ref, shallowRef } from 'vue'
+import Modal from '../../layout/Modal/Modal.vue'
 import Button from '../../ui/Button/Button.vue'
 import Icon from '../../ui/Icon/Icon.vue'
 import Loader from '../../ui/Loader/Loader.vue'
@@ -26,11 +27,30 @@ const emit = defineEmits<{
 
 const search = ref('')
 
+function nameOf(item: T) {
+  return String((item as Record<string, unknown>).nom ?? '')
+}
+
 const filteredItems = computed(() => {
   const query = fold(search.value.trim())
   if (!query) return props.items
-  return props.items.filter((item) => fold(String((item as Record<string, unknown>).nom ?? '')).includes(query))
+  return props.items.filter((item) => fold(nameOf(item)).includes(query))
 })
+
+const pendingDelete = shallowRef<T | null>(null)
+
+function askDelete(item: T) {
+  pendingDelete.value = item
+}
+
+function cancelDelete() {
+  pendingDelete.value = null
+}
+
+function confirmDelete() {
+  if (pendingDelete.value) emit('delete', pendingDelete.value)
+  pendingDelete.value = null
+}
 
 function cellValue(column: AdminTableColumn<T>, item: T) {
   const value = item[column.key]
@@ -72,11 +92,21 @@ function cellValue(column: AdminTableColumn<T>, item: T) {
           <td v-for="column in columns" :key="column.key">{{ cellValue(column, item) }}</td>
           <td class="admin-table__actions">
             <Button color="secondary" variant="ghost" @click="emit('edit', item)">Modifier</Button>
-            <Button color="danger" variant="ghost" @click="emit('delete', item)">Supprimer</Button>
+            <Button color="danger" variant="ghost" @click="askDelete(item)">Supprimer</Button>
           </td>
         </tr>
       </tbody>
     </table>
+
+    <Modal :open="pendingDelete !== null" title="Confirmer la suppression" @close="cancelDelete">
+      <p v-if="pendingDelete" class="admin-table__confirm-text">
+        Supprimer « {{ nameOf(pendingDelete) }} » ? Cette action est définitive.
+      </p>
+      <div class="admin-table__confirm-actions">
+        <Button color="secondary" variant="outlined" @click="cancelDelete">Annuler</Button>
+        <Button color="danger" @click="confirmDelete">Supprimer</Button>
+      </div>
+    </Modal>
   </section>
 </template>
 
@@ -148,6 +178,17 @@ function cellValue(column: AdminTableColumn<T>, item: T) {
 
 .admin-table__actions {
   display: flex;
+  justify-content: flex-end;
+  gap: var(--space-2);
+}
+
+.admin-table__confirm-text {
+  margin: 0 0 var(--space-6);
+}
+
+.admin-table__confirm-actions {
+  display: flex;
+  flex-wrap: wrap;
   justify-content: flex-end;
   gap: var(--space-2);
 }

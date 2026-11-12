@@ -1,4 +1,4 @@
-import { describe, it, expect } from 'vitest'
+import { describe, it, expect, afterEach } from 'vitest'
 import { mount } from '@vue/test-utils'
 import AdminTable from './AdminTable.vue'
 import type { Artiste } from '../../../types/database/artiste'
@@ -54,16 +54,14 @@ describe('AdminTable', () => {
     expect(rows(wrapper)).toHaveLength(3)
   })
 
-  it('émet les actions Ajouter, Modifier et Supprimer avec la ligne concernée', async () => {
+  it('émet les actions Ajouter et Modifier avec la ligne concernée', async () => {
     const wrapper = mountArtistes()
 
     await button(wrapper, 'Ajouter').trigger('click')
     await button(wrapper, 'Modifier', 1).trigger('click')
-    await button(wrapper, 'Supprimer', 2).trigger('click')
 
     expect(wrapper.emitted('add')).toHaveLength(1)
     expect(wrapper.emitted('edit')).toEqual([[ARTISTES[1]]])
-    expect(wrapper.emitted('delete')).toEqual([[ARTISTES[2]]])
   })
 
   it('affiche le Loader pendant le chargement', () => {
@@ -78,5 +76,55 @@ describe('AdminTable', () => {
 
     expect(wrapper.find('table').exists()).toBe(false)
     expect(wrapper.text()).toContain('Aucun résultat.')
+  })
+})
+
+describe('AdminTable (confirmation de suppression)', () => {
+  function dialog() {
+    return document.querySelector('[role="dialog"]')
+  }
+
+  function dialogButton(label: string) {
+    const found = Array.from(dialog()?.querySelectorAll('button') ?? []).find((b) => b.textContent?.trim() === label)
+    if (!found) throw new Error(`Bouton "${label}" introuvable dans la modale`)
+    return found
+  }
+
+  afterEach(() => {
+    document.body.innerHTML = ''
+  })
+
+  it('demande confirmation en rappelant le nom, avant toute suppression', async () => {
+    const wrapper = mountArtistes()
+
+    await button(wrapper, 'Supprimer', 2).trigger('click')
+
+    expect(dialog()?.textContent).toContain('« Angèle »')
+    expect(wrapper.emitted('delete')).toBeUndefined()
+    wrapper.unmount()
+  })
+
+  it('émet delete avec la ligne une fois la suppression confirmée', async () => {
+    const wrapper = mountArtistes()
+
+    await button(wrapper, 'Supprimer', 2).trigger('click')
+    dialogButton('Supprimer').click()
+    await wrapper.vm.$nextTick()
+
+    expect(wrapper.emitted('delete')).toEqual([[ARTISTES[2]]])
+    expect(dialog()).toBeNull()
+    wrapper.unmount()
+  })
+
+  it('ne supprime rien quand on annule', async () => {
+    const wrapper = mountArtistes()
+
+    await button(wrapper, 'Supprimer', 2).trigger('click')
+    dialogButton('Annuler').click()
+    await wrapper.vm.$nextTick()
+
+    expect(wrapper.emitted('delete')).toBeUndefined()
+    expect(dialog()).toBeNull()
+    wrapper.unmount()
   })
 })
