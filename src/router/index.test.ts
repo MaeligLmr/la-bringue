@@ -67,6 +67,16 @@ describe('router', () => {
       expect(router.resolve('/admin/intervenantes').meta.requiresAdmin).toBe(true)
     })
 
+    it('résout la création et la modification d’une artiste', () => {
+      expect(router.resolve('/admin/artistes/nouvelle').name).toBe('admin-artiste-nouvelle')
+
+      const route = router.resolve('/admin/artistes/12')
+      expect(route.name).toBe('admin-artiste')
+      expect(route.meta.requiresAdmin).toBe(true)
+      const props = (route.matched.at(-1)!.props.default as (r: typeof route) => unknown)(route)
+      expect(props).toEqual({ id: 12 })
+    })
+
     it('renvoie une non-admin qui tape /admin vers la home', async () => {
       auth.isAdmin.value = false
       await router.push('/programmation')

@@ -46,7 +46,28 @@ export const router = createRouter({
       meta: { requiresAdmin: true },
       children: [
         { path: '', name: 'admin', redirect: { name: ADMIN_SECTIONS[0].name } },
-        ...ADMIN_SECTIONS.map((section) => ({
+        {
+          path: 'artistes',
+          children: [
+            {
+              path: '',
+              name: 'admin-artistes',
+              component: () => import('../views/admin/AdminArtistesView/AdminArtistesView.vue'),
+            },
+            {
+              path: 'nouvelle',
+              name: 'admin-artiste-nouvelle',
+              component: () => import('../views/admin/AdminArtisteFormView/AdminArtisteFormView.vue'),
+            },
+            {
+              path: ':id(\\d+)',
+              name: 'admin-artiste',
+              component: () => import('../views/admin/AdminArtisteFormView/AdminArtisteFormView.vue'),
+              props: (route) => ({ id: Number(route.params.id) }),
+            },
+          ],
+        },
+        ...ADMIN_SECTIONS.filter((section) => section.name !== 'admin-artistes').map((section) => ({
           path: section.path,
           name: section.name,
           component: () => import('../views/admin/AdminSectionView/AdminSectionView.vue'),
