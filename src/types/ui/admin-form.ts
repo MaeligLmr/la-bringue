@@ -1,6 +1,6 @@
 import type { SelectOption } from './select'
 
-export type AdminFieldType = 'text' | 'textarea' | 'date' | 'time' | 'datetime' | 'select' | 'checkbox' | 'image'
+export type AdminFieldType = 'text' | 'textarea' | 'number' | 'date' | 'time' | 'datetime' | 'select' | 'checkbox' | 'image'
 
 export interface AdminFormField<T> {
   key: keyof T & string
@@ -11,6 +11,9 @@ export interface AdminFormField<T> {
   options?: SelectOption[]
   // Dossier du bucket Storage « images » où envoyer le fichier d'un champ « image ».
   folder?: string
+  // Bornes d'un champ « number ».
+  min?: number
+  max?: number
 }
 
 // Ce dont AdminForm a besoin d'un handler (voir createCrudHandler).

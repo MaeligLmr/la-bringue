@@ -152,6 +152,35 @@ describe('pagination des listes', () => {
     expect(chain.lte).toHaveBeenCalledWith('date_publication', expect.any(String))
   })
 
+  it('formuleHandler.getPage trie par jour de début puis id et cherche dans le titre', async () => {
+    const { from, chain } = mockSupabase(rows(21))
+    const { formuleHandler } = await import('./formule')
+
+    const page = await formuleHandler.getPage({ offset: 20, search: 'pass', pageSize: 20 })
+
+    expect(from).toHaveBeenCalledWith('Formule')
+    expect(chain.ilike).toHaveBeenCalledWith('titre', '%pass%')
+    expect(chain.order).toHaveBeenNthCalledWith(1, 'jour_debut')
+    expect(chain.order).toHaveBeenNthCalledWith(2, 'id_formule')
+    expect(chain.range).toHaveBeenCalledWith(20, 40)
+    expect(page.rows).toHaveLength(20)
+    expect(page.hasMore).toBe(true)
+  })
+
+  it('promotionHandler.getPage joint la formule, trie du plus récent au plus ancien et cherche dans le nom', async () => {
+    const { from, chain } = mockSupabase()
+    const { promotionHandler } = await import('./promotion')
+
+    await promotionHandler.getPage({ offset: 0, search: 'early' })
+
+    expect(from).toHaveBeenCalledWith('Promotion')
+    expect(chain.select).toHaveBeenCalledWith('id_promotion, id_formule, description, reduction_prc, date_debut, date_fin, Formule(titre)')
+    expect(chain.ilike).toHaveBeenCalledWith('description', '%early%')
+    expect(chain.order).toHaveBeenNthCalledWith(1, 'date_debut', { ascending: false })
+    expect(chain.order).toHaveBeenNthCalledWith(2, 'id_promotion', { ascending: false })
+    expect(chain.range).toHaveBeenCalledWith(0, PAGE_SIZE)
+  })
+
   it('conferenceHandler.getPage filtre par jour, thème et titre, trié par jour puis heure', async () => {
     const { from, chain } = mockSupabase()
     const { conferenceHandler } = await import('./conference')
