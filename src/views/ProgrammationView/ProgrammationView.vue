@@ -57,7 +57,6 @@ useScrollReveal()
         v-model:search="search"
         :items="artistes"
         :filters="filters"
-        server-side
         :has-more="hasMore"
         :loading="loading"
         :failed="failed"

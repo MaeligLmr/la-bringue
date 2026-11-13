@@ -3,7 +3,7 @@ import type { Concert } from '../types/database/concert'
 import type { ConcertArtiste } from '../types/database/concert-artiste'
 import type { Scene } from '../types/database/scene'
 import type { ArtisteNom, ArtisteResume } from './artiste'
-import { containsPattern, createCrudHandler, pageRange, toPage, unwrap, type Page } from './crud'
+import { containsPattern, createCrudHandler, pageRange, PAGE_SIZE, toPage, unwrap, type Page } from './crud'
 
 const TABLE = 'Concert'
 
@@ -82,11 +82,13 @@ export const concertHandler = {
     search = '',
     jour = '',
     scene = '',
+    pageSize = PAGE_SIZE,
   }: {
     offset: number
     search?: string
     jour?: string
     scene?: string
+    pageSize?: number
   }): Promise<Page<ConcertDetail>> {
     // !inner : un concert sans scène ou sans artiste correspondant est exclu,
     // au lieu d'être renvoyé avec une jointure vide.
@@ -99,8 +101,8 @@ export const concertHandler = {
     if (scene) query = query.ilike('Scene.nom', `${scene}%`)
     if (search.trim()) query = query.ilike('ConcertArtiste.Artiste.nom', containsPattern(search))
     // id en second critère : un ordre stable évite doublons et trous entre les pages.
-    query = query.order('jour').order('heure_debut').order('id_concert').range(...pageRange(offset))
-    return toPage(unwrap<ConcertDetail[]>(TABLE, await query))
+    query = query.order('jour').order('heure_debut').order('id_concert').range(...pageRange(offset, pageSize))
+    return toPage(unwrap<ConcertDetail[]>(TABLE, await query), pageSize)
   },
 
   async getByScene(idScene: number): Promise<Concert[]> {

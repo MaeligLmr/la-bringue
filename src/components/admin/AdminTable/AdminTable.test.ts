@@ -31,6 +31,8 @@ function button(wrapper: ReturnType<typeof mountArtistes>, label: string, index 
   return wrapper.findAll('button').filter((b) => b.text() === label)[index]
 }
 
+afterEach(() => vi.unstubAllGlobals())
+
 describe('AdminTable', () => {
   it('affiche les colonnes configurées pour une liste d’artistes', () => {
     const wrapper = mountArtistes()
@@ -43,15 +45,19 @@ describe('AdminTable', () => {
     ])
   })
 
-  it('filtre en temps réel par nom', async () => {
+  it('ne filtre rien lui-même : la recherche est transmise au parent, qui la fait côté serveur', async () => {
     const wrapper = mountArtistes()
-    const input = wrapper.find('input[type="search"]')
 
-    await input.setValue('angele')
-    expect(rows(wrapper)).toEqual([['Angèle', 'POP']])
+    await wrapper.find('input[type="search"]').setValue('angele')
 
-    await input.setValue('')
+    expect(wrapper.emitted('update:search')?.at(-1)).toEqual(['angele'])
     expect(rows(wrapper)).toHaveLength(3)
+  })
+
+  it('reflète la recherche fournie par le parent (v-model:search)', () => {
+    const wrapper = mountArtistes({ search: 'aya' })
+
+    expect((wrapper.find('input[type="search"]').element as HTMLInputElement).value).toBe('aya')
   })
 
   it('émet les actions Ajouter et Modifier avec la ligne concernée', async () => {
@@ -64,11 +70,73 @@ describe('AdminTable', () => {
     expect(wrapper.emitted('edit')).toEqual([[ARTISTES[1]]])
   })
 
-  it('affiche le Loader pendant le chargement', () => {
-    const wrapper = mountArtistes({ loading: true })
+  it('affiche le Loader à la place du tableau pendant le premier chargement', () => {
+    const wrapper = mountArtistes({ items: [], loading: true })
 
     expect(wrapper.find('[role="status"]').exists()).toBe(true)
     expect(wrapper.find('table').exists()).toBe(false)
+    expect(wrapper.text()).not.toContain('Aucun résultat.')
+  })
+
+  it('garde le tableau et affiche le Loader dessous pendant le chargement de la suite', () => {
+    const wrapper = mountArtistes({ loading: true, hasMore: true })
+
+    expect(wrapper.find('table').exists()).toBe(true)
+    expect(wrapper.find('[role="status"]').exists()).toBe(true)
+  })
+
+  it('charge la suite quand la sentinelle arrive à l’écran', async () => {
+    let notify: (entries: { isIntersecting: boolean }[]) => void = () => {}
+    vi.stubGlobal(
+      'IntersectionObserver',
+      class {
+        constructor(callback: typeof notify) {
+          notify = callback
+        }
+        observe() {}
+        disconnect() {}
+      }
+    )
+    const wrapper = mountArtistes({ hasMore: true })
+    await flushPromises()
+
+    notify([{ isIntersecting: true }])
+
+    expect(wrapper.emitted('load-more')).toHaveLength(1)
+    expect(button(wrapper, 'Voir plus')).toBeUndefined()
+  })
+
+  it('propose « Voir plus » quand il reste des lignes (sans IntersectionObserver)', async () => {
+    vi.stubGlobal('IntersectionObserver', undefined)
+    const wrapper = mountArtistes({ hasMore: true })
+
+    await button(wrapper, 'Voir plus').trigger('click')
+
+    expect(wrapper.emitted('load-more')).toHaveLength(1)
+  })
+
+  it('ne propose rien quand tout est chargé', () => {
+    const wrapper = mountArtistes({ hasMore: false })
+
+    expect(button(wrapper, 'Voir plus')).toBeUndefined()
+  })
+
+  it('propose de réessayer quand le chargement de la suite a échoué', async () => {
+    const wrapper = mountArtistes({ failed: true, hasMore: true })
+
+    expect(wrapper.find('[role="alert"]').text()).toContain('Impossible de charger la liste.')
+    expect(button(wrapper, 'Voir plus')).toBeUndefined()
+
+    await button(wrapper, 'Réessayer').trigger('click')
+
+    expect(wrapper.emitted('load-more')).toHaveLength(1)
+  })
+
+  it('affiche l’erreur plutôt que « Aucun résultat » si la première page échoue', () => {
+    const wrapper = mountArtistes({ items: [], failed: true })
+
+    expect(wrapper.text()).not.toContain('Aucun résultat.')
+    expect(wrapper.find('[role="alert"]').exists()).toBe(true)
   })
 
   it('affiche l’état vide quand il n’y a rien à afficher', () => {

@@ -9,13 +9,11 @@ import type { FilterConfig, FilterValues, FilterableItem } from '../../../types/
 
 const props = withDefaults(
   defineProps<{
+    // Déjà filtrés côté serveur : la liste ne filtre rien elle-même. Le parent relit
+    // la recherche et les filtres via v-model:search / v-model:selected.
     items: T[]
     filters?: FilterConfig[]
     searchPlaceholder?: string
-    // Liste paginée côté serveur : `items` est déjà filtré par la recherche et
-    // les filtres (le parent les relit via v-model:search / v-model:selected),
-    // la liste n'applique donc aucun filtre elle-même.
-    serverSide?: boolean
     // Reste-t-il des éléments à charger ? Le défilement émet alors `load-more`.
     hasMore?: boolean
     // Un chargement (première page ou suivante) est en cours.
@@ -26,7 +24,6 @@ const props = withDefaults(
   {
     filters: () => [],
     searchPlaceholder: 'Rechercher par nom',
-    serverSide: false,
     hasMore: false,
     loading: false,
     failed: false,
@@ -42,26 +39,6 @@ const selected = defineModel<FilterValues>('selected', { default: () => ({}) })
 const search = defineModel<string>('search', { default: '' })
 // Les ContentCard de la liste surlignent cette recherche dans leur nom.
 provideListSearch(search)
-
-function normalize(value: string) {
-  return value
-    .normalize('NFD')
-    .replace(/[̀-ͯ]/g, '')
-    .toLowerCase()
-    .trim()
-}
-
-const filteredItems = computed(() => {
-  if (props.serverSide) return props.items
-  const query = normalize(search.value)
-  return props.items.filter((item) => {
-    if (query && !normalize(item.nom).includes(query)) return false
-    return props.filters.every(({ key }) => {
-      const value = selected.value[key]
-      return !value || String((item as Record<string, unknown>)[key]) === value
-    })
-  })
-})
 
 function setFilter(key: string, value: string) {
   selected.value = { ...selected.value, [key]: value }
@@ -166,13 +143,13 @@ function onFilterClick(event: MouseEvent) {
     </div>
 
     <p class="filterable-list__count" aria-live="polite">
-      <template v-if="!loading || filteredItems.length">
-        {{ filteredItems.length }}{{ hasMore ? '+' : '' }} résultat{{ filteredItems.length > 1 ? 's' : '' }}
+      <template v-if="!loading || items.length">
+        {{ items.length }}{{ hasMore ? '+' : '' }} résultat{{ items.length > 1 ? 's' : '' }}
       </template>
     </p>
 
-    <ul v-if="filteredItems.length" class="filterable-list__items">
-      <li class="filterable-list__item" v-for="item in filteredItems" :key="item.id">
+    <ul v-if="items.length" class="filterable-list__items">
+      <li class="filterable-list__item" v-for="item in items" :key="item.id">
         <slot name="item" :item="item" />
       </li>
     </ul>

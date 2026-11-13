@@ -1,6 +1,6 @@
 import { supabase } from '../supabase.js'
 import type { Exposant } from '../types/database/exposant'
-import { containsPattern, createCrudHandler, pageRange, toPage, unwrap, type Page } from './crud'
+import { containsPattern, createCrudHandler, pageRange, PAGE_SIZE, toPage, unwrap, type Page } from './crud'
 
 const TABLE = 'Exposant'
 export type ExposantResume = Pick<Exposant, 'id_exposant' | 'nom' | 'photo' | 'categorie'>
@@ -19,17 +19,19 @@ export const exposantHandler = {
     offset,
     search = '',
     categorie = '',
+    pageSize = PAGE_SIZE,
   }: {
     offset: number
     search?: string
     categorie?: string
+    pageSize?: number
   }): Promise<Page<ExposantResume>> {
     let query = supabase.from(TABLE).select('id_exposant, nom, photo, categorie')
     if (categorie) query = query.eq('categorie', categorie)
     if (search.trim()) query = query.ilike('nom', containsPattern(search))
     // id en second critère : un ordre stable évite doublons et trous entre les pages.
-    query = query.order('nom').order('id_exposant').range(...pageRange(offset))
-    return toPage(unwrap<ExposantResume[]>(TABLE, await query))
+    query = query.order('nom').order('id_exposant').range(...pageRange(offset, pageSize))
+    return toPage(unwrap<ExposantResume[]>(TABLE, await query), pageSize)
   },
 
   async getCategories(): Promise<string[]> {

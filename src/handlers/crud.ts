@@ -25,6 +25,8 @@ export function unwrap<T>(table: string, { data, error }: { data: unknown; error
 
 // Taille d'une page des listes paginées (voir usePaginatedList).
 export const PAGE_SIZE = 5
+// Taille d'une page des listes du back-office (plus large : on y parcourt tout).
+export const ADMIN_PAGE_SIZE = 20
 
 export interface Page<T> {
   rows: T[]
@@ -46,6 +48,25 @@ export function toPage<T>(rows: T[], pageSize = PAGE_SIZE): Page<T> {
 // Motif ilike « contient » : % et _ saisis par l'utilisateur sont littéraux.
 export function containsPattern(search: string): string {
   return `%${search.trim().replace(/[\\%_]/g, (char) => `\\${char}`)}%`
+}
+
+// Page d'une table triée par nom, filtrée par recherche sur le nom (listes du back-office).
+export function createNamePage<Row>(table: string, idColumn: string, columns: string, nameColumn = 'nom') {
+  return async function getPage({
+    offset,
+    search = '',
+    pageSize = PAGE_SIZE,
+  }: {
+    offset: number
+    search?: string
+    pageSize?: number
+  }): Promise<Page<Row>> {
+    let query = supabase.from(table).select(columns)
+    if (search.trim()) query = query.ilike(nameColumn, containsPattern(search))
+    // id en second critère : un ordre stable évite doublons et trous entre les pages.
+    query = query.order(nameColumn).order(idColumn).range(...pageRange(offset, pageSize))
+    return toPage(unwrap<Row[]>(table, await query), pageSize)
+  }
 }
 
 // `columns` : colonnes lues (jamais '*'), au format du select Supabase.

@@ -4,7 +4,7 @@ import { createRouter, createWebHistory } from 'vue-router'
 import AdminConferencesView from './AdminConferencesView.vue'
 
 const { conferenceHandler, likeHandler, toast } = vi.hoisted(() => ({
-  conferenceHandler: { getAllDetailed: vi.fn(), remove: vi.fn() },
+  conferenceHandler: { getPage: vi.fn(), remove: vi.fn() },
   likeHandler: { countFor: vi.fn() },
   toast: { success: vi.fn(), error: vi.fn() },
 }))
@@ -57,7 +57,7 @@ function button(wrapper: Awaited<ReturnType<typeof mountView>>['wrapper'], label
 
 beforeEach(() => {
   vi.clearAllMocks()
-  conferenceHandler.getAllDetailed.mockResolvedValue(CONFERENCES)
+  conferenceHandler.getPage.mockResolvedValue({ rows: CONFERENCES, hasMore: false })
   conferenceHandler.remove.mockResolvedValue(undefined)
   likeHandler.countFor.mockResolvedValue(5)
 })
@@ -108,6 +108,20 @@ describe('AdminConferencesView', () => {
     expect(conferenceHandler.remove).toHaveBeenCalledWith(1)
     expect(rows(wrapper)).toHaveLength(1)
     expect(toast.success).toHaveBeenCalled()
+    wrapper.unmount()
+  })
+
+  it('lit la première page par 20 et cherche côté serveur après la frappe', async () => {
+    const { wrapper } = await mountView()
+    expect(conferenceHandler.getPage).toHaveBeenLastCalledWith({ offset: 0, search: '', pageSize: 20 })
+
+    vi.useFakeTimers()
+    await wrapper.find('input[type="search"]').setValue('parité')
+    await vi.advanceTimersByTimeAsync(300)
+    vi.useRealTimers()
+    await flushPromises()
+
+    expect(conferenceHandler.getPage).toHaveBeenLastCalledWith({ offset: 0, search: 'parité', pageSize: 20 })
     wrapper.unmount()
   })
 })

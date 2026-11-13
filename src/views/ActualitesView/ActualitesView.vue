@@ -43,7 +43,6 @@ useScrollReveal()
         v-model:search="search"
         :items="actualites"
         search-placeholder="Rechercher une actualité"
-        server-side
         :has-more="hasMore"
         :loading="loading"
         :failed="failed"

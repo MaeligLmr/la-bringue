@@ -5,7 +5,7 @@ import AdminExposantsView from './AdminExposantsView.vue'
 import type { Exposant } from '../../../types/database/exposant'
 
 const { exposantHandler, toast } = vi.hoisted(() => ({
-  exposantHandler: { getAll: vi.fn(), remove: vi.fn() },
+  exposantHandler: { getPage: vi.fn(), remove: vi.fn() },
   toast: { success: vi.fn(), error: vi.fn() },
 }))
 
@@ -43,7 +43,7 @@ function dialogButton(label: string) {
 
 beforeEach(() => {
   vi.clearAllMocks()
-  exposantHandler.getAll.mockResolvedValue(EXPOSANTS.map((exposant) => ({ ...exposant })))
+  exposantHandler.getPage.mockResolvedValue({ rows: EXPOSANTS.map((exposant) => ({ ...exposant })), hasMore: false })
   exposantHandler.remove.mockResolvedValue(undefined)
 })
 
@@ -102,6 +102,20 @@ describe('AdminExposantsView', () => {
 
     expect(wrapper.findAll('tbody tr')).toHaveLength(2)
     expect(toast.error).toHaveBeenCalled()
+    wrapper.unmount()
+  })
+
+  it('lit la première page par 20 et cherche côté serveur après la frappe', async () => {
+    const { wrapper } = await mountView()
+    expect(exposantHandler.getPage).toHaveBeenLastCalledWith({ offset: 0, search: '', pageSize: 20 })
+
+    vi.useFakeTimers()
+    await wrapper.find('input[type="search"]').setValue('Biocoop')
+    await vi.advanceTimersByTimeAsync(300)
+    vi.useRealTimers()
+    await flushPromises()
+
+    expect(exposantHandler.getPage).toHaveBeenLastCalledWith({ offset: 0, search: 'Biocoop', pageSize: 20 })
     wrapper.unmount()
   })
 })

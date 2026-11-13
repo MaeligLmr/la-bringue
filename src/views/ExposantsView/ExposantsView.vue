@@ -75,7 +75,6 @@ useScrollReveal()
         v-model:search="search"
         :items="exposants"
         :filters="filters"
-        server-side
         :has-more="hasMore"
         :loading="loading"
         :failed="failed"
