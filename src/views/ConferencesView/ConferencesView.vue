@@ -11,6 +11,7 @@ import { conferenceHandler } from '../../handlers/conference'
 import { labelOf, toConferenceCards } from '../../lib/cards/cards'
 import { usePaginatedList } from '../../composables/usePaginatedList/usePaginatedList'
 import { useScrollReveal } from '../../composables/useScrollReveal/useScrollReveal'
+import { toOptions } from '../../lib/options/options'
 
 // Valeurs de l'enum `themes_conferences`, dans l'ordre de la base.
 const themes = ref<string[]>([])
@@ -33,7 +34,7 @@ const filters = computed<FilterConfig[]>(() => [
     key: 'theme',
     label: 'Thème',
     allLabel: 'Tous les thèmes',
-    options: themes.value.map((theme) => ({ value: theme, label: theme })),
+    options: toOptions(themes.value),
   },
 ])
 

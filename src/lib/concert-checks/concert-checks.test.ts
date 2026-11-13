@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import { chevauchements, heureFinError } from './concert-checks'
+import { chevauchements, creneauSaisi, heureFinError, horaireRules } from './concert-checks'
 
 describe('heureFinError', () => {
   it('bloque une heure de fin avant ou égale à l’heure de début', () => {
@@ -50,5 +50,28 @@ describe('chevauchements', () => {
   it('ne signale rien tant que jour, lieu ou heure de début manquent', () => {
     expect(chevauchements({ lieu: '', jour: '2026-08-29', heure_debut: '21:00', heure_fin: null }, [CHROME_SAMEDI_21H])).toEqual([])
     expect(chevauchements({ lieu: 1, jour: '', heure_debut: '21:00', heure_fin: null }, [CHROME_SAMEDI_21H])).toEqual([])
+  })
+})
+
+describe('horaireRules', () => {
+  it('signale une heure de fin incohérente sur le champ heure_fin', () => {
+    expect(horaireRules({ heure_debut: '21:00', heure_fin: '20:00' })).toEqual({
+      heure_fin: "L'heure de fin doit être après l'heure de début.",
+    })
+    expect(horaireRules({ heure_debut: '21:00', heure_fin: '22:00' })).toEqual({ heure_fin: undefined })
+  })
+})
+
+describe('creneauSaisi', () => {
+  it('construit le créneau à partir des valeurs du formulaire', () => {
+    const values = { jour: '2026-08-29', heure_debut: '21:00', heure_fin: '22:00', titre: 'ignoré' }
+
+    expect(creneauSaisi(values, 7, 'conferences')).toEqual({
+      id: 7,
+      lieu: 'conferences',
+      jour: '2026-08-29',
+      heure_debut: '21:00',
+      heure_fin: '22:00',
+    })
   })
 })

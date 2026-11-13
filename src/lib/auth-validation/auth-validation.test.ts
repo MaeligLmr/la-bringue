@@ -17,8 +17,7 @@ import {
   USERNAME_TOO_SHORT,
   USERNAME_INVALID,
   type SignupFields,
-  type ProfileFields,
-} from './auth-validation'
+  type ProfileFields, clearErrors } from './auth-validation'
 
 const VALID_SIGNUP_FIELDS: SignupFields = {
   email: 'alice@example.com',
@@ -170,5 +169,15 @@ describe('validateProfileFields', () => {
 
   it('ne renvoie aucune erreur pour des champs valides, et ne connaît pas email/password', () => {
     expect(validateProfileFields(VALID_PROFILE_FIELDS)).toEqual({})
+  })
+})
+
+describe('clearErrors', () => {
+  it('efface tous les messages d’erreur présents', () => {
+    const errors = { email: 'Email invalide.', password: 'Trop court.' }
+
+    clearErrors(errors)
+
+    expect(errors).toEqual({ email: undefined, password: undefined })
   })
 })

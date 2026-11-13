@@ -59,7 +59,7 @@ describe('AdminForm', () => {
 
     await wrapper.find('form').trigger('submit')
 
-    expect(wrapper.find('.admin-form__error').text()).toBe('Ce champ est obligatoire.')
+    expect(wrapper.find('.form-field__error').text()).toBe('Ce champ est obligatoire.')
     expect(handler.create).not.toHaveBeenCalled()
   })
 
@@ -212,7 +212,7 @@ describe('AdminForm', () => {
     await wrapper.find('#admin-description').setValue('interdit')
     await wrapper.find('form').trigger('submit')
 
-    expect(wrapper.find('.admin-form__error').text()).toBe('Description refusée.')
+    expect(wrapper.find('.form-field__error').text()).toBe('Description refusée.')
     expect(handler.create).not.toHaveBeenCalled()
   })
 
@@ -225,5 +225,20 @@ describe('AdminForm', () => {
     await wrapper.find('#admin-nom').setValue('Angèle')
 
     expect(wrapper.find('.apercu').text()).toBe('Angèle')
+  })
+
+  it('affiche l’avertissement calculé sur la saisie, sans bloquer l’envoi', async () => {
+    const handler = makeHandler()
+    const warning = (values: Record<string, unknown>) => (values.nom === 'Angèle' ? 'Déjà programmée ce jour-là.' : '')
+    const wrapper = mount(AdminForm<Artiste>, { props: { fields: FIELDS, handler, warning } })
+
+    expect(wrapper.find('.admin-form__warning').exists()).toBe(false)
+
+    await wrapper.find('#admin-nom').setValue('Angèle')
+    expect(wrapper.find('.admin-form__warning').text()).toBe('Déjà programmée ce jour-là.')
+
+    await wrapper.find('form').trigger('submit')
+    await flushPromises()
+    expect(handler.create).toHaveBeenCalled()
   })
 })

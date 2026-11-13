@@ -150,3 +150,42 @@ code {
   opacity: 1;
   translate: 0 0;
 }
+
+.form-field {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  width: 100%;
+}
+
+.form-field > label {
+  font-weight: var(--font-weight-medium);
+  color: var(--text-h);
+}
+
+.form-field > input,
+.form-field > textarea {
+  width: 100%;
+  box-sizing: border-box;
+  padding: var(--space-2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-small);
+  background: var(--bg);
+  color: var(--text-h);
+  font: inherit;
+}
+
+.form-field > input[aria-invalid='true'],
+.form-field > textarea[aria-invalid='true'] {
+  border-color: var(--alert-danger-border);
+}
+
+.form-field__required {
+  color: var(--alert-danger-text);
+}
+
+.form-field__error {
+  margin: 0;
+  color: var(--alert-danger-text);
+  font-size: 0.85em;
+}

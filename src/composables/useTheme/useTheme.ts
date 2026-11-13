@@ -45,10 +45,6 @@ function setPreference(next: ThemePreference) {
   else localStorage.setItem(STORAGE_KEY, next)
 }
 
-function toggleTheme() {
-  setPreference(resolvedTheme.value === 'dark' ? 'light' : 'dark')
-}
-
 export function useTheme() {
-  return { preference, resolvedTheme, setPreference, toggleTheme }
+  return { preference, resolvedTheme, setPreference }
 }

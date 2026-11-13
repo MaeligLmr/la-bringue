@@ -2,6 +2,7 @@
 import { computed, onMounted, ref } from 'vue'
 import { toast } from 'vue-sonner'
 import AdminLinks from '../AdminLinks/AdminLinks.vue'
+import { byNom } from '../../../composables/useAdminList/useAdminList'
 import Checkbox from '../../ui/Checkbox/Checkbox.vue'
 import { artisteHandler } from '../../../handlers/artiste'
 import type { Artiste } from '../../../types/database/artiste'
@@ -23,11 +24,7 @@ onMounted(async () => {
   }
 })
 
-const items = computed(() =>
-  artistes.value
-    .map((artiste) => ({ id: artiste.id_artiste, nom: artiste.nom ?? '' }))
-    .sort((a, b) => a.nom.localeCompare(b.nom))
-)
+const items = computed(() => byNom(artistes.value.map((artiste) => ({ id: artiste.id_artiste, nom: artiste.nom ?? '' }))))
 
 function toEntry(item: LinkEntry): LineupEntry {
   return { ...item, artiste_annonce: newAnnoncee.value, featuring: newFeaturing.value }
