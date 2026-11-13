@@ -1,6 +1,6 @@
 // Dossiers d'images hébergés dans le bucket Supabase Storage `images`.
 const STORAGE_BUCKET = 'images'
-const STORAGE_FOLDERS = ['exposants', 'programmation', 'conferences', 'conferencieres']
+const STORAGE_FOLDERS = ['exposants', 'programmation', 'conferences', 'conferencieres', 'actualites']
 
 // `photo` est soit une URL complète (utilisée telle quelle), soit un chemin
 // absolu (ex: "/programmation/aya-nakamura.webp"). Les chemins des dossiers

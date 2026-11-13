@@ -3,6 +3,7 @@ import { useRouter } from 'vue-router'
 import AdminPage from '../../../components/admin/AdminPage/AdminPage.vue'
 import AdminTable from '../../../components/admin/AdminTable/AdminTable.vue'
 import { useAdminList } from '../../../composables/useAdminList/useAdminList'
+import { ADMIN_PAGE_SIZE } from '../../../handlers/crud'
 import { concertHandler, type ConcertDetail } from '../../../handlers/concert'
 import { formatHoraire, labelOf } from '../../../lib/cards/cards'
 import { JOURS } from '../../../types/ui/programmation'
@@ -36,8 +37,11 @@ function toRow(concert: ConcertDetail): ConcertRow {
   }
 }
 
-const { items: concerts, loading, remove } = useAdminList({
-  load: async () => (await concertHandler.getAllDetailed()).map(toRow),
+const { items: concerts, search, hasMore, loading, failed, loadMore, remove } = useAdminList({
+  fetchPage: async (offset, search) => {
+    const page = await concertHandler.getPage({ offset, search, pageSize: ADMIN_PAGE_SIZE })
+    return { ...page, rows: page.rows.map(toRow) }
+  },
   remove: (concert: ConcertRow) => concertHandler.remove(concert.id_concert),
   idOf: (concert) => concert.id_concert,
   loadError: 'Impossible de charger les concerts.',
@@ -55,10 +59,14 @@ async function deleteImpact(concert: ConcertRow) {
       :items="concerts"
       :columns="COLUMNS"
       row-key="id_concert"
+      v-model:search="search"
       :loading="loading"
+      :has-more="hasMore"
+      :failed="failed"
       :delete-impact="deleteImpact"
       @add="router.push({ name: 'admin-concert-nouveau' })"
       @edit="(concert) => router.push({ name: 'admin-concert', params: { id: concert.id_concert } })"
+      @load-more="loadMore"
       @delete="remove"
     />
   </AdminPage>

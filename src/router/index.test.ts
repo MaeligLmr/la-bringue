@@ -100,6 +100,32 @@ describe('router', () => {
       expect(props).toEqual({ id: 9 })
     })
 
+    it('résout la liste, la création et la modification d’une actualité', () => {
+      expect(router.resolve('/admin/actualites').name).toBe('admin-actualites')
+      expect(router.resolve('/admin/actualites/nouvelle').name).toBe('admin-actualite-nouvelle')
+
+      const route = router.resolve('/admin/actualites/3')
+      expect(route.name).toBe('admin-actualite')
+      expect(route.meta.requiresAdmin).toBe(true)
+      const props = (route.matched.at(-1)!.props.default as (r: typeof route) => unknown)(route)
+      expect(props).toEqual({ id: 3 })
+    })
+
+    it('résout la billetterie et les promotions du back-office, réservées aux admins', () => {
+      expect(router.resolve('/admin/billetterie').name).toBe('admin-formules')
+      expect(router.resolve('/admin/billetterie/nouvelle').name).toBe('admin-formule-nouvelle')
+      expect(router.resolve('/admin/promotions').name).toBe('admin-promotions')
+      expect(router.resolve('/admin/promotions/nouvelle').name).toBe('admin-promotion-nouvelle')
+
+      for (const [path, name, id] of [['/admin/billetterie/4', 'admin-formule', 4], ['/admin/promotions/6', 'admin-promotion', 6]] as const) {
+        const route = router.resolve(path)
+        expect(route.name).toBe(name)
+        expect(route.meta.requiresAdmin).toBe(true)
+        const props = (route.matched.at(-1)!.props.default as (r: typeof route) => unknown)(route)
+        expect(props).toEqual({ id })
+      }
+    })
+
     it('résout la liste, la création et la modification d’un concert', () => {
       expect(router.resolve('/admin/concerts').name).toBe('admin-concerts')
       expect(router.resolve('/admin/concerts/nouveau').name).toBe('admin-concert-nouveau')

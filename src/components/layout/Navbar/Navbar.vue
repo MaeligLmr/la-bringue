@@ -2,6 +2,7 @@
 import { computed, onMounted, onUnmounted, ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { useAuth } from '../../../composables/useAuth/useAuth'
+import { useProfilePicture } from '../../../composables/useProfilePicture/useProfilePicture'
 import { useNotifications } from '../../../composables/useNotifications/useNotifications'
 import { useTheme, type ThemePreference } from '../../../composables/useTheme/useTheme'
 import Button from '../../ui/Button/Button.vue'
@@ -13,6 +14,7 @@ import logoDark from '../../../assets/logo/Logo-Dark.svg'
 
 const router = useRouter()
 const { user, isLoggedIn } = useAuth()
+const { ppUrl } = useProfilePicture()
 const { unreadCount } = useNotifications()
 
 const programmeLabel = computed(() =>
@@ -132,6 +134,10 @@ function goToAndCloseMenu(path: string) {
           @click="goTo('/profil')"
         >
           {{ displayName }}
+          <!-- Photo de profil à la place de l'icône, quand il y en a une. -->
+          <template v-if="ppUrl" #icon-right>
+            <img class="navbar__avatar" :src="ppUrl" alt="" />
+          </template>
         </Button>
         <Button
           v-else
@@ -289,6 +295,14 @@ function goToAndCloseMenu(path: string) {
   display: block;
   height: 1.75rem;
   width: auto;
+}
+
+.navbar__avatar {
+  flex: none;
+  width: var(--icon-medium-width);
+  height: var(--icon-medium-height);
+  border-radius: var(--radius-full);
+  object-fit: cover;
 }
 
 .navbar__badge {

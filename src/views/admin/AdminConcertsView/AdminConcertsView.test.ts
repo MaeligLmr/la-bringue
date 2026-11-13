@@ -4,7 +4,7 @@ import { createRouter, createWebHistory } from 'vue-router'
 import AdminConcertsView from './AdminConcertsView.vue'
 
 const { concertHandler, toast } = vi.hoisted(() => ({
-  concertHandler: { getAllDetailed: vi.fn(), remove: vi.fn() },
+  concertHandler: { getPage: vi.fn(), remove: vi.fn() },
   toast: { success: vi.fn(), error: vi.fn() },
 }))
 
@@ -53,7 +53,7 @@ function button(wrapper: Awaited<ReturnType<typeof mountView>>['wrapper'], label
 
 beforeEach(() => {
   vi.clearAllMocks()
-  concertHandler.getAllDetailed.mockResolvedValue(CONCERTS)
+  concertHandler.getPage.mockResolvedValue({ rows: CONCERTS, hasMore: false })
   concertHandler.remove.mockResolvedValue(undefined)
 })
 
@@ -100,6 +100,20 @@ describe('AdminConcertsView', () => {
     expect(concertHandler.remove).toHaveBeenCalledWith(1)
     expect(rows(wrapper)).toHaveLength(1)
     expect(toast.success).toHaveBeenCalled()
+    wrapper.unmount()
+  })
+
+  it('lit la première page par 20 et cherche côté serveur après la frappe', async () => {
+    const { wrapper } = await mountView()
+    expect(concertHandler.getPage).toHaveBeenLastCalledWith({ offset: 0, search: '', pageSize: 20 })
+
+    vi.useFakeTimers()
+    await wrapper.find('input[type="search"]').setValue('Aya')
+    await vi.advanceTimersByTimeAsync(300)
+    vi.useRealTimers()
+    await flushPromises()
+
+    expect(concertHandler.getPage).toHaveBeenLastCalledWith({ offset: 0, search: 'Aya', pageSize: 20 })
     wrapper.unmount()
   })
 })

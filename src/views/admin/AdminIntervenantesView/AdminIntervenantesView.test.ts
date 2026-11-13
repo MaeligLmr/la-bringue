@@ -5,7 +5,7 @@ import AdminIntervenantesView from './AdminIntervenantesView.vue'
 import type { Conferenciere } from '../../../types/database/conferenciere'
 
 const { conferenciereHandler, participationHandler, toast } = vi.hoisted(() => ({
-  conferenciereHandler: { getAll: vi.fn(), remove: vi.fn() },
+  conferenciereHandler: { getPage: vi.fn(), remove: vi.fn() },
   participationHandler: { getConferencesByConferenciere: vi.fn() },
   toast: { success: vi.fn(), error: vi.fn() },
 }))
@@ -14,9 +14,10 @@ vi.mock('../../../handlers/conferenciere', () => ({ conferenciereHandler }))
 vi.mock('../../../handlers/participation', () => ({ participationHandler }))
 vi.mock('vue-sonner', () => ({ toast }))
 
+// Déjà triées par nom : le tri est fait côté serveur (getPage).
 const INTERVENANTES: Conferenciere[] = [
-  { id_conferenciere: 2, nom: 'Rokhaya Diallo', description: 'Journaliste', photo: null },
   { id_conferenciere: 1, nom: 'Alice Coffin', description: null, photo: null },
+  { id_conferenciere: 2, nom: 'Rokhaya Diallo', description: 'Journaliste', photo: null },
 ]
 
 async function mountView() {
@@ -49,7 +50,7 @@ function dialogButton(label: string) {
 
 beforeEach(() => {
   vi.clearAllMocks()
-  conferenciereHandler.getAll.mockResolvedValue(INTERVENANTES.map((intervenante) => ({ ...intervenante })))
+  conferenciereHandler.getPage.mockResolvedValue({ rows: INTERVENANTES.map((intervenante) => ({ ...intervenante })), hasMore: false })
   conferenciereHandler.remove.mockResolvedValue(undefined)
   participationHandler.getConferencesByConferenciere.mockResolvedValue([{ id_conference: 1 }, { id_conference: 2 }])
 })
@@ -111,6 +112,20 @@ describe('AdminIntervenantesView', () => {
 
     expect(rows(wrapper)).toHaveLength(2)
     expect(toast.error).toHaveBeenCalled()
+    wrapper.unmount()
+  })
+
+  it('lit la première page par 20 et cherche côté serveur après la frappe', async () => {
+    const { wrapper } = await mountView()
+    expect(conferenciereHandler.getPage).toHaveBeenLastCalledWith({ offset: 0, search: '', pageSize: 20 })
+
+    vi.useFakeTimers()
+    await wrapper.find('input[type="search"]').setValue('Alice')
+    await vi.advanceTimersByTimeAsync(300)
+    vi.useRealTimers()
+    await flushPromises()
+
+    expect(conferenciereHandler.getPage).toHaveBeenLastCalledWith({ offset: 0, search: 'Alice', pageSize: 20 })
     wrapper.unmount()
   })
 })

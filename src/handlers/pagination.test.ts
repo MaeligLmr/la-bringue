@@ -5,7 +5,7 @@ import { PAGE_SIZE } from './crud'
 // `await` résout sur `response` (comme un vrai PostgrestBuilder thenable).
 function mockSupabase(data: unknown = []) {
   const chain: Record<string, ReturnType<typeof vi.fn>> & { then?: unknown } = {}
-  for (const method of ['select', 'eq', 'order', 'limit', 'range', 'ilike', 'maybeSingle']) {
+  for (const method of ['select', 'eq', 'order', 'limit', 'range', 'ilike', 'lte', 'maybeSingle']) {
     chain[method] = vi.fn(() => chain)
   }
   chain.then = (resolve: (value: unknown) => void) => resolve({ data, error: null })
@@ -73,6 +73,47 @@ describe('pagination des listes', () => {
     expect(page).toEqual({ rows: rows(PAGE_SIZE - 1), hasMore: false })
   })
 
+  it('une taille de page personnalisée est respectée (listes du back-office)', async () => {
+    const { chain } = mockSupabase(rows(21))
+    const { exposantHandler } = await import('./exposant')
+
+    const page = await exposantHandler.getPage({ offset: 20, pageSize: 20 })
+
+    expect(chain.range).toHaveBeenCalledWith(20, 40)
+    expect(page.rows).toHaveLength(20)
+    expect(page.hasMore).toBe(true)
+  })
+
+  it('artisteHandler.getPage trie par nom, cherche dans le nom et échappe la saisie', async () => {
+    const { from, chain } = mockSupabase(rows(PAGE_SIZE + 1))
+    const { artisteHandler } = await import('./artiste')
+
+    const page = await artisteHandler.getPage({ offset: PAGE_SIZE, search: '50%_off' })
+
+    expect(from).toHaveBeenCalledWith('Artiste')
+    expect(chain.select).toHaveBeenCalledWith('id_artiste, nom, photo, categorie, description')
+    expect(chain.ilike).toHaveBeenCalledWith('nom', '%50\\%\\_off%')
+    expect(chain.order).toHaveBeenNthCalledWith(1, 'nom')
+    expect(chain.order).toHaveBeenNthCalledWith(2, 'id_artiste')
+    expect(chain.range).toHaveBeenCalledWith(PAGE_SIZE, 2 * PAGE_SIZE)
+    expect(page.rows).toHaveLength(PAGE_SIZE)
+    expect(page.hasMore).toBe(true)
+  })
+
+  it('conferenciereHandler.getPage sans recherche ne filtre pas, et respecte pageSize', async () => {
+    const { from, chain } = mockSupabase(rows(3))
+    const { conferenciereHandler } = await import('./conferenciere')
+
+    const page = await conferenciereHandler.getPage({ offset: 0, pageSize: 20 })
+
+    expect(from).toHaveBeenCalledWith('Conferenciere')
+    expect(chain.ilike).not.toHaveBeenCalled()
+    expect(chain.order).toHaveBeenNthCalledWith(1, 'nom')
+    expect(chain.order).toHaveBeenNthCalledWith(2, 'id_conferenciere')
+    expect(chain.range).toHaveBeenCalledWith(0, 20)
+    expect(page).toEqual({ rows: rows(3), hasMore: false })
+  })
+
   it('actualiteHandler.getPage trie de la plus récente à la plus ancienne et cherche dans le titre', async () => {
     const { from, chain } = mockSupabase()
     const { actualiteHandler } = await import('./actualite')
@@ -81,9 +122,63 @@ describe('pagination des listes', () => {
 
     expect(from).toHaveBeenCalledWith('Actualite')
     expect(chain.ilike).toHaveBeenCalledWith('titre', '%festival%')
+    // Seules les actualités dont la date de publication est atteinte sont lues.
+    expect(chain.lte).toHaveBeenCalledWith('date_publication', expect.stringMatching(/^\d{4}-\d{2}-\d{2}T/))
     expect(chain.order).toHaveBeenNthCalledWith(1, 'date_publication', { ascending: false })
     expect(chain.order).toHaveBeenNthCalledWith(2, 'id_actualite', { ascending: false })
     expect(chain.range).toHaveBeenCalledWith(2 * PAGE_SIZE, 3 * PAGE_SIZE)
+  })
+
+  it('actualiteHandler.getPage lit aussi les actualités en attente avec includeUnpublished (back-office)', async () => {
+    const { chain } = mockSupabase()
+    const { actualiteHandler } = await import('./actualite')
+
+    await actualiteHandler.getPage({ offset: 0, includeUnpublished: true })
+
+    expect(chain.lte).not.toHaveBeenCalled()
+  })
+
+  it('actualiteHandler.getLatest et getPublishedById ne lisent que les actualités publiées', async () => {
+    const { chain } = mockSupabase([])
+    const { actualiteHandler } = await import('./actualite')
+
+    await actualiteHandler.getLatest(3)
+    expect(chain.lte).toHaveBeenLastCalledWith('date_publication', expect.any(String))
+    expect(chain.limit).toHaveBeenCalledWith(3)
+
+    chain.lte.mockClear()
+    await actualiteHandler.getPublishedById(7)
+    expect(chain.eq).toHaveBeenCalledWith('id_actualite', 7)
+    expect(chain.lte).toHaveBeenCalledWith('date_publication', expect.any(String))
+  })
+
+  it('formuleHandler.getPage trie par jour de début puis id et cherche dans le titre', async () => {
+    const { from, chain } = mockSupabase(rows(21))
+    const { formuleHandler } = await import('./formule')
+
+    const page = await formuleHandler.getPage({ offset: 20, search: 'pass', pageSize: 20 })
+
+    expect(from).toHaveBeenCalledWith('Formule')
+    expect(chain.ilike).toHaveBeenCalledWith('titre', '%pass%')
+    expect(chain.order).toHaveBeenNthCalledWith(1, 'jour_debut')
+    expect(chain.order).toHaveBeenNthCalledWith(2, 'id_formule')
+    expect(chain.range).toHaveBeenCalledWith(20, 40)
+    expect(page.rows).toHaveLength(20)
+    expect(page.hasMore).toBe(true)
+  })
+
+  it('promotionHandler.getPage joint la formule, trie du plus récent au plus ancien et cherche dans le nom', async () => {
+    const { from, chain } = mockSupabase()
+    const { promotionHandler } = await import('./promotion')
+
+    await promotionHandler.getPage({ offset: 0, search: 'early' })
+
+    expect(from).toHaveBeenCalledWith('Promotion')
+    expect(chain.select).toHaveBeenCalledWith('id_promotion, id_formule, description, reduction_prc, date_debut, date_fin, Formule(titre)')
+    expect(chain.ilike).toHaveBeenCalledWith('description', '%early%')
+    expect(chain.order).toHaveBeenNthCalledWith(1, 'date_debut', { ascending: false })
+    expect(chain.order).toHaveBeenNthCalledWith(2, 'id_promotion', { ascending: false })
+    expect(chain.range).toHaveBeenCalledWith(0, PAGE_SIZE)
   })
 
   it('conferenceHandler.getPage filtre par jour, thème et titre, trié par jour puis heure', async () => {

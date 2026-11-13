@@ -133,7 +133,10 @@ async function submit() {
 <template>
   <form class="admin-form" novalidate @submit.prevent="submit">
     <div v-for="field in fields" :key="field.key" class="form-field">
-      <label :for="`admin-${field.key}`">{{ field.label }}</label>
+      <label :for="`admin-${field.key}`">
+        {{ field.label }}
+        <span v-if="field.required" class="form-field__required" aria-hidden="true">*</span>
+      </label>
 
       <textarea v-if="field.type === 'textarea'" :id="`admin-${field.key}`" v-model="values[field.key]" />
 
@@ -166,7 +169,15 @@ async function submit() {
         :current-url="values[field.key] ? photoUrl(String(values[field.key])) : undefined"
       />
 
-      <input v-else :id="`admin-${field.key}`" v-model="values[field.key]" :type="field.type" />
+      <input
+        v-else
+        :id="`admin-${field.key}`"
+        v-model="values[field.key]"
+        :type="field.type"
+        :min="field.min"
+        :max="field.max"
+        :step="field.type === 'number' ? 'any' : undefined"
+      />
 
       <p v-if="errors[field.key]" class="form-field__error">{{ errors[field.key] }}</p>
     </div>

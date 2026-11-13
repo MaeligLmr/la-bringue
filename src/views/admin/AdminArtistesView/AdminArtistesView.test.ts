@@ -5,7 +5,7 @@ import AdminArtistesView from './AdminArtistesView.vue'
 import type { Artiste } from '../../../types/database/artiste'
 
 const { artisteHandler, concertArtisteHandler, likeHandler, toast } = vi.hoisted(() => ({
-  artisteHandler: { getAll: vi.fn(), remove: vi.fn() },
+  artisteHandler: { getPage: vi.fn(), remove: vi.fn() },
   concertArtisteHandler: { getConcertsByArtiste: vi.fn() },
   likeHandler: { countFor: vi.fn() },
   toast: { success: vi.fn(), error: vi.fn() },
@@ -47,7 +47,7 @@ function dialogButton(label: string) {
 
 beforeEach(() => {
   vi.clearAllMocks()
-  artisteHandler.getAll.mockResolvedValue(ARTISTES.map((artiste) => ({ ...artiste })))
+  artisteHandler.getPage.mockResolvedValue({ rows: ARTISTES.map((artiste) => ({ ...artiste })), hasMore: false })
   artisteHandler.remove.mockResolvedValue(undefined)
   likeHandler.countFor.mockResolvedValue(12)
   concertArtisteHandler.getConcertsByArtiste.mockResolvedValue([{ id_concert: 1 }, { id_concert: 2 }])
@@ -110,6 +110,20 @@ describe('AdminArtistesView', () => {
 
     expect(wrapper.findAll('tbody tr')).toHaveLength(2)
     expect(toast.error).toHaveBeenCalled()
+    wrapper.unmount()
+  })
+
+  it('lit la première page par 20 et cherche côté serveur après la frappe', async () => {
+    const { wrapper } = await mountView()
+    expect(artisteHandler.getPage).toHaveBeenLastCalledWith({ offset: 0, search: '', pageSize: 20 })
+
+    vi.useFakeTimers()
+    await wrapper.find('input[type="search"]').setValue('Angèle')
+    await vi.advanceTimersByTimeAsync(300)
+    vi.useRealTimers()
+    await flushPromises()
+
+    expect(artisteHandler.getPage).toHaveBeenLastCalledWith({ offset: 0, search: 'Angèle', pageSize: 20 })
     wrapper.unmount()
   })
 })

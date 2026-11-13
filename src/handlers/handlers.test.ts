@@ -246,7 +246,7 @@ describe('exposantHandler', () => {
   })
 })
 
-describe('formuleHandler', () => {
+describe('formuleHandler et promotionHandler', () => {
   it('getAllWithPromotions joint les promotions et trie par jour de début', async () => {
     const { from, chain } = mockSupabase()
     const { formuleHandler } = await import('./formule')
@@ -270,6 +270,35 @@ describe('formuleHandler', () => {
     expect(chain.eq).toHaveBeenCalledWith('homepage', true)
     expect(chain.order).toHaveBeenCalledWith('jour_debut')
     expect(result).toEqual(rows)
+  })
+
+  it('getByFormule filtre sur la formule', async () => {
+    const { from, chain } = mockSupabase()
+    const { promotionHandler } = await import('./promotion')
+
+    await promotionHandler.getByFormule(3)
+
+    expect(from).toHaveBeenCalledWith('Promotion')
+    expect(chain.eq).toHaveBeenCalledWith('id_formule', 3)
+  })
+
+  it('getActives compare à l’instant donné, en ISO sans fuseau', async () => {
+    const { chain } = mockSupabase()
+    const { promotionHandler } = await import('./promotion')
+
+    await promotionHandler.getActives(new Date('2026-08-28T10:30:45.123Z'))
+
+    expect(chain.lte).toHaveBeenCalledWith('date_debut', '2026-08-28T10:30:45')
+    expect(chain.gte).toHaveBeenCalledWith('date_fin', '2026-08-28T10:30:45')
+  })
+
+  it('getActives utilise l’heure courante par défaut', async () => {
+    const { chain } = mockSupabase()
+    const { promotionHandler } = await import('./promotion')
+
+    await promotionHandler.getActives()
+
+    expect(chain.lte).toHaveBeenCalledWith('date_debut', expect.stringMatching(/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}$/))
   })
 })
 

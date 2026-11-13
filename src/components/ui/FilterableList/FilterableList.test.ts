@@ -59,14 +59,13 @@ describe('FilterableList', () => {
     wrapper.unmount()
   })
 
-  it('filtre en temps réel sur le nom, sans tenir compte de la casse ni des accents', async () => {
+  it('ne filtre rien lui-même : il affiche les items reçus, la recherche étant faite côté serveur', async () => {
     const wrapper = mountList()
 
     await wrapper.find('input[type="search"]').setValue('beyonce')
-    expect(displayedNames(wrapper)).toEqual(['Beyoncé'])
 
-    await wrapper.find('input[type="search"]').setValue('ANG')
-    expect(displayedNames(wrapper)).toEqual(['Angèle'])
+    expect(wrapper.emitted('update:search')?.at(-1)).toEqual(['beyonce'])
+    expect(displayedNames(wrapper)).toEqual(['Beyoncé', 'Aya Nakamura', 'Angèle'])
 
     wrapper.unmount()
   })
@@ -88,74 +87,71 @@ describe('FilterableList', () => {
   })
 
   it('sélectionne une option au clic, et "tous" retire le filtre', async () => {
-    const wrapper = mountList()
+    const wrapper = mountList({
+      selected: {},
+      'onUpdate:selected': (value: Record<string, string>) => wrapper.setProps({ selected: value }),
+    })
 
     await filterButton(wrapper, 'Dimanche').trigger('click')
-    expect(displayedNames(wrapper)).toEqual(['Angèle'])
+    expect(wrapper.emitted('update:selected')?.at(-1)).toEqual([{ jour: 'dimanche' }])
     expect(filterButton(wrapper, 'Dimanche').attributes('aria-pressed')).toBe('true')
     expect(filterButton(wrapper, 'Tous les jours').attributes('aria-pressed')).toBe('false')
 
     await filterButton(wrapper, 'Tous les jours').trigger('click')
-    expect(displayedNames(wrapper)).toEqual(['Beyoncé', 'Aya Nakamura', 'Angèle'])
+    expect(wrapper.emitted('update:selected')?.at(-1)).toEqual([{ jour: '' }])
+    expect(filterButton(wrapper, 'Tous les jours').attributes('aria-pressed')).toBe('true')
 
     wrapper.unmount()
   })
 
-  it('combine recherche et filtres en logique ET', async () => {
-    const wrapper = mountList({ selected: { jour: 'samedi' } })
-    expect(displayedNames(wrapper)).toEqual(['Beyoncé', 'Aya Nakamura'])
-
-    await filterButton(wrapper, 'Chrome').trigger('click')
-    expect(displayedNames(wrapper)).toEqual(['Beyoncé'])
-
-    await wrapper.find('input[type="search"]').setValue('aya')
-    expect(displayedNames(wrapper)).toEqual([])
-
-    wrapper.unmount()
-  })
-
-  it('applique les filtres pré-sélectionnés via v-model:selected', async () => {
+  it('garde les autres filtres quand on en change un', async () => {
     const wrapper = mountList({ selected: { scene: 'chrome' } })
 
-    expect(displayedNames(wrapper)).toEqual(['Beyoncé', 'Angèle'])
-
     await filterButton(wrapper, 'Dimanche').trigger('click')
+
     expect(wrapper.emitted('update:selected')?.[0]).toEqual([{ scene: 'chrome', jour: 'dimanche' }])
 
     wrapper.unmount()
   })
 
-  it('affiche un message explicite et un bouton qui réinitialise tout quand il n’y a aucun résultat', async () => {
-    const wrapper = mountList({
-      selected: { jour: 'dimanche' },
-      'onUpdate:selected': (value: Record<string, string>) => wrapper.setProps({ selected: value }),
-    })
+  it('reflète les filtres pré-sélectionnés via v-model:selected', () => {
+    const wrapper = mountList({ selected: { scene: 'chrome' } })
 
-    await wrapper.find('input[type="search"]').setValue('aya')
+    expect(filterButton(wrapper, 'Chrome').attributes('aria-pressed')).toBe('true')
+    expect(filterButton(wrapper, 'Toutes les scènes').attributes('aria-pressed')).toBe('false')
+    expect(filterButton(wrapper, 'Tous les jours').attributes('aria-pressed')).toBe('true')
+
+    wrapper.unmount()
+  })
+
+  it('affiche un message explicite et un bouton qui réinitialise tout quand il n’y a aucun résultat', async () => {
+    const wrapper = mountList({ items: [], search: 'zzz', selected: { jour: 'dimanche' } })
+
     expect(displayedNames(wrapper)).toEqual([])
-    expect(wrapper.find('.filterable-list__empty').text()).toContain(
-      'Aucun résultat ne correspond à ta recherche.'
-    )
+    expect(wrapper.find('.filterable-list__empty').text()).toContain('Aucun résultat ne correspond à ta recherche.')
 
     await wrapper.find('.filterable-list__empty button').trigger('click')
-    expect((wrapper.find('input[type="search"]').element as HTMLInputElement).value).toBe('')
-    expect(displayedNames(wrapper)).toEqual(['Beyoncé', 'Aya Nakamura', 'Angèle'])
-    expect(wrapper.find('.filterable-list__empty').exists()).toBe(false)
+
+    expect(wrapper.emitted('update:search')?.at(-1)).toEqual([''])
+    expect(wrapper.emitted('update:selected')?.at(-1)).toEqual([{}])
 
     wrapper.unmount()
   })
 
   it('affiche une croix dans le champ dès qu’une recherche est saisie, et elle la vide', async () => {
-    const wrapper = mountList()
+    const wrapper = mountList({
+      search: '',
+      'onUpdate:search': (value: string) => wrapper.setProps({ search: value }),
+    })
     expect(wrapper.find('.search-bar__clear').exists()).toBe(false)
 
     const input = wrapper.find('input[type="search"]')
     await input.setValue('aya')
-    expect(displayedNames(wrapper)).toEqual(['Aya Nakamura'])
+    expect(wrapper.find('.search-bar__clear').exists()).toBe(true)
 
     await wrapper.find('.search-bar__clear').trigger('click')
     expect((input.element as HTMLInputElement).value).toBe('')
-    expect(displayedNames(wrapper)).toEqual(['Beyoncé', 'Aya Nakamura', 'Angèle'])
+    expect(wrapper.emitted('update:search')?.at(-1)).toEqual([''])
     expect(wrapper.find('.search-bar__clear').exists()).toBe(false)
 
     wrapper.unmount()

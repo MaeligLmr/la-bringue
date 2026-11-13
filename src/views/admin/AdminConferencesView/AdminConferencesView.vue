@@ -3,7 +3,8 @@ import { useRouter } from 'vue-router'
 import AdminPage from '../../../components/admin/AdminPage/AdminPage.vue'
 import AdminTable from '../../../components/admin/AdminTable/AdminTable.vue'
 import { useAdminList } from '../../../composables/useAdminList/useAdminList'
-import { conferenceHandler, type ConferenceDetail } from '../../../handlers/conference'
+import { ADMIN_PAGE_SIZE } from '../../../handlers/crud'
+import { conferenceHandler, type ConferenceResume } from '../../../handlers/conference'
 import { likeHandler } from '../../../handlers/like'
 import { formatHoraire, labelOf } from '../../../lib/cards/cards'
 import { JOURS } from '../../../types/ui/programmation'
@@ -28,7 +29,7 @@ const COLUMNS: AdminTableColumn<ConferenceRow>[] = [
   { key: 'theme', label: 'Thème' },
 ]
 
-function toRow(conference: ConferenceDetail): ConferenceRow {
+function toRow(conference: ConferenceResume): ConferenceRow {
   const noms = conference.Participation.flatMap((participation) =>
     participation.Conferenciere?.nom ? [participation.Conferenciere.nom] : []
   )
@@ -42,8 +43,11 @@ function toRow(conference: ConferenceDetail): ConferenceRow {
   }
 }
 
-const { items: conferences, loading, remove } = useAdminList({
-  load: async () => (await conferenceHandler.getAllDetailed()).map(toRow),
+const { items: conferences, search, hasMore, loading, failed, loadMore, remove } = useAdminList({
+  fetchPage: async (offset, search) => {
+    const page = await conferenceHandler.getPage({ offset, search, pageSize: ADMIN_PAGE_SIZE })
+    return { ...page, rows: page.rows.map(toRow) }
+  },
   remove: (conference: ConferenceRow) => conferenceHandler.remove(conference.id_conference),
   idOf: (conference) => conference.id_conference,
   loadError: 'Impossible de charger les conférences.',
@@ -65,10 +69,14 @@ async function deleteImpact(conference: ConferenceRow) {
       :items="conferences"
       :columns="COLUMNS"
       row-key="id_conference"
+      v-model:search="search"
       :loading="loading"
+      :has-more="hasMore"
+      :failed="failed"
       :delete-impact="deleteImpact"
       @add="router.push({ name: 'admin-conference-nouvelle' })"
       @edit="(conference) => router.push({ name: 'admin-conference', params: { id: conference.id_conference } })"
+      @load-more="loadMore"
       @delete="remove"
     />
   </AdminPage>

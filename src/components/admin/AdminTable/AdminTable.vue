@@ -4,7 +4,7 @@ import Modal from '../../layout/Modal/Modal.vue'
 import Button from '../../ui/Button/Button.vue'
 import Loader from '../../ui/Loader/Loader.vue'
 import SearchBar from '../../ui/SearchBar/SearchBar.vue'
-import { fold } from '../../../lib/highlight/highlight'
+import { useInfiniteScroll } from '../../../composables/useInfiniteScroll/useInfiniteScroll'
 import type { AdminTableColumn } from '../../../types/ui/admin-table.ts'
 
 const props = withDefaults(
@@ -12,11 +12,18 @@ const props = withDefaults(
     items: T[]
     columns: AdminTableColumn<T>[]
     rowKey: keyof T & string
+    // Un chargement (première page ou suivante) est en cours.
     loading?: boolean
+    // Reste-t-il des lignes à charger ? Le défilement émet alors `load-more`.
+    hasMore?: boolean
+    // Le dernier chargement a échoué : « Réessayer » émet `load-more`.
+    failed?: boolean
     deleteImpact?: (item: T) => Promise<string[]>
   }>(),
   {
     loading: false,
+    hasMore: false,
+    failed: false,
   }
 )
 
@@ -24,19 +31,25 @@ const emit = defineEmits<{
   add: []
   edit: [item: T]
   delete: [item: T]
+  'load-more': []
 }>()
 
-const search = ref('')
+// Recherche par nom, appliquée côté serveur : `items` arrive déjà filtré, et le
+// parent relit la saisie via v-model:search.
+const search = defineModel<string>('search', { default: '' })
 
 function nameOf(item: T) {
   return String((item as Record<string, unknown>).nom ?? '')
 }
 
-const filteredItems = computed(() => {
-  const query = fold(search.value.trim())
-  if (!query) return props.items
-  return props.items.filter((item) => fold(nameOf(item)).includes(query))
+// Sentinelle sous le tableau : la voir arriver charge la page suivante.
+const sentinel = ref<HTMLElement | null>(null)
+const { supported: canObserve } = useInfiniteScroll({
+  target: sentinel,
+  onLoadMore: () => emit('load-more'),
+  disabled: computed(() => !props.hasMore || props.loading || props.failed),
 })
+
 
 const pendingDelete = shallowRef<T | null>(null)
 
@@ -86,11 +99,13 @@ function cellValue(column: AdminTableColumn<T>, item: T) {
       <Button icon-left="plus" @click="emit('add')">Ajouter</Button>
     </div>
 
-    <Loader v-if="loading" />
+    <Loader v-if="loading && !items.length" />
 
-    <p v-else-if="!filteredItems.length" class="admin-table__empty">Aucun résultat.</p>
+    <p v-else-if="!items.length && !failed" class="admin-table__empty">Aucun résultat.</p>
 
-    <table v-else class="admin-table__table">
+    <!-- Défile sur le côté quand les colonnes ne tiennent pas dans la largeur. -->
+    <div v-else-if="items.length" class="admin-table__scroll">
+    <table class="admin-table__table">
       <thead>
         <tr>
           <th v-for="column in columns" :key="column.key" scope="col">{{ column.label }}</th>
@@ -98,10 +113,14 @@ function cellValue(column: AdminTableColumn<T>, item: T) {
         </tr>
       </thead>
       <tbody>
-        <tr v-for="item in filteredItems" :key="String(item[rowKey])">
-          <td v-for="column in columns" :key="column.key">{{ cellValue(column, item) }}</td>
+        <tr v-for="item in items" :key="String(item[rowKey])">
+          <td v-for="column in columns" :key="column.key">
+            <!-- Une cellule peut être personnalisée via le slot « cell-<clé> » (tag, lien…). -->
+            <slot :name="`cell-${column.key}`" :item="item">{{ cellValue(column, item) }}</slot>
+          </td>
           <td>
             <div class="admin-table__actions">
+              <slot name="row-actions" :item="item" />
               <Button color="secondary" variant="ghost" icon-left="edit" @click="emit('edit', item)">Modifier</Button>
               <Button color="danger" variant="ghost" icon-left="trash" @click="askDelete(item)">Supprimer</Button>
             </div>
@@ -109,6 +128,19 @@ function cellValue(column: AdminTableColumn<T>, item: T) {
         </tr>
       </tbody>
     </table>
+    </div>
+
+    <Loader v-if="loading && items.length" />
+
+    <div v-else-if="failed" class="admin-table__more" role="alert">
+      <p>Impossible de charger la liste.</p>
+      <Button color="primary" variant="outlined" @click="emit('load-more')">Réessayer</Button>
+    </div>
+
+    <div v-else-if="hasMore" ref="sentinel" class="admin-table__more">
+      <!-- Sans IntersectionObserver, le défilement ne peut rien déclencher. -->
+      <Button v-if="!canObserve" color="primary" variant="outlined" @click="emit('load-more')">Voir plus</Button>
+    </div>
 
     <Modal :open="pendingDelete !== null" title="Confirmer la suppression" @close="cancelDelete">
       <p v-if="pendingDelete" class="admin-table__confirm-text">
@@ -141,8 +173,16 @@ function cellValue(column: AdminTableColumn<T>, item: T) {
   gap: var(--space-3);
 }
 
+.admin-table__scroll {
+  overflow-x: auto;
+  scrollbar-width: thin;
+  scrollbar-color: var(--border) transparent;
+}
+
 .admin-table__table {
   width: 100%;
+  /* En dessous, le tableau défile au lieu de s'écraser. */
+  min-width: 36rem;
   border-collapse: collapse;
   text-align: left;
 }
@@ -165,6 +205,8 @@ function cellValue(column: AdminTableColumn<T>, item: T) {
 
 .admin-table__actions {
   display: flex;
+  flex-wrap: nowrap;
+  white-space: nowrap;
   justify-content: flex-end;
   gap: var(--space-2);
 }
@@ -187,6 +229,18 @@ ul.admin-table__impact {
   flex-wrap: wrap;
   justify-content: flex-end;
   gap: var(--space-2);
+}
+
+.admin-table__more {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-3);
+  min-height: 1px;
+}
+
+.admin-table__more p {
+  margin: 0;
 }
 
 .admin-table__empty {

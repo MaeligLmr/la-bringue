@@ -84,7 +84,8 @@ const tokenStyle = computed(() => {
     <template v-else>
       <Icon v-if="iconLeft" :name="iconLeft" :size="iconSize" />
       <span v-if="$slots.default" class="button__label"><slot /></span>
-      <Icon v-if="iconRight" :name="iconRight" :size="iconSize" />
+      <!-- Un contenu à la place de l'icône de droite (ex : photo de profil). -->
+      <slot name="icon-right"><Icon v-if="iconRight" :name="iconRight" :size="iconSize" /></slot>
     </template>
   </component>
 </template>

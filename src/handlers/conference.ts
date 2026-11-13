@@ -2,7 +2,7 @@ import { supabase } from '../supabase.js'
 import type { Conference } from '../types/database/conference'
 import type { Conferenciere } from '../types/database/conferenciere'
 import type { Participation } from '../types/database/participation'
-import { containsPattern, createCrudHandler, pageRange, toPage, unwrap, type Page } from './crud'
+import { containsPattern, createCrudHandler, pageRange, PAGE_SIZE, toPage, unwrap, type Page } from './crud'
 
 const TABLE = 'Conference'
 
@@ -38,19 +38,21 @@ export const conferenceHandler = {
     search = '',
     jour = '',
     theme = '',
+    pageSize = PAGE_SIZE,
   }: {
     offset: number
     search?: string
     jour?: string
     theme?: string
+    pageSize?: number
   }): Promise<Page<ConferenceResume>> {
     let query = supabase.from(TABLE).select(LIST_SELECT)
     if (jour) query = query.eq('jour', jour)
     if (theme) query = query.eq('theme', theme)
     if (search.trim()) query = query.ilike('titre', containsPattern(search))
     // id en second critère : un ordre stable évite doublons et trous entre les pages.
-    query = query.order('jour').order('heure_debut').order('id_conference').range(...pageRange(offset))
-    return toPage(unwrap<ConferenceResume[]>(TABLE, await query))
+    query = query.order('jour').order('heure_debut').order('id_conference').range(...pageRange(offset, pageSize))
+    return toPage(unwrap<ConferenceResume[]>(TABLE, await query), pageSize)
   },
 
   async getAllDetailed(): Promise<ConferenceDetail[]> {

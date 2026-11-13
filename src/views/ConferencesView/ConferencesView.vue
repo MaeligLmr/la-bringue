@@ -79,7 +79,6 @@ useScrollReveal()
         :items="conferences"
         :filters="filters"
         search-placeholder="Rechercher par titre"
-        server-side
         :has-more="hasMore"
         :loading="loading"
         :failed="failed"

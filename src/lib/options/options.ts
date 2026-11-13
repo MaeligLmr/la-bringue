@@ -5,3 +5,9 @@ export function toOptions(values: (string | null | undefined)[], { sorted = fals
   if (sorted) uniques.sort((a, b) => a.localeCompare(b))
   return uniques.map((value) => ({ value, label: value }))
 }
+
+// Tri alphabétique par nom (artistes, intervenantes proposées dans un menu),
+// sans modifier la liste reçue.
+export function byNom<T extends { nom: string | null }>(rows: T[]) {
+  return [...rows].sort((a, b) => (a.nom ?? '').localeCompare(b.nom ?? ''))
+}
