@@ -166,7 +166,15 @@ async function submit() {
         :current-url="values[field.key] ? photoUrl(String(values[field.key])) : undefined"
       />
 
-      <input v-else :id="`admin-${field.key}`" v-model="values[field.key]" :type="field.type" />
+      <input
+        v-else
+        :id="`admin-${field.key}`"
+        v-model="values[field.key]"
+        :type="field.type"
+        :min="field.min"
+        :max="field.max"
+        :step="field.type === 'number' ? 'any' : undefined"
+      />
 
       <p v-if="errors[field.key]" class="admin-form__error">{{ errors[field.key] }}</p>
     </div>

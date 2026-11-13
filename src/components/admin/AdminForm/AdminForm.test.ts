@@ -53,6 +53,36 @@ describe('AdminForm', () => {
     toast.error.mockClear()
   })
 
+  it('gère un champ numérique : valeur numérique, bornes, vide envoyé à null', async () => {
+    const handler = makeHandler()
+    const wrapper = mount(AdminForm<{ nom: string; prix: number | null }>, {
+      props: {
+        fields: [
+          { key: 'nom', label: 'Nom', type: 'text', required: true },
+          { key: 'prix', label: 'Prix', type: 'number', min: 0, max: 100 },
+        ],
+        handler: handler as never,
+      },
+    })
+    const prix = wrapper.find('#admin-prix')
+
+    expect(prix.attributes('type')).toBe('number')
+    expect(prix.attributes('min')).toBe('0')
+    expect(prix.attributes('max')).toBe('100')
+    expect(prix.attributes('step')).toBe('any')
+
+    await wrapper.find('#admin-nom').setValue('Pass')
+    await prix.setValue('45.5')
+    await wrapper.find('form').trigger('submit')
+    await flushPromises()
+    expect(handler.create.mock.calls[0][0]).toEqual({ nom: 'Pass', prix: 45.5 })
+
+    await prix.setValue('')
+    await wrapper.find('form').trigger('submit')
+    await flushPromises()
+    expect(handler.create.mock.calls[1][0]).toEqual({ nom: 'Pass', prix: null })
+  })
+
   it('marque les champs obligatoires d’un astérisque, et eux seuls', () => {
     const wrapper = mountForm(makeHandler())
 
