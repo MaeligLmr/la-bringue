@@ -15,7 +15,10 @@ withDefaults(
   <div class="admin-page" :class="`admin-page--${width}`">
     <RouterLink v-if="back" :to="back.to" class="admin-page__back">← {{ back.label }}</RouterLink>
     <h1>{{ title }}</h1>
-    <slot />
+    <!-- La largeur (form / wide) ne limite que le contenu : le titre, lui, peut tenir sur une ligne. -->
+    <div class="admin-page__content">
+      <slot />
+    </div>
   </div>
 </template>
 
@@ -26,11 +29,15 @@ withDefaults(
   gap: var(--space-6);
 }
 
-.admin-page--form {
+.admin-page__content {
+  min-width: 0;
+}
+
+.admin-page--form .admin-page__content {
   max-width: 36rem;
 }
 
-.admin-page--wide {
+.admin-page--wide .admin-page__content {
   max-width: 48rem;
 }
 

@@ -79,6 +79,11 @@ const DATE_PUBLICATION_FORMAT = new Intl.DateTimeFormat('fr-FR', {
   timeZone: 'Europe/Paris',
 })
 
+// « 28 août 2026 » ; chaîne vide sans date.
+export function formatDatePublication(date: string | null): string {
+  return date ? DATE_PUBLICATION_FORMAT.format(new Date(date)) : ''
+}
+
 // Conserve l'ordre reçu : le tri (plus récentes d'abord) est fait par le handler.
 export function toActualiteCards(actualites: Actualite[]): ActualiteCard[] {
   return actualites.map((actualite) => ({
@@ -86,8 +91,6 @@ export function toActualiteCards(actualites: Actualite[]): ActualiteCard[] {
     nom: actualite.titre ?? '',
     description: actualite.description ?? '',
     photo: actualite.photo,
-    date: actualite.date_publication
-      ? DATE_PUBLICATION_FORMAT.format(new Date(actualite.date_publication))
-      : '',
+    date: formatDatePublication(actualite.date_publication),
   }))
 }

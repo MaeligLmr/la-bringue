@@ -103,7 +103,9 @@ function cellValue(column: AdminTableColumn<T>, item: T) {
 
     <p v-else-if="!items.length && !failed" class="admin-table__empty">Aucun résultat.</p>
 
-    <table v-else-if="items.length" class="admin-table__table">
+    <!-- Défile sur le côté quand les colonnes ne tiennent pas dans la largeur. -->
+    <div v-else-if="items.length" class="admin-table__scroll">
+    <table class="admin-table__table">
       <thead>
         <tr>
           <th v-for="column in columns" :key="column.key" scope="col">{{ column.label }}</th>
@@ -112,9 +114,13 @@ function cellValue(column: AdminTableColumn<T>, item: T) {
       </thead>
       <tbody>
         <tr v-for="item in items" :key="String(item[rowKey])">
-          <td v-for="column in columns" :key="column.key">{{ cellValue(column, item) }}</td>
+          <td v-for="column in columns" :key="column.key">
+            <!-- Une cellule peut être personnalisée via le slot « cell-<clé> » (tag, lien…). -->
+            <slot :name="`cell-${column.key}`" :item="item">{{ cellValue(column, item) }}</slot>
+          </td>
           <td>
             <div class="admin-table__actions">
+              <slot name="row-actions" :item="item" />
               <Button color="secondary" variant="ghost" icon-left="edit" @click="emit('edit', item)">Modifier</Button>
               <Button color="danger" variant="ghost" icon-left="trash" @click="askDelete(item)">Supprimer</Button>
             </div>
@@ -122,6 +128,7 @@ function cellValue(column: AdminTableColumn<T>, item: T) {
         </tr>
       </tbody>
     </table>
+    </div>
 
     <Loader v-if="loading && items.length" />
 
@@ -166,8 +173,16 @@ function cellValue(column: AdminTableColumn<T>, item: T) {
   gap: var(--space-3);
 }
 
+.admin-table__scroll {
+  overflow-x: auto;
+  scrollbar-width: thin;
+  scrollbar-color: var(--border) transparent;
+}
+
 .admin-table__table {
   width: 100%;
+  /* En dessous, le tableau défile au lieu de s'écraser. */
+  min-width: 36rem;
   border-collapse: collapse;
   text-align: left;
 }
@@ -190,6 +205,8 @@ function cellValue(column: AdminTableColumn<T>, item: T) {
 
 .admin-table__actions {
   display: flex;
+  flex-wrap: nowrap;
+  white-space: nowrap;
   justify-content: flex-end;
   gap: var(--space-2);
 }

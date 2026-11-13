@@ -24,7 +24,7 @@ watch(
     const current = ++requestId
     status.value = 'loading'
     try {
-      const row = await actualiteHandler.getById(id)
+      const row = await actualiteHandler.getPublishedById(id)
       if (current !== requestId) return
       actualite.value = row ? toActualiteCards([row])[0] : null
       status.value = row ? 'ready' : 'not-found'
