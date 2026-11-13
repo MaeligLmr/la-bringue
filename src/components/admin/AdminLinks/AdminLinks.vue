@@ -56,22 +56,37 @@ function remove(entry: T) {
   <fieldset class="admin-links">
     <legend>{{ legend }}</legend>
 
-    <p v-if="!links.length">{{ empty }}</p>
+    <!-- Liste et ligne d'ajout partagent le même cadre et les mêmes colonnes
+         (nom / sélecteur · options · bouton) pour rester alignées. -->
+    <div class="admin-links__box">
+      <p v-if="!links.length" class="admin-links__empty">{{ empty }}</p>
 
-    <ul v-else class="admin-links__list">
-      <li v-for="entry in links" :key="entry.id" class="admin-links__item">
-        <span class="admin-links__nom">{{ entry.nom }}</span>
-        <slot name="entry" :entry="entry" :update="(patch: Partial<T>) => update(entry, patch)" />
-        <Button color="danger" variant="ghost" :aria-label="`Retirer ${entry.nom} ${context}`" @click="remove(entry)">
-          Retirer
+      <ul v-else class="admin-links__list">
+        <li v-for="entry in links" :key="entry.id" class="admin-links__row">
+          <span class="admin-links__main admin-links__nom">{{ entry.nom }}</span>
+          <slot name="entry" :entry="entry" :update="(patch: Partial<T>) => update(entry, patch)" />
+          <Button
+            class="admin-links__action"
+            color="danger"
+            variant="ghost"
+            icon-left="close"
+            :aria-label="`Retirer ${entry.nom} ${context}`"
+            @click="remove(entry)"
+          >
+            Retirer
+          </Button>
+        </li>
+      </ul>
+
+      <div class="admin-links__row admin-links__add">
+        <div class="admin-links__main">
+          <Select v-model="selected" :options="choix" :placeholder="placeholder" :aria-label="placeholder" />
+        </div>
+        <slot name="add-options" />
+        <Button class="admin-links__action" variant="outlined" icon-left="plus" :disabled="!selected" @click="add">
+          Ajouter
         </Button>
-      </li>
-    </ul>
-
-    <div class="admin-links__add">
-      <Select v-model="selected" :options="choix" :placeholder="placeholder" :aria-label="placeholder" />
-      <slot name="add-options" />
-      <Button variant="outlined" icon-left="plus" :disabled="!selected" @click="add">Ajouter</Button>
+      </div>
     </div>
 
     <p v-if="hint" class="admin-links__hint">{{ hint }}</p>
@@ -101,37 +116,52 @@ function remove(entry: T) {
   margin: 0;
 }
 
+.admin-links__box {
+  display: flex;
+  flex-direction: column;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-medium);
+}
+
+.admin-links__empty {
+  padding: var(--space-3) var(--space-4);
+  border-bottom: 1px solid var(--border);
+}
+
 .admin-links__list {
   display: flex;
   flex-direction: column;
   margin: 0;
   padding: 0;
   list-style: none;
-  border: 1px solid var(--border);
-  border-radius: var(--radius-medium);
 }
 
-.admin-links__item,
-.admin-links__add {
+.admin-links__row {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
   gap: var(--space-3);
+  padding: var(--space-2) var(--space-4);
 }
 
-.admin-links__item {
-  padding: var(--space-2) var(--space-4);
+.admin-links__list .admin-links__row {
   border-bottom: 1px solid var(--border);
 }
 
-.admin-links__item:last-child {
-  border-bottom: none;
+/* Colonne de gauche : nom d'un côté, sélecteur de l'autre. */
+.admin-links__main {
+  flex: 1 1 10rem;
+  min-width: 0;
 }
 
 .admin-links__nom {
-  flex: 1 1 10rem;
   color: var(--text-h);
   font-weight: var(--font-weight-medium);
+}
+
+/* Même largeur pour Retirer et Ajouter : les options du milieu restent alignées. */
+.admin-links__action {
+  min-width: 8rem;
 }
 
 .admin-links :slotted(label) {

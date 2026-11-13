@@ -16,7 +16,7 @@ describe('Select', () => {
     })
 
     expect(wrapper.find('.select__value').text()).toBe('Clair')
-    expect(wrapper.find('[role="listbox"]').exists()).toBe(false)
+    expect(document.body.querySelector('[role="listbox"]') !== null).toBe(false)
     expect(wrapper.find('[role="combobox"]').attributes('aria-expanded')).toBe('false')
 
     wrapper.unmount()
@@ -30,9 +30,8 @@ describe('Select', () => {
 
     await wrapper.find('[role="combobox"]').trigger('click')
 
-    const listbox = wrapper.find('[role="listbox"]')
-    expect(listbox.exists()).toBe(true)
-    expect(wrapper.findAll('[role="option"]')).toHaveLength(3)
+    expect(document.body.querySelector('[role="listbox"]')).not.toBeNull()
+    expect(document.body.querySelectorAll('[role="option"]')).toHaveLength(3)
 
     wrapper.unmount()
   })
@@ -44,10 +43,11 @@ describe('Select', () => {
     })
 
     await wrapper.find('[role="combobox"]').trigger('click')
-    await wrapper.findAll('[role="option"]')[1].trigger('click')
+    ;(document.body.querySelectorAll('[role="option"]')[1] as HTMLElement).click()
+    await wrapper.vm.$nextTick()
 
     expect(wrapper.emitted('update:modelValue')).toEqual([['light']])
-    expect(wrapper.find('[role="listbox"]').exists()).toBe(false)
+    expect(document.body.querySelector('[role="listbox"]') !== null).toBe(false)
 
     wrapper.unmount()
   })
@@ -77,7 +77,7 @@ describe('Select', () => {
     await wrapper.find('[role="combobox"]').trigger('click')
     await wrapper.find('[role="combobox"]').trigger('keydown', { key: 'Escape' })
 
-    expect(wrapper.find('[role="listbox"]').exists()).toBe(false)
+    expect(document.body.querySelector('[role="listbox"]') !== null).toBe(false)
     expect(wrapper.emitted('update:modelValue')).toBeUndefined()
 
     wrapper.unmount()
@@ -90,25 +90,25 @@ describe('Select', () => {
     })
 
     await wrapper.find('[role="combobox"]').trigger('click')
-    expect(wrapper.find('[role="listbox"]').exists()).toBe(true)
+    expect(document.body.querySelector('[role="listbox"]') !== null).toBe(true)
 
     document.body.click()
     await wrapper.vm.$nextTick()
 
-    expect(wrapper.find('[role="listbox"]').exists()).toBe(false)
+    expect(document.body.querySelector('[role="listbox"]') !== null).toBe(false)
 
     wrapper.unmount()
   })
 
-  it('pointe la taille (padding/police) vers les tokens Button correspondants', () => {
+  it('applique la classe de taille (les valeurs viennent des tokens du thème)', () => {
     const wrapper = mount(Select, {
       props: { modelValue: 'system', options: OPTIONS, size: 'large' },
       attachTo: document.body,
     })
 
-    const style = wrapper.attributes('style') ?? ''
-    expect(style).toContain('var(--button-large-with-text-padding-x)')
-    expect(style).toContain('var(--font-size-button-large)')
+    expect(wrapper.classes()).toContain('select--large')
+    // Plus de style inline : le CSS lit directement les tokens de theme.css.
+    expect(wrapper.attributes('style')).toBeUndefined()
 
     wrapper.unmount()
   })
@@ -122,7 +122,7 @@ describe('Select', () => {
     expect(wrapper.find('[role="combobox"]').attributes('disabled')).toBeDefined()
 
     await wrapper.find('[role="combobox"]').trigger('click')
-    expect(wrapper.find('[role="listbox"]').exists()).toBe(false)
+    expect(document.body.querySelector('[role="listbox"]') !== null).toBe(false)
 
     wrapper.unmount()
   })

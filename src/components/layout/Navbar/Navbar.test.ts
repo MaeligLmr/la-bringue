@@ -237,7 +237,7 @@ describe('Navbar', () => {
 
     select.click()
     await wrapper.vm.$nextTick()
-    const options = Array.from(document.body.querySelectorAll('.navbar__menu [role="option"]')) as HTMLElement[]
+    const options = Array.from(document.body.querySelectorAll('[role="option"]')) as HTMLElement[]
     expect(options.map((option) => option.textContent?.trim())).toEqual(['Par défaut', 'Clair', 'Sombre'])
 
     options[2].click()

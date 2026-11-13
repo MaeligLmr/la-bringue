@@ -2,8 +2,8 @@
 import { computed, ref, shallowRef } from 'vue'
 import Modal from '../../layout/Modal/Modal.vue'
 import Button from '../../ui/Button/Button.vue'
-import Icon from '../../ui/Icon/Icon.vue'
 import Loader from '../../ui/Loader/Loader.vue'
+import SearchBar from '../../ui/SearchBar/SearchBar.vue'
 import { fold } from '../../../lib/highlight/highlight'
 import type { AdminTableColumn } from '../../../types/ui/admin-table.ts'
 
@@ -81,18 +81,9 @@ function cellValue(column: AdminTableColumn<T>, item: T) {
 <template>
   <section class="admin-table">
     <div class="admin-table__toolbar">
-      <label class="admin-table__search">
-        <Icon name="search" size="small" />
-        <input
-          v-model="search"
-          type="search"
-          class="admin-table__search-input"
-          placeholder="Rechercher par nom"
-          aria-label="Rechercher par nom"
-        />
-      </label>
+      <SearchBar v-model="search" />
 
-      <Button @click="emit('add')">Ajouter</Button>
+      <Button icon-left="plus" @click="emit('add')">Ajouter</Button>
     </div>
 
     <Loader v-if="loading" />
@@ -109,9 +100,11 @@ function cellValue(column: AdminTableColumn<T>, item: T) {
       <tbody>
         <tr v-for="item in filteredItems" :key="String(item[rowKey])">
           <td v-for="column in columns" :key="column.key">{{ cellValue(column, item) }}</td>
-          <td class="admin-table__actions">
-            <Button color="secondary" variant="ghost" @click="emit('edit', item)">Modifier</Button>
-            <Button color="danger" variant="ghost" @click="askDelete(item)">Supprimer</Button>
+          <td>
+            <div class="admin-table__actions">
+              <Button color="secondary" variant="ghost" icon-left="edit" @click="emit('edit', item)">Modifier</Button>
+              <Button color="danger" variant="ghost" icon-left="trash" @click="askDelete(item)">Supprimer</Button>
+            </div>
           </td>
         </tr>
       </tbody>
@@ -128,7 +121,7 @@ function cellValue(column: AdminTableColumn<T>, item: T) {
       </ul>
       <div class="admin-table__confirm-actions">
         <Button color="secondary" variant="outlined" @click="cancelDelete">Annuler</Button>
-        <Button color="danger" @click="confirmDelete">Supprimer</Button>
+        <Button color="danger" icon-left="trash" @click="confirmDelete">Supprimer</Button>
       </div>
     </Modal>
   </section>
@@ -146,36 +139,6 @@ function cellValue(column: AdminTableColumn<T>, item: T) {
   flex-wrap: wrap;
   align-items: center;
   gap: var(--space-3);
-}
-
-.admin-table__search {
-  display: flex;
-  align-items: center;
-  gap: var(--button-medium-with-text-gap);
-  flex: 1 1 16rem;
-  box-sizing: border-box;
-  padding: var(--button-medium-with-text-padding-y) var(--button-medium-with-text-padding-x);
-  border: 1px solid var(--select-trigger-border);
-  border-radius: var(--radius-medium);
-  color: var(--select-trigger-text);
-}
-
-.admin-table__search:focus-within {
-  box-shadow: 0 0 0 3px var(--select-trigger-focus-ring);
-}
-
-.admin-table__search-input {
-  flex: 1;
-  min-width: 0;
-  padding: 0;
-  border: none;
-  outline: none;
-  background: transparent;
-  color: inherit;
-  font-family: inherit;
-  font-size: var(--font-size-button-medium);
-  font-weight: var(--font-weight-medium);
-  line-height: 1;
 }
 
 .admin-table__table {

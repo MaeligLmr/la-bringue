@@ -1,10 +1,11 @@
 <script setup lang="ts">
-import { computed, onBeforeUnmount, onMounted, ref } from 'vue'
+import { computed, ref } from 'vue'
 import Icon from '../Icon/Icon.vue'
+import { useFloatingPanel } from '../../../composables/useFloatingPanel/useFloatingPanel'
 import type { SelectOption } from '../../../types/ui/select.ts'
-// Reusing Button's size type/tokens on purpose: a Select must line up at
-// the same height as a Button of the same size wherever they sit next to
-// each other (e.g. the Navbar), so they share one size vocabulary.
+// Même vocabulaire de tailles que Button (medium / large) pour qu'un Select
+// s'aligne à côté d'un Button, mais les valeurs viennent des tokens propres
+// au Select (--select-{taille}-*), pas de ceux de Button.
 import type { ButtonSize } from '../../../types/ui/button.ts'
 
 const props = withDefaults(
@@ -22,23 +23,20 @@ const props = withDefaults(
   }
 )
 
-// Points --select-size-* at the matching Button size tokens (padding,
-// gap, font-size) — see Button.vue's tokenStyle for the same pattern.
-const sizeStyle = computed(() => {
-  const sizeSlot = `--button-${props.size}-with-text`
-  return {
-    '--select-padding-x': `var(${sizeSlot}-padding-x)`,
-    '--select-padding-y': `var(${sizeSlot}-padding-y)`,
-    '--select-gap': `var(${sizeSlot}-gap)`,
-    '--select-font-size': `var(--font-size-button-${props.size})`,
-  }
-})
-
 const emit = defineEmits<{ 'update:modelValue': [value: string] }>()
 
 const isOpen = ref(false)
 const activeIndex = ref(-1)
 const rootEl = ref<HTMLElement | null>(null)
+const listboxEl = ref<HTMLElement | null>(null)
+// Le listbox est téléporté dans <body> (voir useFloatingPanel).
+const { style: listboxStyle, updatePosition } = useFloatingPanel({
+  anchor: rootEl,
+  panel: listboxEl,
+  isOpen,
+  close,
+  matchWidth: true,
+})
 // One id per instance so aria-controls/id stay unique with several <Select> on a page.
 const listboxId = `select-listbox-${Math.random().toString(36).slice(2, 9)}`
 
@@ -48,6 +46,7 @@ const selectedOption = computed(
 
 function open() {
   if (props.disabled || props.options.length === 0) return
+  updatePosition()
   isOpen.value = true
   activeIndex.value = Math.max(
     0,
@@ -106,16 +105,10 @@ function onTriggerKeydown(event: KeyboardEvent) {
   }
 }
 
-function onClickOutside(event: MouseEvent) {
-  if (rootEl.value && !rootEl.value.contains(event.target as Node)) close()
-}
-
-onMounted(() => document.addEventListener('click', onClickOutside))
-onBeforeUnmount(() => document.removeEventListener('click', onClickOutside))
 </script>
 
 <template>
-  <div ref="rootEl" class="select" :class="{ 'select--open': isOpen }" :style="sizeStyle">
+  <div ref="rootEl" class="select" :class="[`select--${size}`, { 'select--open': isOpen }]">
     <button
       type="button"
       class="select__trigger"
@@ -136,7 +129,8 @@ onBeforeUnmount(() => document.removeEventListener('click', onClickOutside))
       <Icon name="chevron-down" size="small" class="select__arrow" />
     </button>
 
-    <ul v-if="isOpen" :id="listboxId" class="select__listbox" role="listbox">
+    <Teleport to="body">
+    <ul v-if="isOpen" :id="listboxId" ref="listboxEl" class="select__listbox" :style="listboxStyle" role="listbox">
       <li
         v-for="(option, index) in options"
         :key="option.value"
@@ -153,6 +147,7 @@ onBeforeUnmount(() => document.removeEventListener('click', onClickOutside))
         {{ option.label }}
       </li>
     </ul>
+    </Teleport>
   </div>
 </template>
 
@@ -163,29 +158,33 @@ onBeforeUnmount(() => document.removeEventListener('click', onClickOutside))
   width: 100%;
 }
 
+/* Les tailles viennent directement des tokens --select-{medium|large}-* de
+   theme.css (medium par défaut, large via .select--large). */
 .select__trigger {
-  /* Same box model as a Button of the same size (padding tokens,
-     font-size, line-height, border width) so a Select sits at the same
-     height as a Button next to it — e.g. the theme switcher and the auth
-     buttons in the Navbar. --select-* set by sizeStyle in the script. */
   display: flex;
   align-items: center;
-  gap: var(--select-gap);
+  gap: var(--select-medium-gap);
   width: 100%;
   box-sizing: border-box;
-  padding: var(--select-padding-y) var(--select-padding-x);
+  padding: var(--select-medium-padding-y) var(--select-medium-padding-x);
   border: 1px solid var(--select-trigger-border);
   border-radius: var(--radius-medium);
   background: var(--select-trigger-background);
   color: var(--select-trigger-text);
   font-family: inherit;
-  font-size: var(--select-font-size);
+  font-size: var(--select-medium-font-size);
   font-weight: var(--font-weight-medium);
   line-height: 1;
   cursor: pointer;
   transition:
     background-color 0.15s ease,
     box-shadow 0.15s ease;
+}
+
+.select--large .select__trigger {
+  gap: var(--select-large-gap);
+  padding: var(--select-large-padding-y) var(--select-large-padding-x);
+  font-size: var(--select-large-font-size);
 }
 
 .select__trigger:hover:not(:disabled) {
@@ -209,7 +208,7 @@ onBeforeUnmount(() => document.removeEventListener('click', onClickOutside))
   overflow: hidden;
   text-overflow: ellipsis;
   font-family: inherit;
-  font-size: var(--select-font-size);
+  font-size: inherit;
   font-weight: var(--font-weight-medium);
   line-height: 1;
 }
@@ -234,13 +233,15 @@ onBeforeUnmount(() => document.removeEventListener('click', onClickOutside))
 }
 
 .select__listbox {
-  position: absolute;
-  z-index: 20;
-  top: calc(100% + var(--space-1));
-  left: 0;
-  min-width: 100%;
+  position: fixed;
+  z-index: 1000;
+  overflow-y: auto;
+  box-sizing: border-box;
+  /* Barre de défilement fine, qui reprend les couleurs du thème. */
+  scrollbar-width: thin;
+  scrollbar-color: var(--select-listbox-border) transparent;
   margin: 0;
-  padding: var(--space-1);
+  padding: var(--select-listbox-padding);
   list-style: none;
   border: 1px solid var(--select-listbox-border);
   border-radius: var(--radius-medium);
@@ -248,9 +249,22 @@ onBeforeUnmount(() => document.removeEventListener('click', onClickOutside))
   box-shadow: var(--shadow);
 }
 
+.select__listbox::-webkit-scrollbar {
+  width: 8px;
+}
+
+.select__listbox::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.select__listbox::-webkit-scrollbar-thumb {
+  border-radius: var(--radius-full);
+  background: var(--select-listbox-border);
+}
+
 .select__option {
-  padding: var(--space-2) var(--space-3);
-  border-radius: calc(var(--radius-medium) - var(--space-1));
+  padding: var(--select-option-padding-y) var(--select-option-padding-x);
+  border-radius: var(--select-option-radius);
   color: var(--select-option-text);
   white-space: nowrap;
   cursor: pointer;

@@ -337,6 +337,20 @@ const SELECT_TOKEN_LINES = {
     "--select-option-text: var(--color-pink-bright-900);",
     "--select-option-hover-background: color-mix(in srgb, var(--color-pink-bright-500) 12%, transparent);",
     "--select-option-selected-text: var(--color-pink-bright-600);",
+    // Tailles et espacements propres au Select (valeurs de départ = celles de
+    // Button medium/large, mais indépendantes). Identiques en clair et en sombre.
+    "--select-medium-padding-x: 0.625rem;",
+    "--select-medium-padding-y: 0.5rem;",
+    "--select-medium-gap: 0.5rem;",
+    "--select-medium-font-size: 0.875rem;",
+    "--select-large-padding-x: 0.75rem;",
+    "--select-large-padding-y: 0.625rem;",
+    "--select-large-gap: 0.625rem;",
+    "--select-large-font-size: 1.25rem;",
+    "--select-listbox-padding: var(--space-2);",
+    "--select-option-padding-x: var(--space-4);",
+    "--select-option-padding-y: var(--space-3);",
+    "--select-option-radius: var(--radius-small);",
   ],
   dark: [
     "--select-trigger-hover-background: color-mix(in srgb, var(--color-pink-bright-700) 50%, transparent);",

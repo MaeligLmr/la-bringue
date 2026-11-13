@@ -31,7 +31,7 @@ function addButton(wrapper: Awaited<ReturnType<typeof mountLineup>>) {
 }
 
 function checkboxes(wrapper: Awaited<ReturnType<typeof mountLineup>>) {
-  return wrapper.findAll('.admin-links__item input[type="checkbox"]')
+  return wrapper.findAll('.admin-links__list .admin-links__row input[type="checkbox"]')
 }
 
 beforeEach(() => {

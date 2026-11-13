@@ -4,6 +4,11 @@ import { toast } from 'vue-sonner'
 import { supabase } from '../../../supabase.js'
 import Button from '../../ui/Button/Button.vue'
 import Select from '../../ui/Select/Select.vue'
+import FileUpload from '../../ui/FileUpload/FileUpload.vue'
+import Checkbox from '../../ui/Checkbox/Checkbox.vue'
+import DatePicker from '../../ui/DatePicker/DatePicker.vue'
+import { photoUrl } from '../../../lib/photo/photo.ts'
+import { IMAGE_INPUT_TYPES, ImageError, MAX_ORIGINAL_BYTES, MAX_WEBP_BYTES, toWebp } from '../../../lib/image/to-webp.ts'
 import type { AdminFormField, AdminFormHandler } from '../../../types/ui/admin-form.ts'
 
 const props = defineProps<{
@@ -15,6 +20,7 @@ const props = defineProps<{
 
 const emit = defineEmits<{ saved: [item: T] }>()
 
+const MAX_WEBP_MO = MAX_WEBP_BYTES / 1024 / 1024
 const ERROR_MESSAGE = 'L’enregistrement a échoué. Réessaie plus tard.'
 
 const values = reactive<Record<string, any>>({})
@@ -60,14 +66,34 @@ function validate() {
   return props.fields.every((field) => !errors[field.key])
 }
 
-function onFileChange(key: string, event: Event) {
-  files[key] = (event.target as HTMLInputElement).files?.[0]
+// Nom de fichier parlant pour le SEO, tiré du nom (ou titre) de l'élément, sinon du fichier
+// (« Angèle » → « angele-3f2a9c1b.webp »), avec un suffixe aléatoire pour garantir l'unicité.
+function slugify(text: string) {
+  return text
+    .normalize('NFD')
+    .replace(/[̀-ͯ]/g, '')
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/^-+|-+$/g, '')
 }
 
-// Envoie le fichier dans le bucket « images »
-async function upload(field: AdminFormField<T>, file: File) {
-  const path = `${field.folder}/${Date.now()}-${file.name}`
-  const { error } = await supabase.storage.from('images').upload(path, file)
+// Tout ce qui part dans Storage est du WebP : l'extension est donc toujours « .webp »,
+// quel que soit le nom du fichier d'origine.
+function storageFileName(file: File) {
+  const dot = file.name.lastIndexOf('.')
+  const base = dot > 0 ? file.name.slice(0, dot) : file.name
+  const label = String(values.nom ?? values.titre ?? '')
+  const slug = slugify(label) || slugify(base) || 'image'
+  const id = crypto.randomUUID().slice(0, 8)
+  return `${slug}-${id}.webp`
+}
+
+// Convertit l'image en WebP puis l'envoie dans le bucket « images »
+async function upload(field: AdminFormField<T>, original: File) {
+  const file = await toWebp(original)
+  if (file.type !== 'image/webp') throw new Error('Seules les images WebP sont envoyées dans Storage.')
+  const path = `${field.folder}/${storageFileName(file)}`
+  const { error } = await supabase.storage.from('images').upload(path, file, { contentType: file.type })
   if (error) throw error
   return `/${path}`
 }
@@ -92,8 +118,9 @@ async function submit() {
 
     toast.success('Enregistré.')
     emit('saved', item)
-  } catch {
-    toast.error(ERROR_MESSAGE)
+  } catch (error) {
+    // Une image refusée (trop lourde, mauvais format) s'explique à l'utilisateur ; le reste reste générique.
+    toast.error(error instanceof ImageError ? error.message : ERROR_MESSAGE)
   } finally {
     submitting.value = false
   }
@@ -115,19 +142,25 @@ async function submit() {
         :aria-label="field.label"
       />
 
-      <input
-        v-else-if="field.type === 'checkbox'"
+      <Checkbox v-else-if="field.type === 'checkbox'" :id="`admin-${field.key}`" v-model="values[field.key]" />
+
+      <DatePicker
+        v-else-if="field.type === 'date' || field.type === 'time' || field.type === 'datetime'"
         :id="`admin-${field.key}`"
         v-model="values[field.key]"
-        type="checkbox"
+        :mode="field.type"
+        :aria-label="field.label"
+        :clearable="!field.required"
       />
 
-      <input
+      <FileUpload
         v-else-if="field.type === 'image'"
         :id="`admin-${field.key}`"
-        type="file"
-        accept="image/*"
-        @change="onFileChange(field.key, $event)"
+        v-model="files[field.key]"
+        :accept="IMAGE_INPUT_TYPES.join(',')"
+        :max-size="MAX_ORIGINAL_BYTES"
+        :hint="`Converti en WebP · ${MAX_WEBP_MO} Mo max après conversion`"
+        :current-url="values[field.key] ? photoUrl(String(values[field.key])) : undefined"
       />
 
       <input v-else :id="`admin-${field.key}`" v-model="values[field.key]" :type="field.type" />
@@ -163,7 +196,7 @@ async function submit() {
   color: var(--text-h);
 }
 
-.admin-form__field input:not([type='checkbox']):not([type='file']),
+.admin-form__field input,
 .admin-form__field textarea {
   width: 100%;
   box-sizing: border-box;
@@ -173,10 +206,6 @@ async function submit() {
   background: var(--bg);
   color: var(--text-h);
   font: inherit;
-}
-
-.admin-form__field input[type='checkbox'] {
-  align-self: flex-start;
 }
 
 .admin-form__error {
