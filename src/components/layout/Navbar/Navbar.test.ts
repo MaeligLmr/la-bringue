@@ -6,9 +6,17 @@ import { createRouter, createWebHistory } from 'vue-router'
 // supabase.auth.getSession() at import time — reset the module registry
 // and re-mock supabase before each dynamic re-import, same as
 // useAuth.test.ts.
+// `pp` : chemin de la photo de profil de la personne connectée (null = aucune).
 function mockSupabase(
-  session: { user: { id: string; email: string; user_metadata?: { username?: string } } } | null
+  session: { user: { id: string; email: string; user_metadata?: { username?: string } } } | null,
+  pp: string | null = null
 ) {
+  vi.doMock('../../../handlers/profil', () => ({
+    profilHandler: {
+      getPp: vi.fn().mockResolvedValue(pp),
+      getPpUrl: vi.fn().mockResolvedValue('https://signed/pp'),
+    },
+  }))
   vi.doMock('../../../supabase.js', () => ({
     supabase: {
       auth: {
@@ -248,6 +256,33 @@ describe('Navbar', () => {
     expect(document.body.querySelector('.navbar__menu')).not.toBeNull()
 
     useTheme().setPreference('system')
+    wrapper.unmount()
+  })
+
+  it('affiche la photo de profil à la place de l’icône utilisateur quand il y en a une', async () => {
+    mockSupabase({ user: { id: '1', email: 'alice@example.com', user_metadata: { username: 'alice_m' } } }, '1/a.webp')
+    const { wrapper } = await mountNavbar()
+    const { useAuth } = await import('../../../composables/useAuth/useAuth')
+    await useAuth().ready
+    await vi.waitFor(() => expect(wrapper.find('.navbar__avatar').exists()).toBe(true))
+
+    expect(wrapper.find('.navbar__avatar').attributes('src')).toBe('https://signed/pp')
+    expect(wrapper.find('.navbar__badge .icon').exists()).toBe(false)
+    expect(wrapper.text()).toContain('alice_m')
+
+    wrapper.unmount()
+  })
+
+  it('garde l’icône utilisateur sans photo de profil', async () => {
+    mockSupabase({ user: { id: '1', email: 'alice@example.com', user_metadata: { username: 'alice_m' } } }, null)
+    const { wrapper } = await mountNavbar()
+    const { useAuth } = await import('../../../composables/useAuth/useAuth')
+    await useAuth().ready
+    await wrapper.vm.$nextTick()
+
+    expect(wrapper.find('.navbar__avatar').exists()).toBe(false)
+    expect(wrapper.find('.navbar__badge .icon').exists()).toBe(true)
+
     wrapper.unmount()
   })
 })
