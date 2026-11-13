@@ -72,7 +72,7 @@ declare
   public_tables text[] := array[
     'Artiste', 'Concert', 'Scene',
     'Conference', 'Conferenciere', 'Participation', 'Exposant',
-    'Actualite', 'Formule', 'InfoPratique'
+    'Formule', 'InfoPratique'
   ];
 begin
   foreach t in array public_tables loop
@@ -82,6 +82,15 @@ begin
   end loop;
 end;
 $$;
+
+-- Seules les actualités dont la date de publication est atteinte sont visibles du
+-- site public (les admins voient tout via « Gestion admin »). Sans date : jamais visible.
+-- La policy générique « Lecture publique » doit disparaître, sinon elle l'emporterait.
+drop policy if exists "Lecture publique" on public."Actualite";
+drop policy if exists "Lecture des actualités publiées" on public."Actualite";
+create policy "Lecture des actualités publiées" on public."Actualite"
+  for select to anon, authenticated
+  using (date_publication <= now());
 
 -- Les artistes pas encore annoncées restent cachées du site public.
 drop policy if exists "Lecture des artistes annoncées" on public."ConcertArtiste";

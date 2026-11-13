@@ -53,6 +53,18 @@ describe('AdminForm', () => {
     toast.error.mockClear()
   })
 
+  it('marque les champs obligatoires d’un astérisque, et eux seuls', () => {
+    const wrapper = mountForm(makeHandler())
+
+    const stars = wrapper.findAll('.admin-form__field').map((field) => field.find('.admin-form__required').exists())
+
+    // Nom (obligatoire), puis description, catégorie et photo.
+    expect(stars).toEqual([true, false, false, false])
+    expect(wrapper.find('label[for="admin-nom"]').text()).toBe('Nom *')
+    // L'astérisque est décoratif : le lecteur d'écran lit « Nom » seul.
+    expect(wrapper.find('.admin-form__required').attributes('aria-hidden')).toBe('true')
+  })
+
   it('affiche un message sous un champ obligatoire vide, sans appel au serveur', async () => {
     const handler = makeHandler()
     const wrapper = mountForm(handler)

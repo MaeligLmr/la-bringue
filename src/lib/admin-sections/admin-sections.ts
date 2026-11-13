@@ -13,4 +13,5 @@ export const ADMIN_SECTIONS: AdminSection[] = [
   { name: 'admin-conferences', path: 'conferences', label: 'Conférences' },
   { name: 'admin-intervenantes', path: 'intervenantes', label: 'Intervenantes' },
   { name: 'admin-exposants', path: 'exposants', label: 'Exposants' },
+  { name: 'admin-actualites', path: 'actualites', label: 'Actualités' },
 ]

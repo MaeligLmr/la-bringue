@@ -221,4 +221,22 @@ describe('AdminTable (confirmation de suppression)', () => {
     expect(dialog()).toBeNull()
     wrapper.unmount()
   })
+
+  it('permet de personnaliser une cellule via le slot cell-<clé>', () => {
+    const wrapper = mount(AdminTable<Artiste>, {
+      props: { items: ARTISTES, columns: COLONNES, rowKey: 'id_artiste' },
+      slots: { 'cell-categorie': '<template #cell-categorie="{ item }"><em class="badge">{{ item.categorie }}!</em></template>' },
+    })
+
+    expect(wrapper.findAll('.badge').map((badge) => badge.text())).toEqual(['Pop!', 'RnB!', 'Pop!'])
+  })
+
+  it('ajoute des actions de ligne via le slot row-actions', async () => {
+    const wrapper = mount(AdminTable<Artiste>, {
+      props: { items: ARTISTES, columns: COLONNES, rowKey: 'id_artiste' },
+      slots: { 'row-actions': '<template #row-actions="{ item }"><button class="extra">Voir {{ item.nom }}</button></template>' },
+    })
+
+    expect(wrapper.findAll('.extra').map((node) => node.text())).toEqual(['Voir Beyoncé', 'Voir Aya Nakamura', 'Voir Angèle'])
+  })
 })

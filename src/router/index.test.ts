@@ -100,6 +100,17 @@ describe('router', () => {
       expect(props).toEqual({ id: 9 })
     })
 
+    it('résout la liste, la création et la modification d’une actualité', () => {
+      expect(router.resolve('/admin/actualites').name).toBe('admin-actualites')
+      expect(router.resolve('/admin/actualites/nouvelle').name).toBe('admin-actualite-nouvelle')
+
+      const route = router.resolve('/admin/actualites/3')
+      expect(route.name).toBe('admin-actualite')
+      expect(route.meta.requiresAdmin).toBe(true)
+      const props = (route.matched.at(-1)!.props.default as (r: typeof route) => unknown)(route)
+      expect(props).toEqual({ id: 3 })
+    })
+
     it('résout la liste, la création et la modification d’un concert', () => {
       expect(router.resolve('/admin/concerts').name).toBe('admin-concerts')
       expect(router.resolve('/admin/concerts/nouveau').name).toBe('admin-concert-nouveau')

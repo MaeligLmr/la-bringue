@@ -130,7 +130,10 @@ async function submit() {
 <template>
   <form class="admin-form" novalidate @submit.prevent="submit">
     <div v-for="field in fields" :key="field.key" class="admin-form__field">
-      <label :for="`admin-${field.key}`">{{ field.label }}</label>
+      <label :for="`admin-${field.key}`">
+        {{ field.label }}
+        <span v-if="field.required" class="admin-form__required" aria-hidden="true">*</span>
+      </label>
 
       <textarea v-if="field.type === 'textarea'" :id="`admin-${field.key}`" v-model="values[field.key]" />
 
@@ -206,6 +209,10 @@ async function submit() {
   background: var(--bg);
   color: var(--text-h);
   font: inherit;
+}
+
+.admin-form__required {
+  color: var(--alert-danger-text);
 }
 
 .admin-form__error {

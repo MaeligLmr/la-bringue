@@ -55,6 +55,13 @@ const CRUD_SECTIONS: CrudSection[] = [
     list: () => import('../views/admin/AdminExposantsView/AdminExposantsView.vue'),
     form: () => import('../views/admin/AdminExposantFormView/AdminExposantFormView.vue'),
   },
+  {
+    path: 'actualites',
+    names: { list: 'admin-actualites', create: 'admin-actualite-nouvelle', edit: 'admin-actualite' },
+    createPath: 'nouvelle',
+    list: () => import('../views/admin/AdminActualitesView/AdminActualitesView.vue'),
+    form: () => import('../views/admin/AdminActualiteFormView/AdminActualiteFormView.vue'),
+  },
 ]
 
 function crudRoutes({ path, names, createPath, list, form }: CrudSection): RouteRecordRaw {
