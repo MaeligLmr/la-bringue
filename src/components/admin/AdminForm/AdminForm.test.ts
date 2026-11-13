@@ -3,16 +3,19 @@ import { flushPromises, mount } from '@vue/test-utils'
 import AdminForm from './AdminForm.vue'
 import { PostgrestError } from '@supabase/supabase-js'
 import { HandlerError } from '../../../handlers/crud'
+import { ImageError } from '../../../lib/image/to-webp'
 import type { Artiste } from '../../../types/database/artiste'
 import type { AdminFormField } from '../../../types/ui/admin-form'
 
 const { upload } = vi.hoisted(() => ({ upload: vi.fn() }))
+const { toWebp } = vi.hoisted(() => ({ toWebp: vi.fn() }))
 const { toast } = vi.hoisted(() => ({ toast: { success: vi.fn(), error: vi.fn() } }))
 
 vi.mock('../../../supabase.js', () => ({
   supabase: { storage: { from: () => ({ upload }) } },
 }))
 vi.mock('vue-sonner', () => ({ toast }))
+vi.mock('../../../lib/image/to-webp.ts', async (importOriginal) => ({ ...(await importOriginal<object>()), toWebp }))
 
 const ANGELE: Artiste = { id_artiste: 3, nom: 'Angèle', photo: '/programmation/angele.webp', description: 'Pop belge', categorie: 'pop' }
 
@@ -44,6 +47,8 @@ function mountForm(handler = makeHandler(), id?: number) {
 describe('AdminForm', () => {
   beforeEach(() => {
     upload.mockReset()
+    // Par défaut : l'image est déjà prête (WebP), renvoyée telle quelle.
+    toWebp.mockReset().mockImplementation(async (file: File) => file)
     toast.success.mockClear()
     toast.error.mockClear()
   })
@@ -125,6 +130,60 @@ describe('AdminForm', () => {
     const path = upload.mock.calls[0][0] as string
     expect(path).toMatch(/^programmation\/angele-[0-9a-f]{8}\.webp$/)
     expect(handler.create.mock.calls[0][0].photo).toBe(`/${path}`)
+  })
+
+  it('convertit l’image en WebP avant de l’envoyer, avec le bon type MIME', async () => {
+    upload.mockResolvedValue({ data: {}, error: null })
+    toWebp.mockResolvedValue(new File(['webp'], 'Photo Angèle.webp', { type: 'image/webp' }))
+    const handler = makeHandler()
+    const wrapper = mountForm(handler)
+    const input = wrapper.find('#admin-photo')
+    const jpeg = new File(['x'], 'Photo Angèle.jpg', { type: 'image/jpeg' })
+    Object.defineProperty(input.element, 'files', { value: [jpeg] })
+
+    await wrapper.find('#admin-nom').setValue('Angèle')
+    await input.trigger('change')
+    await wrapper.find('form').trigger('submit')
+    await flushPromises()
+
+    expect(toWebp).toHaveBeenCalledWith(jpeg)
+    const [path, sent, options] = upload.mock.calls[0]
+    expect(path).toMatch(/^programmation\/angele-[0-9a-f]{8}\.webp$/)
+    expect((sent as File).type).toBe('image/webp')
+    expect(options).toEqual({ contentType: 'image/webp' })
+  })
+
+  it('n’enregistre rien et prévient si la conversion échoue', async () => {
+    toWebp.mockRejectedValue(new Error('boom'))
+    const handler = makeHandler()
+    const wrapper = mountForm(handler)
+    const input = wrapper.find('#admin-photo')
+    Object.defineProperty(input.element, 'files', { value: [new File(['x'], 'a.jpg', { type: 'image/jpeg' })] })
+
+    await wrapper.find('#admin-nom').setValue('Angèle')
+    await input.trigger('change')
+    await wrapper.find('form').trigger('submit')
+    await flushPromises()
+
+    expect(upload).not.toHaveBeenCalled()
+    expect(handler.create).not.toHaveBeenCalled()
+    expect(toast.error).toHaveBeenCalled()
+  })
+
+  it('affiche le message précis quand l’image est trop lourde', async () => {
+    toWebp.mockRejectedValue(new ImageError('L’image fait plus de 5 Mo en WebP, même compressée.'))
+    const handler = makeHandler()
+    const wrapper = mountForm(handler)
+    const input = wrapper.find('#admin-photo')
+    Object.defineProperty(input.element, 'files', { value: [new File(['x'], 'a.jpg', { type: 'image/jpeg' })] })
+
+    await wrapper.find('#admin-nom').setValue('Angèle')
+    await input.trigger('change')
+    await wrapper.find('form').trigger('submit')
+    await flushPromises()
+
+    expect(toast.error).toHaveBeenCalledWith('L’image fait plus de 5 Mo en WebP, même compressée.')
+    expect(handler.create).not.toHaveBeenCalled()
   })
 
   it('affiche un message d’erreur lisible sur une HandlerError', async () => {

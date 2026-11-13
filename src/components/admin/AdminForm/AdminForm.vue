@@ -8,6 +8,7 @@ import FileUpload from '../../ui/FileUpload/FileUpload.vue'
 import Checkbox from '../../ui/Checkbox/Checkbox.vue'
 import DatePicker from '../../ui/DatePicker/DatePicker.vue'
 import { photoUrl } from '../../../lib/photo/photo.ts'
+import { IMAGE_INPUT_TYPES, ImageError, MAX_ORIGINAL_BYTES, MAX_WEBP_BYTES, toWebp } from '../../../lib/image/to-webp.ts'
 import type { AdminFormField, AdminFormHandler } from '../../../types/ui/admin-form.ts'
 
 const props = defineProps<{
@@ -19,6 +20,7 @@ const props = defineProps<{
 
 const emit = defineEmits<{ saved: [item: T] }>()
 
+const MAX_WEBP_MO = MAX_WEBP_BYTES / 1024 / 1024
 const ERROR_MESSAGE = 'L’enregistrement a échoué. Réessaie plus tard.'
 
 const values = reactive<Record<string, any>>({})
@@ -75,20 +77,23 @@ function slugify(text: string) {
     .replace(/^-+|-+$/g, '')
 }
 
+// Tout ce qui part dans Storage est du WebP : l'extension est donc toujours « .webp »,
+// quel que soit le nom du fichier d'origine.
 function storageFileName(file: File) {
   const dot = file.name.lastIndexOf('.')
   const base = dot > 0 ? file.name.slice(0, dot) : file.name
-  const ext = dot > 0 ? file.name.slice(dot + 1).toLowerCase().replace(/[^a-z0-9]/g, '') : ''
   const label = String(values.nom ?? values.titre ?? '')
   const slug = slugify(label) || slugify(base) || 'image'
   const id = crypto.randomUUID().slice(0, 8)
-  return `${slug}-${id}${ext ? `.${ext}` : ''}`
+  return `${slug}-${id}.webp`
 }
 
-// Envoie le fichier dans le bucket « images »
-async function upload(field: AdminFormField<T>, file: File) {
+// Convertit l'image en WebP puis l'envoie dans le bucket « images »
+async function upload(field: AdminFormField<T>, original: File) {
+  const file = await toWebp(original)
+  if (file.type !== 'image/webp') throw new Error('Seules les images WebP sont envoyées dans Storage.')
   const path = `${field.folder}/${storageFileName(file)}`
-  const { error } = await supabase.storage.from('images').upload(path, file)
+  const { error } = await supabase.storage.from('images').upload(path, file, { contentType: file.type })
   if (error) throw error
   return `/${path}`
 }
@@ -113,8 +118,9 @@ async function submit() {
 
     toast.success('Enregistré.')
     emit('saved', item)
-  } catch {
-    toast.error(ERROR_MESSAGE)
+  } catch (error) {
+    // Une image refusée (trop lourde, mauvais format) s'explique à l'utilisateur ; le reste reste générique.
+    toast.error(error instanceof ImageError ? error.message : ERROR_MESSAGE)
   } finally {
     submitting.value = false
   }
@@ -151,6 +157,9 @@ async function submit() {
         v-else-if="field.type === 'image'"
         :id="`admin-${field.key}`"
         v-model="files[field.key]"
+        :accept="IMAGE_INPUT_TYPES.join(',')"
+        :max-size="MAX_ORIGINAL_BYTES"
+        :hint="`Converti en WebP · ${MAX_WEBP_MO} Mo max après conversion`"
         :current-url="values[field.key] ? photoUrl(String(values[field.key])) : undefined"
       />
 

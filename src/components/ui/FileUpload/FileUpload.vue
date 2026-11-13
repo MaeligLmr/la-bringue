@@ -13,6 +13,8 @@ const props = withDefaults(
     accept?: string
     /** Taille max en octets. */
     maxSize?: number
+    /** Remplace la consigne sous le titre (ex : une limite qui ne porte pas sur l’original). */
+    hint?: string
     disabled?: boolean
   }>(),
   { accept: 'image/*', maxSize: 5 * 1024 * 1024, disabled: false }
@@ -110,7 +112,7 @@ function browse() {
         </template>
         <template v-else>
           <strong>{{ currentUrl ? 'Remplacer l’image' : 'Glisse un fichier ici' }}</strong>
-          <span class="file-upload__hint">ou parcours tes fichiers · max {{ formatSize(maxSize) }}</span>
+          <span class="file-upload__hint">{{ hint ?? `ou parcours tes fichiers · max ${formatSize(maxSize)}` }}</span>
         </template>
       </div>
 
