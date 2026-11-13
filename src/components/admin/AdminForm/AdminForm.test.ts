@@ -114,7 +114,7 @@ describe('AdminForm', () => {
     const handler = makeHandler()
     const wrapper = mountForm(handler)
     const input = wrapper.find('#admin-photo')
-    const file = new File(['x'], 'angele.webp', { type: 'image/webp' })
+    const file = new File(['x'], 'IMG_4032.WEBP', { type: 'image/webp' })
     Object.defineProperty(input.element, 'files', { value: [file] })
 
     await wrapper.find('#admin-nom').setValue('Angèle')
@@ -123,7 +123,7 @@ describe('AdminForm', () => {
     await flushPromises()
 
     const path = upload.mock.calls[0][0] as string
-    expect(path).toMatch(/^programmation\/\d+-angele\.webp$/)
+    expect(path).toMatch(/^programmation\/angele-[0-9a-f]{8}\.webp$/)
     expect(handler.create.mock.calls[0][0].photo).toBe(`/${path}`)
   })
 

@@ -4,6 +4,8 @@ import { toast } from 'vue-sonner'
 import { supabase } from '../../../supabase.js'
 import Button from '../../ui/Button/Button.vue'
 import Select from '../../ui/Select/Select.vue'
+import FileUpload from '../../ui/FileUpload/FileUpload.vue'
+import { photoUrl } from '../../../lib/photo/photo.ts'
 import type { AdminFormField, AdminFormHandler } from '../../../types/ui/admin-form.ts'
 
 const props = defineProps<{
@@ -60,13 +62,30 @@ function validate() {
   return props.fields.every((field) => !errors[field.key])
 }
 
-function onFileChange(key: string, event: Event) {
-  files[key] = (event.target as HTMLInputElement).files?.[0]
+// Nom de fichier parlant pour le SEO, tiré du nom (ou titre) de l'élément, sinon du fichier
+// (« Angèle » → « angele-3f2a9c1b.webp »), avec un suffixe aléatoire pour garantir l'unicité.
+function slugify(text: string) {
+  return text
+    .normalize('NFD')
+    .replace(/[̀-ͯ]/g, '')
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/^-+|-+$/g, '')
+}
+
+function storageFileName(file: File) {
+  const dot = file.name.lastIndexOf('.')
+  const base = dot > 0 ? file.name.slice(0, dot) : file.name
+  const ext = dot > 0 ? file.name.slice(dot + 1).toLowerCase().replace(/[^a-z0-9]/g, '') : ''
+  const label = String(values.nom ?? values.titre ?? '')
+  const slug = slugify(label) || slugify(base) || 'image'
+  const id = crypto.randomUUID().slice(0, 8)
+  return `${slug}-${id}${ext ? `.${ext}` : ''}`
 }
 
 // Envoie le fichier dans le bucket « images »
 async function upload(field: AdminFormField<T>, file: File) {
-  const path = `${field.folder}/${Date.now()}-${file.name}`
+  const path = `${field.folder}/${storageFileName(file)}`
   const { error } = await supabase.storage.from('images').upload(path, file)
   if (error) throw error
   return `/${path}`
@@ -122,12 +141,11 @@ async function submit() {
         type="checkbox"
       />
 
-      <input
+      <FileUpload
         v-else-if="field.type === 'image'"
         :id="`admin-${field.key}`"
-        type="file"
-        accept="image/*"
-        @change="onFileChange(field.key, $event)"
+        v-model="files[field.key]"
+        :current-url="values[field.key] ? photoUrl(String(values[field.key])) : undefined"
       />
 
       <input v-else :id="`admin-${field.key}`" v-model="values[field.key]" :type="field.type" />
