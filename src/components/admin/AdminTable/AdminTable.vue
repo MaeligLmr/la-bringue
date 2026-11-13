@@ -109,9 +109,11 @@ function cellValue(column: AdminTableColumn<T>, item: T) {
       <tbody>
         <tr v-for="item in filteredItems" :key="String(item[rowKey])">
           <td v-for="column in columns" :key="column.key">{{ cellValue(column, item) }}</td>
-          <td class="admin-table__actions">
-            <Button color="secondary" variant="ghost" @click="emit('edit', item)">Modifier</Button>
-            <Button color="danger" variant="ghost" @click="askDelete(item)">Supprimer</Button>
+          <td>
+            <div class="admin-table__actions">
+              <Button color="secondary" variant="ghost" @click="emit('edit', item)">Modifier</Button>
+              <Button color="danger" variant="ghost" @click="askDelete(item)">Supprimer</Button>
+            </div>
           </td>
         </tr>
       </tbody>
