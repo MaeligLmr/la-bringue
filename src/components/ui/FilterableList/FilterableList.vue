@@ -1,8 +1,8 @@
 <script setup lang="ts" generic="T extends FilterableItem">
 import { computed, ref } from 'vue'
 import Button from '../Button/Button.vue'
-import Icon from '../Icon/Icon.vue'
 import Loader from '../Loader/Loader.vue'
+import SearchBar from '../SearchBar/SearchBar.vue'
 import { useInfiniteScroll } from '../../../composables/useInfiniteScroll/useInfiniteScroll'
 import { provideListSearch } from '../../../composables/useListSearch/useListSearch'
 import type { FilterConfig, FilterValues, FilterableItem } from '../../../types/ui/filterable-list.ts'
@@ -131,25 +131,7 @@ function onFilterClick(event: MouseEvent) {
 <template>
   <section class="filterable-list">
     <div class="filterable-list__toolbar">
-      <label class="filterable-list__search">
-        <Icon name="search" size="small" />
-        <input
-          v-model="search"
-          type="search"
-          class="filterable-list__search-input"
-          :placeholder="searchPlaceholder"
-          :aria-label="searchPlaceholder"
-        />
-        <button
-          v-if="search"
-          type="button"
-          class="filterable-list__search-clear"
-          aria-label="Effacer la recherche"
-          @click="search = ''"
-        >
-          <Icon name="plus" size="small" />
-        </button>
-      </label>
+      <SearchBar v-model="search" :placeholder="searchPlaceholder" />
     </div>
 
     <div
@@ -228,36 +210,6 @@ function onFilterClick(event: MouseEvent) {
   gap: var(--space-2);
 }
 
-.filterable-list__search {
-  display: flex;
-  align-items: center;
-  gap: var(--button-medium-with-text-gap);
-  flex: 1 1 auto;
-  box-sizing: border-box;
-  padding: var(--button-medium-with-text-padding-y) var(--button-medium-with-text-padding-x);
-  border: 1px solid var(--select-trigger-border);
-  border-radius: var(--radius-medium);
-  color: var(--select-trigger-text);
-}
-
-.filterable-list__search:focus-within {
-  box-shadow: 0 0 0 3px var(--select-trigger-focus-ring);
-}
-
-.filterable-list__search-input {
-  flex: 1;
-  min-width: 0;
-  padding: 0;
-  border: none;
-  outline: none;
-  background: transparent;
-  color: inherit;
-  font-family: inherit;
-  font-size: var(--font-size-button-medium);
-  font-weight: var(--font-weight-medium);
-  line-height: 1;
-}
-
 /* Une ligne qui défile horizontalement, fondue sur le bord droit, plutôt
    qu'un retour à la ligne — sur tous les écrans, pour que les filtres en
    bout de ligne restent atteignables sur un petit écran desktop. */
@@ -324,23 +276,5 @@ function onFilterClick(event: MouseEvent) {
   gap: var(--space-4);
   padding: var(--space-8) 0;
   text-align: center;
-}
-
-/* Croix pour vider la recherche (celle, native, du champ est masquée). */
-.filterable-list__search-input::-webkit-search-cancel-button {
-  display: none;
-}
-
-.filterable-list__search-clear {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  padding: 0;
-  border: none;
-  background: transparent;
-  color: inherit;
-  cursor: pointer;
-  /* Icône « plus » tournée : c'est une croix. */
-  transform: rotate(45deg);
 }
 </style>

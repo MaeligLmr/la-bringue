@@ -147,16 +147,16 @@ describe('FilterableList', () => {
 
   it('affiche une croix dans le champ dès qu’une recherche est saisie, et elle la vide', async () => {
     const wrapper = mountList()
-    expect(wrapper.find('.filterable-list__search-clear').exists()).toBe(false)
+    expect(wrapper.find('.search-bar__clear').exists()).toBe(false)
 
     const input = wrapper.find('input[type="search"]')
     await input.setValue('aya')
     expect(displayedNames(wrapper)).toEqual(['Aya Nakamura'])
 
-    await wrapper.find('.filterable-list__search-clear').trigger('click')
+    await wrapper.find('.search-bar__clear').trigger('click')
     expect((input.element as HTMLInputElement).value).toBe('')
     expect(displayedNames(wrapper)).toEqual(['Beyoncé', 'Aya Nakamura', 'Angèle'])
-    expect(wrapper.find('.filterable-list__search-clear').exists()).toBe(false)
+    expect(wrapper.find('.search-bar__clear').exists()).toBe(false)
 
     wrapper.unmount()
   })

@@ -55,6 +55,9 @@ const FILENAME_BY_ICON: Record<IconName, string> = {
   // the rotation produces a perfect X with no separate SVG needed.
   close: 'plus.svg',
   'star-separation': 'star-separation.svg',
+  calendar: 'calendar.svg',
+  clock: 'clock.svg',
+  trash: 'trash.svg',
 }
 
 const ROTATE_45: ReadonlySet<IconName> = new Set(['close'])

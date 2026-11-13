@@ -5,6 +5,8 @@ import { supabase } from '../../../supabase.js'
 import Button from '../../ui/Button/Button.vue'
 import Select from '../../ui/Select/Select.vue'
 import FileUpload from '../../ui/FileUpload/FileUpload.vue'
+import Checkbox from '../../ui/Checkbox/Checkbox.vue'
+import DatePicker from '../../ui/DatePicker/DatePicker.vue'
 import { photoUrl } from '../../../lib/photo/photo.ts'
 import type { AdminFormField, AdminFormHandler } from '../../../types/ui/admin-form.ts'
 
@@ -134,11 +136,15 @@ async function submit() {
         :aria-label="field.label"
       />
 
-      <input
-        v-else-if="field.type === 'checkbox'"
+      <Checkbox v-else-if="field.type === 'checkbox'" :id="`admin-${field.key}`" v-model="values[field.key]" />
+
+      <DatePicker
+        v-else-if="field.type === 'date' || field.type === 'time' || field.type === 'datetime'"
         :id="`admin-${field.key}`"
         v-model="values[field.key]"
-        type="checkbox"
+        :mode="field.type"
+        :aria-label="field.label"
+        :clearable="!field.required"
       />
 
       <FileUpload
@@ -181,7 +187,7 @@ async function submit() {
   color: var(--text-h);
 }
 
-.admin-form__field input:not([type='checkbox']):not([type='file']),
+.admin-form__field input,
 .admin-form__field textarea {
   width: 100%;
   box-sizing: border-box;
@@ -191,10 +197,6 @@ async function submit() {
   background: var(--bg);
   color: var(--text-h);
   font: inherit;
-}
-
-.admin-form__field input[type='checkbox'] {
-  align-self: flex-start;
 }
 
 .admin-form__error {

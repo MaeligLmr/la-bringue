@@ -100,15 +100,15 @@ describe('Select', () => {
     wrapper.unmount()
   })
 
-  it('pointe la taille (padding/police) vers les tokens Button correspondants', () => {
+  it('applique la classe de taille (les valeurs viennent des tokens du thème)', () => {
     const wrapper = mount(Select, {
       props: { modelValue: 'system', options: OPTIONS, size: 'large' },
       attachTo: document.body,
     })
 
-    const style = wrapper.attributes('style') ?? ''
-    expect(style).toContain('var(--button-large-with-text-padding-x)')
-    expect(style).toContain('var(--font-size-button-large)')
+    expect(wrapper.classes()).toContain('select--large')
+    // Plus de style inline : le CSS lit directement les tokens de theme.css.
+    expect(wrapper.attributes('style')).toBeUndefined()
 
     wrapper.unmount()
   })

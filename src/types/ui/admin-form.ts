@@ -1,6 +1,6 @@
 import type { SelectOption } from './select'
 
-export type AdminFieldType = 'text' | 'textarea' | 'date' | 'time' | 'select' | 'checkbox' | 'image'
+export type AdminFieldType = 'text' | 'textarea' | 'date' | 'time' | 'datetime' | 'select' | 'checkbox' | 'image'
 
 export interface AdminFormField<T> {
   key: keyof T & string

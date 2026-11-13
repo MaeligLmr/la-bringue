@@ -2,6 +2,7 @@
 import { computed, onMounted, ref } from 'vue'
 import { toast } from 'vue-sonner'
 import AdminLinks from '../AdminLinks/AdminLinks.vue'
+import Checkbox from '../../ui/Checkbox/Checkbox.vue'
 import { artisteHandler } from '../../../handlers/artiste'
 import type { Artiste } from '../../../types/database/artiste'
 import type { LineupEntry, LinkEntry } from '../../../lib/links/links'
@@ -36,10 +37,6 @@ function resetOptions() {
   newAnnoncee.value = true
   newFeaturing.value = false
 }
-
-function checked(event: Event) {
-  return (event.target as HTMLInputElement).checked
-}
 </script>
 
 <template>
@@ -55,25 +52,13 @@ function checked(event: Event) {
     @added="resetOptions"
   >
     <template #entry="{ entry, update }">
-      <label>
-        <input type="checkbox" :checked="entry.artiste_annonce" @change="update({ artiste_annonce: checked($event) })" />
-        Annoncée
-      </label>
-      <label>
-        <input type="checkbox" :checked="entry.featuring" @change="update({ featuring: checked($event) })" />
-        Featuring
-      </label>
+      <Checkbox :model-value="entry.artiste_annonce" @update:model-value="update({ artiste_annonce: $event })">Annoncée</Checkbox>
+      <Checkbox :model-value="entry.featuring" @update:model-value="update({ featuring: $event })">Featuring</Checkbox>
     </template>
 
     <template #add-options>
-      <label>
-        <input v-model="newAnnoncee" type="checkbox" />
-        Annoncée
-      </label>
-      <label>
-        <input v-model="newFeaturing" type="checkbox" />
-        Featuring
-      </label>
+      <Checkbox v-model="newAnnoncee">Annoncée</Checkbox>
+      <Checkbox v-model="newFeaturing">Featuring</Checkbox>
     </template>
   </AdminLinks>
 </template>
