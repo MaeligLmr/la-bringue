@@ -171,4 +171,107 @@ describe('ProfileView', () => {
 
     wrapper.unmount()
   })
+
+  describe('photo de profil', () => {
+    const profil = { getPp: vi.fn(), getPpUrl: vi.fn(), changePp: vi.fn() }
+
+    beforeEach(() => {
+      profil.getPp.mockReset().mockResolvedValue(null)
+      profil.getPpUrl.mockReset().mockResolvedValue('https://signed/pp')
+      profil.changePp.mockReset().mockResolvedValue('1/new.webp')
+      vi.doMock('../../handlers/profil', () => ({ profilHandler: profil }))
+      vi.spyOn(console, 'error').mockImplementation(() => {})
+    })
+
+    async function choosePhoto(wrapper: Awaited<ReturnType<typeof mountProfileView>>['wrapper']) {
+      const file = new File(['x'], 'moi.jpg', { type: 'image/jpeg' })
+      const input = wrapper.find('#profile-photo')
+      Object.defineProperty(input.element, 'files', { value: [file] })
+      await input.trigger('change')
+      return file
+    }
+
+    it('affiche la photo actuelle via son URL signée', async () => {
+      profil.getPp.mockResolvedValue('1/old.webp')
+      mockSupabase(LOGGED_IN_SESSION)
+      const { wrapper } = await mountProfileView()
+      await vi.waitFor(() => expect(wrapper.find('.file-upload__preview').exists()).toBe(true))
+
+      expect(profil.getPp).toHaveBeenCalledWith('1')
+      expect(profil.getPpUrl).toHaveBeenCalledWith('1/old.webp')
+      expect(wrapper.find('.file-upload__preview').attributes('src')).toBe('https://signed/pp')
+
+      wrapper.unmount()
+    })
+
+    it('reste utilisable si la photo ne se charge pas', async () => {
+      profil.getPp.mockRejectedValue(new Error('boom'))
+      mockSupabase(LOGGED_IN_SESSION)
+      const { wrapper } = await mountProfileView()
+
+      expect((wrapper.find('#profile-first-name').element as HTMLInputElement).value).toBe('Alice')
+      expect(wrapper.find('.file-upload__preview').exists()).toBe(false)
+
+      wrapper.unmount()
+    })
+
+    it('envoie la photo choisie (convertie en WebP par le handler) puis enregistre le profil', async () => {
+      profil.getPp.mockResolvedValue('1/old.webp')
+      mockSupabase(LOGGED_IN_SESSION)
+      const { wrapper } = await mountProfileView()
+      await vi.waitFor(() => expect(profil.getPpUrl).toHaveBeenCalled())
+      const file = await choosePhoto(wrapper)
+
+      await wrapper.find('.profile__form').trigger('submit')
+
+      await vi.waitFor(() => expect(toast.success).toHaveBeenCalledWith('Profil mis à jour.'))
+      expect(profil.changePp).toHaveBeenCalledWith('1', file, '1/old.webp')
+      expect(updateUser).toHaveBeenCalled()
+      expect(profil.getPpUrl).toHaveBeenLastCalledWith('1/new.webp')
+
+      wrapper.unmount()
+    })
+
+    it('n’envoie rien quand aucune photo n’est choisie', async () => {
+      mockSupabase(LOGGED_IN_SESSION)
+      const { wrapper } = await mountProfileView()
+
+      await wrapper.find('.profile__form').trigger('submit')
+
+      await vi.waitFor(() => expect(toast.success).toHaveBeenCalled())
+      expect(profil.changePp).not.toHaveBeenCalled()
+
+      wrapper.unmount()
+    })
+
+    it('affiche le message précis d’une image refusée et n’enregistre pas le profil', async () => {
+      const { ImageError } = await import('../../lib/image/to-webp')
+      profil.changePp.mockRejectedValue(new ImageError('L’image fait plus de 1 Mo en WebP.'))
+      mockSupabase(LOGGED_IN_SESSION)
+      const { wrapper } = await mountProfileView()
+      await choosePhoto(wrapper)
+
+      await wrapper.find('.profile__form').trigger('submit')
+
+      await vi.waitFor(() => expect(toast.error).toHaveBeenCalledWith('L’image fait plus de 1 Mo en WebP.'))
+      expect(updateUser).not.toHaveBeenCalled()
+      expect(toast.success).not.toHaveBeenCalled()
+
+      wrapper.unmount()
+    })
+
+    it('affiche un message générique si l’envoi de la photo échoue', async () => {
+      profil.changePp.mockRejectedValue(new Error('denied'))
+      mockSupabase(LOGGED_IN_SESSION)
+      const { wrapper } = await mountProfileView()
+      await choosePhoto(wrapper)
+
+      await wrapper.find('.profile__form').trigger('submit')
+
+      await vi.waitFor(() => expect(toast.error).toHaveBeenCalledWith('La photo n’a pas pu être envoyée. Réessaie plus tard.'))
+      expect(updateUser).not.toHaveBeenCalled()
+
+      wrapper.unmount()
+    })
+  })
 })
