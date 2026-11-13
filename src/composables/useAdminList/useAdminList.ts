@@ -1,26 +1,27 @@
-import { onMounted, ref, type Ref } from 'vue'
+import { ref } from 'vue'
 import { toast } from 'vue-sonner'
+import type { Page } from '../../handlers/crud'
+import { usePaginatedList } from '../usePaginatedList/usePaginatedList'
 
 export const REMOVE_ERROR_MESSAGE = 'La suppression a échoué. Réessaie plus tard.'
 
+// Liste du back-office : lue page par page côté serveur (recherche comprise, avec
+// un délai après la frappe), la suite se charge au défilement (loadMore). Une
+// suppression retire la ligne localement, sans tout recharger.
 export function useAdminList<T>(options: {
-  load: () => Promise<T[]>
+  // Lit une page : `offset` = nombre de lignes déjà chargées, `search` = recherche en cours.
+  fetchPage: (offset: number, search: string) => Promise<Page<T>>
   remove: (item: T) => Promise<void>
   idOf: (item: T) => number
   loadError: string
   removed: (item: T) => string
 }) {
-  const items = ref<T[]>([]) as Ref<T[]>
-  const loading = ref(true)
+  const search = ref('')
 
-  onMounted(async () => {
-    try {
-      items.value = await options.load()
-    } catch {
-      toast.error(options.loadError)
-    } finally {
-      loading.value = false
-    }
+  const { items, hasMore, loading, failed, loadMore } = usePaginatedList<T>({
+    fetchPage: (offset, query) => options.fetchPage(offset, query.search),
+    search,
+    onError: () => toast.error(options.loadError),
   })
 
   async function remove(item: T) {
@@ -33,9 +34,5 @@ export function useAdminList<T>(options: {
     }
   }
 
-  return { items, loading, remove }
-}
-
-export function byNom<T extends { nom: string | null }>(rows: T[]) {
-  return [...rows].sort((a, b) => (a.nom ?? '').localeCompare(b.nom ?? ''))
+  return { items, search, hasMore, loading, failed, loadMore, remove }
 }

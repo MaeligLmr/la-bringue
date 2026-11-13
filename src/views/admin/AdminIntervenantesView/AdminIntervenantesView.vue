@@ -2,7 +2,8 @@
 import { useRouter } from 'vue-router'
 import AdminPage from '../../../components/admin/AdminPage/AdminPage.vue'
 import AdminTable from '../../../components/admin/AdminTable/AdminTable.vue'
-import { byNom, useAdminList } from '../../../composables/useAdminList/useAdminList'
+import { useAdminList } from '../../../composables/useAdminList/useAdminList'
+import { ADMIN_PAGE_SIZE } from '../../../handlers/crud'
 import { conferenciereHandler } from '../../../handlers/conferenciere'
 import { participationHandler } from '../../../handlers/participation'
 import type { Conferenciere } from '../../../types/database/conferenciere'
@@ -15,8 +16,8 @@ const COLUMNS: AdminTableColumn<Conferenciere>[] = [
   { key: 'description', label: 'Description', format: (value) => (value ? String(value) : '—') },
 ]
 
-const { items: intervenantes, loading, remove } = useAdminList({
-  load: async () => byNom(await conferenciereHandler.getAll()),
+const { items: intervenantes, search, hasMore, loading, failed, loadMore, remove } = useAdminList({
+  fetchPage: (offset, search) => conferenciereHandler.getPage({ offset, search, pageSize: ADMIN_PAGE_SIZE }),
   remove: (intervenante: Conferenciere) => conferenciereHandler.remove(intervenante.id_conferenciere),
   idOf: (intervenante) => intervenante.id_conferenciere,
   loadError: 'Impossible de charger les intervenantes.',
@@ -39,10 +40,14 @@ async function deleteImpact(intervenante: Conferenciere) {
       :items="intervenantes"
       :columns="COLUMNS"
       row-key="id_conferenciere"
+      v-model:search="search"
       :loading="loading"
+      :has-more="hasMore"
+      :failed="failed"
       :delete-impact="deleteImpact"
       @add="router.push({ name: 'admin-intervenante-nouvelle' })"
       @edit="(intervenante) => router.push({ name: 'admin-intervenante', params: { id: intervenante.id_conferenciere } })"
+      @load-more="loadMore"
       @delete="remove"
     />
   </AdminPage>

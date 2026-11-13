@@ -1,8 +1,12 @@
 import type { Conferenciere } from '../types/database/conferenciere'
-import { createCrudHandler } from './crud'
+import { createCrudHandler, createNamePage } from './crud'
 
-export const conferenciereHandler = createCrudHandler<Conferenciere, 'id_conferenciere'>(
-  'Conferenciere',
-  'id_conferenciere',
-  'id_conferenciere, nom, description, photo'
-)
+const TABLE = 'Conferenciere'
+const COLUMNS = 'id_conferenciere, nom, description, photo'
+
+export const conferenciereHandler = {
+  ...createCrudHandler<Conferenciere, 'id_conferenciere'>(TABLE, 'id_conferenciere', COLUMNS),
+
+  // Une page de la liste, par nom ; `search` filtre sur le nom (back-office).
+  getPage: createNamePage<Conferenciere>(TABLE, 'id_conferenciere', COLUMNS),
+}

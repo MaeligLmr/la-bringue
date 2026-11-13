@@ -2,8 +2,9 @@
 import { useRouter } from 'vue-router'
 import AdminPage from '../../../components/admin/AdminPage/AdminPage.vue'
 import AdminTable from '../../../components/admin/AdminTable/AdminTable.vue'
-import { byNom, useAdminList } from '../../../composables/useAdminList/useAdminList'
+import { useAdminList } from '../../../composables/useAdminList/useAdminList'
 import { artisteHandler } from '../../../handlers/artiste'
+import { ADMIN_PAGE_SIZE } from '../../../handlers/crud'
 import { concertArtisteHandler } from '../../../handlers/concert-artiste'
 import { likeHandler } from '../../../handlers/like'
 import type { Artiste } from '../../../types/database/artiste'
@@ -16,8 +17,8 @@ const COLUMNS: AdminTableColumn<Artiste>[] = [
   { key: 'categorie', label: 'Catégorie', format: (value) => (value ? String(value) : '—') },
 ]
 
-const { items: artistes, loading, remove } = useAdminList({
-  load: async () => byNom(await artisteHandler.getAll()),
+const { items: artistes, search, hasMore, loading, failed, loadMore, remove } = useAdminList({
+  fetchPage: (offset, search) => artisteHandler.getPage({ offset, search, pageSize: ADMIN_PAGE_SIZE }),
   remove: (artiste: Artiste) => artisteHandler.remove(artiste.id_artiste),
   idOf: (artiste) => artiste.id_artiste,
   loadError: 'Impossible de charger les artistes.',
@@ -44,10 +45,14 @@ async function deleteImpact(artiste: Artiste) {
       :items="artistes"
       :columns="COLUMNS"
       row-key="id_artiste"
+      v-model:search="search"
       :loading="loading"
+      :has-more="hasMore"
+      :failed="failed"
       :delete-impact="deleteImpact"
       @add="router.push({ name: 'admin-artiste-nouvelle' })"
       @edit="(artiste) => router.push({ name: 'admin-artiste', params: { id: artiste.id_artiste } })"
+      @load-more="loadMore"
       @delete="remove"
     />
   </AdminPage>

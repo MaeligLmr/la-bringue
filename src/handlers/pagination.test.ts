@@ -73,6 +73,47 @@ describe('pagination des listes', () => {
     expect(page).toEqual({ rows: rows(PAGE_SIZE - 1), hasMore: false })
   })
 
+  it('une taille de page personnalisée est respectée (listes du back-office)', async () => {
+    const { chain } = mockSupabase(rows(21))
+    const { exposantHandler } = await import('./exposant')
+
+    const page = await exposantHandler.getPage({ offset: 20, pageSize: 20 })
+
+    expect(chain.range).toHaveBeenCalledWith(20, 40)
+    expect(page.rows).toHaveLength(20)
+    expect(page.hasMore).toBe(true)
+  })
+
+  it('artisteHandler.getPage trie par nom, cherche dans le nom et échappe la saisie', async () => {
+    const { from, chain } = mockSupabase(rows(PAGE_SIZE + 1))
+    const { artisteHandler } = await import('./artiste')
+
+    const page = await artisteHandler.getPage({ offset: PAGE_SIZE, search: '50%_off' })
+
+    expect(from).toHaveBeenCalledWith('Artiste')
+    expect(chain.select).toHaveBeenCalledWith('id_artiste, nom, photo, categorie, description')
+    expect(chain.ilike).toHaveBeenCalledWith('nom', '%50\\%\\_off%')
+    expect(chain.order).toHaveBeenNthCalledWith(1, 'nom')
+    expect(chain.order).toHaveBeenNthCalledWith(2, 'id_artiste')
+    expect(chain.range).toHaveBeenCalledWith(PAGE_SIZE, 2 * PAGE_SIZE)
+    expect(page.rows).toHaveLength(PAGE_SIZE)
+    expect(page.hasMore).toBe(true)
+  })
+
+  it('conferenciereHandler.getPage sans recherche ne filtre pas, et respecte pageSize', async () => {
+    const { from, chain } = mockSupabase(rows(3))
+    const { conferenciereHandler } = await import('./conferenciere')
+
+    const page = await conferenciereHandler.getPage({ offset: 0, pageSize: 20 })
+
+    expect(from).toHaveBeenCalledWith('Conferenciere')
+    expect(chain.ilike).not.toHaveBeenCalled()
+    expect(chain.order).toHaveBeenNthCalledWith(1, 'nom')
+    expect(chain.order).toHaveBeenNthCalledWith(2, 'id_conferenciere')
+    expect(chain.range).toHaveBeenCalledWith(0, 20)
+    expect(page).toEqual({ rows: rows(3), hasMore: false })
+  })
+
   it('actualiteHandler.getPage trie de la plus récente à la plus ancienne et cherche dans le titre', async () => {
     const { from, chain } = mockSupabase()
     const { actualiteHandler } = await import('./actualite')

@@ -3,7 +3,7 @@ import type { Artiste } from '../types/database/artiste'
 import type { Concert } from '../types/database/concert'
 import type { ConcertArtiste } from '../types/database/concert-artiste'
 import type { Scene } from '../types/database/scene'
-import { createCrudHandler, unwrap } from './crud'
+import { createCrudHandler, createNamePage, unwrap } from './crud'
 
 const TABLE = 'Artiste'
 
@@ -16,8 +16,13 @@ export interface ArtisteDetail extends Artiste {
   ConcertArtiste: (ConcertArtiste & { Concert: (Concert & { Scene: Scene | null }) | null })[]
 }
 
+const COLUMNS = 'id_artiste, nom, photo, categorie, description'
+
 export const artisteHandler = {
-  ...createCrudHandler<Artiste, 'id_artiste'>(TABLE, 'id_artiste', 'id_artiste, nom, photo, categorie, description'),
+  ...createCrudHandler<Artiste, 'id_artiste'>(TABLE, 'id_artiste', COLUMNS),
+
+  // Une page de la liste, par nom ; `search` filtre sur le nom (back-office).
+  getPage: createNamePage<Artiste>(TABLE, 'id_artiste', COLUMNS),
 
   // Artiste + ses concerts (avec leur scène), pour la fiche détail.
   async getDetailById(id: number): Promise<ArtisteDetail | null> {
