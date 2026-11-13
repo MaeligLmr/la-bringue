@@ -39,6 +39,10 @@ const emit = defineEmits<{ 'update:modelValue': [value: string] }>()
 const isOpen = ref(false)
 const activeIndex = ref(-1)
 const rootEl = ref<HTMLElement | null>(null)
+const listboxEl = ref<HTMLElement | null>(null)
+// Le listbox est téléporté dans <body> (pas rogné par un overflow parent, ex: modale ou
+// tableau admin) : on le positionne donc en `fixed` d'après le bouton.
+const listboxStyle = ref<Record<string, string>>({})
 // One id per instance so aria-controls/id stay unique with several <Select> on a page.
 const listboxId = `select-listbox-${Math.random().toString(36).slice(2, 9)}`
 
@@ -46,8 +50,32 @@ const selectedOption = computed(
   () => props.options.find((option) => option.value === props.modelValue) ?? null
 )
 
+const VIEWPORT_MARGIN = 8
+const GAP = 4
+const MAX_LISTBOX_HEIGHT = 320
+
+function updatePosition() {
+  const rect = rootEl.value?.getBoundingClientRect()
+  if (!rect) return
+  const below = window.innerHeight - rect.bottom - GAP - VIEWPORT_MARGIN
+  const above = rect.top - GAP - VIEWPORT_MARGIN
+  // S'ouvre vers le haut seulement s'il y a nettement plus de place qu'en dessous.
+  const openUp = below < Math.min(MAX_LISTBOX_HEIGHT, 160) && above > below
+  const maxHeight = Math.max(80, Math.min(MAX_LISTBOX_HEIGHT, openUp ? above : below))
+  listboxStyle.value = {
+    ...(openUp
+      ? { bottom: `${window.innerHeight - rect.top + GAP}px` }
+      : { top: `${rect.bottom + GAP}px` }),
+    left: `${rect.left}px`,
+    minWidth: `${rect.width}px`,
+    maxWidth: `calc(100vw - ${2 * VIEWPORT_MARGIN}px)`,
+    maxHeight: `${maxHeight}px`,
+  }
+}
+
 function open() {
   if (props.disabled || props.options.length === 0) return
+  updatePosition()
   isOpen.value = true
   activeIndex.value = Math.max(
     0,
@@ -107,11 +135,25 @@ function onTriggerKeydown(event: KeyboardEvent) {
 }
 
 function onClickOutside(event: MouseEvent) {
-  if (rootEl.value && !rootEl.value.contains(event.target as Node)) close()
+  const target = event.target as Node
+  if (rootEl.value?.contains(target) || listboxEl.value?.contains(target)) return
+  close()
 }
 
-onMounted(() => document.addEventListener('click', onClickOutside))
-onBeforeUnmount(() => document.removeEventListener('click', onClickOutside))
+function onViewportChange() {
+  if (isOpen.value) updatePosition()
+}
+
+onMounted(() => {
+  document.addEventListener('click', onClickOutside)
+  window.addEventListener('resize', onViewportChange)
+  window.addEventListener('scroll', onViewportChange, true)
+})
+onBeforeUnmount(() => {
+  document.removeEventListener('click', onClickOutside)
+  window.removeEventListener('resize', onViewportChange)
+  window.removeEventListener('scroll', onViewportChange, true)
+})
 </script>
 
 <template>
@@ -136,7 +178,8 @@ onBeforeUnmount(() => document.removeEventListener('click', onClickOutside))
       <Icon name="chevron-down" size="small" class="select__arrow" />
     </button>
 
-    <ul v-if="isOpen" :id="listboxId" class="select__listbox" role="listbox">
+    <Teleport to="body">
+    <ul v-if="isOpen" :id="listboxId" ref="listboxEl" class="select__listbox" :style="listboxStyle" role="listbox">
       <li
         v-for="(option, index) in options"
         :key="option.value"
@@ -153,6 +196,7 @@ onBeforeUnmount(() => document.removeEventListener('click', onClickOutside))
         {{ option.label }}
       </li>
     </ul>
+    </Teleport>
   </div>
 </template>
 
@@ -234,11 +278,13 @@ onBeforeUnmount(() => document.removeEventListener('click', onClickOutside))
 }
 
 .select__listbox {
-  position: absolute;
-  z-index: 20;
-  top: calc(100% + var(--space-1));
-  left: 0;
-  min-width: 100%;
+  position: fixed;
+  z-index: 1000;
+  overflow-y: auto;
+  box-sizing: border-box;
+  /* Barre de défilement fine, qui reprend les couleurs du thème. */
+  scrollbar-width: thin;
+  scrollbar-color: var(--select-listbox-border) transparent;
   margin: 0;
   padding: var(--space-1);
   list-style: none;
@@ -246,6 +292,19 @@ onBeforeUnmount(() => document.removeEventListener('click', onClickOutside))
   border-radius: var(--radius-medium);
   background: var(--select-listbox-background);
   box-shadow: var(--shadow);
+}
+
+.select__listbox::-webkit-scrollbar {
+  width: 8px;
+}
+
+.select__listbox::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.select__listbox::-webkit-scrollbar-thumb {
+  border-radius: var(--radius-full);
+  background: var(--select-listbox-border);
 }
 
 .select__option {
