@@ -3,11 +3,13 @@ import { effectScope, nextTick, ref } from 'vue'
 
 const getPp = vi.fn()
 const getPpUrl = vi.fn()
-const user = ref<{ id: string } | null>(null)
+// État partagé au niveau du module : chaque test charge une copie neuve du module, avec
+// sa propre référence `user` (sinon les observateurs des copies précédentes réagiraient aussi).
+let user = ref<{ id: string } | null>(null)
 
-// État partagé au niveau du module : on le réinitialise à chaque test.
 async function load() {
   vi.resetModules()
+  user = ref<{ id: string } | null>(null)
   vi.doMock('../../handlers/profil', () => ({ profilHandler: { getPp, getPpUrl } }))
   vi.doMock('../useAuth/useAuth', () => ({ useAuth: () => ({ user }) }))
   const { useProfilePicture } = await import('./useProfilePicture')
@@ -21,7 +23,6 @@ beforeEach(() => {
   vi.useFakeTimers()
   getPp.mockReset().mockResolvedValue(null)
   getPpUrl.mockReset().mockImplementation(async (path: string) => `https://signed/${path}`)
-  user.value = null
   vi.spyOn(console, 'error').mockImplementation(() => {})
 })
 
