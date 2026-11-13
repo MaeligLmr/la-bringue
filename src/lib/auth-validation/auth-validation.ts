@@ -24,6 +24,10 @@ export function isValidUsername(value: string): boolean {
   return USERNAME_PATTERN.test(value)
 }
 
+export function clearErrors(errors: FieldErrors) {
+  for (const key of Object.keys(errors) as (keyof FieldErrors)[]) errors[key] = undefined
+}
+
 export interface FieldErrors {
   email?: string
   password?: string

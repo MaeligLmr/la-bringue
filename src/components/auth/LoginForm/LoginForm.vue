@@ -2,7 +2,7 @@
 import { reactive, ref } from 'vue'
 import { toast } from 'vue-sonner'
 import { supabase } from '../../../supabase.js'
-import { validateLoginFields, type FieldErrors } from '../../../lib/auth-validation/auth-validation'
+import { clearErrors, validateLoginFields, type FieldErrors } from '../../../lib/auth-validation/auth-validation'
 import { mapAuthError } from '../../../lib/auth-errors/auth-errors'
 import { withTimeout } from '../../../lib/with-timeout/with-timeout'
 import Button from '../../ui/Button/Button.vue'
@@ -27,8 +27,7 @@ defineExpose({ focusFirstField })
 async function handleSubmit() {
   if (isSubmitting.value) return
 
-  errors.email = undefined
-  errors.password = undefined
+  clearErrors(errors)
 
   const fieldErrors = validateLoginFields(email.value, password.value)
   if (fieldErrors.email || fieldErrors.password) {
@@ -62,8 +61,8 @@ async function handleSubmit() {
 
 <template>
   <form class="auth-form" novalidate @submit.prevent="handleSubmit">
-    <div class="auth-form__field">
-      <label for="login-email">Email <span class="auth-form__required" aria-hidden="true">*</span></label>
+    <div class="form-field">
+      <label for="login-email">Email <span class="form-field__required" aria-hidden="true">*</span></label>
       <input
         id="login-email"
         ref="emailInputEl"
@@ -74,13 +73,13 @@ async function handleSubmit() {
         :aria-invalid="Boolean(errors.email)"
         :aria-describedby="errors.email ? 'login-email-error' : undefined"
       />
-      <p v-if="errors.email" id="login-email-error" class="auth-form__error" role="alert">
+      <p v-if="errors.email" id="login-email-error" class="form-field__error" role="alert">
         {{ errors.email }}
       </p>
     </div>
 
-    <div class="auth-form__field">
-      <label for="login-password">Mot de passe <span class="auth-form__required" aria-hidden="true">*</span></label>
+    <div class="form-field">
+      <label for="login-password">Mot de passe <span class="form-field__required" aria-hidden="true">*</span></label>
       <PasswordInput
         id="login-password"
         ref="passwordInputEl"
@@ -90,7 +89,7 @@ async function handleSubmit() {
         :aria-invalid="Boolean(errors.password)"
         :aria-describedby="errors.password ? 'login-password-error' : undefined"
       />
-      <p v-if="errors.password" id="login-password-error" class="auth-form__error" role="alert">
+      <p v-if="errors.password" id="login-password-error" class="form-field__error" role="alert">
         {{ errors.password }}
       </p>
     </div>
@@ -122,41 +121,5 @@ async function handleSubmit() {
   display: flex;
   flex-direction: column;
   gap: var(--space-4);
-}
-
-.auth-form__field {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-1);
-}
-
-.auth-form__field label {
-  font-weight: var(--font-weight-medium);
-  color: var(--text-h);
-}
-
-.auth-form__required {
-  color: var(--alert-danger-text);
-}
-
-.auth-form__field input {
-  width: 100%;
-  box-sizing: border-box;
-  padding: var(--space-2);
-  border: 1px solid var(--border);
-  border-radius: var(--radius-small);
-  background: var(--bg);
-  color: var(--text-h);
-  font: inherit;
-}
-
-.auth-form__field input[aria-invalid='true'] {
-  border-color: var(--alert-danger-border);
-}
-
-.auth-form__error {
-  margin: 0;
-  color: var(--alert-danger-text);
-  font-size: 0.85em;
 }
 </style>

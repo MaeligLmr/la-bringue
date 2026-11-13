@@ -6,7 +6,7 @@ import { useAdminList } from '../../../composables/useAdminList/useAdminList'
 import { ADMIN_PAGE_SIZE } from '../../../handlers/crud'
 import { conferenceHandler, type ConferenceResume } from '../../../handlers/conference'
 import { likeHandler } from '../../../handlers/like'
-import { formatHeure, labelOf } from '../../../lib/cards/cards'
+import { formatHoraire, labelOf } from '../../../lib/cards/cards'
 import { JOURS } from '../../../types/ui/programmation'
 import type { AdminTableColumn } from '../../../types/ui/admin-table'
 
@@ -38,7 +38,7 @@ function toRow(conference: ConferenceResume): ConferenceRow {
     nom: conference.titre ?? 'Sans titre',
     intervenantes: noms.join(', ') || '—',
     jour: conference.jour ? labelOf(JOURS, conference.jour) : '—',
-    horaire: [formatHeure(conference.heure_debut), formatHeure(conference.heure_fin)].filter(Boolean).join(' – ') || '—',
+    horaire: formatHoraire(conference.heure_debut, conference.heure_fin) || '—',
     theme: conference.theme ?? '—',
   }
 }

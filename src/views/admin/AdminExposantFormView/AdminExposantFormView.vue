@@ -8,6 +8,7 @@ import { exposantHandler } from '../../../handlers/exposant'
 import type { Exposant } from '../../../types/database/exposant'
 import type { AdminFormField } from '../../../types/ui/admin-form'
 import type { SelectOption } from '../../../types/ui/select'
+import { toOptions } from '../../../lib/options/options'
 
 defineProps<{ id?: number }>()
 
@@ -19,9 +20,7 @@ const ready = ref(false)
 onMounted(async () => {
   try {
     const noms = await exposantHandler.getCategories()
-    categories.value = [...new Set(noms.filter(Boolean))]
-      .sort((a, b) => a.localeCompare(b))
-      .map((categorie) => ({ value: categorie, label: categorie }))
+    categories.value = toOptions(noms, { sorted: true })
   } catch {
     toast.error('Impossible de charger les catégories.')
   } finally {

@@ -5,7 +5,7 @@ import AdminTable from '../../../components/admin/AdminTable/AdminTable.vue'
 import { useAdminList } from '../../../composables/useAdminList/useAdminList'
 import { ADMIN_PAGE_SIZE } from '../../../handlers/crud'
 import { concertHandler, type ConcertDetail } from '../../../handlers/concert'
-import { formatHeure, labelOf } from '../../../lib/cards/cards'
+import { formatHoraire, labelOf } from '../../../lib/cards/cards'
 import { JOURS } from '../../../types/ui/programmation'
 import type { AdminTableColumn } from '../../../types/ui/admin-table'
 
@@ -32,7 +32,7 @@ function toRow(concert: ConcertDetail): ConcertRow {
     id_concert: concert.id_concert,
     nom: noms.join(', ') || 'Aucune artiste',
     jour: concert.jour ? labelOf(JOURS, concert.jour) : '—',
-    horaire: [formatHeure(concert.heure_debut), formatHeure(concert.heure_fin)].filter(Boolean).join(' – ') || '—',
+    horaire: formatHoraire(concert.heure_debut, concert.heure_fin) || '—',
     scene: concert.Scene?.nom ?? '—',
   }
 }

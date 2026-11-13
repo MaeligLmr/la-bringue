@@ -23,6 +23,20 @@ export function heureFinError(heureDebut: string | null, heureFin: string | null
   return "L'heure de fin doit être après l'heure de début."
 }
 
+export function horaireRules(values: Record<string, unknown>) {
+  return { heure_fin: heureFinError(values.heure_debut as string | null, values.heure_fin as string | null) }
+}
+
+export function creneauSaisi(values: Record<string, unknown>, id: number | undefined, lieu: Creneau['lieu']): Creneau {
+  return {
+    id,
+    lieu,
+    jour: values.jour as string | null,
+    heure_debut: values.heure_debut as string | null,
+    heure_fin: values.heure_fin as string | null,
+  }
+}
+
 function plage(creneau: Creneau) {
   const debut = minutes(creneau.heure_debut)
   if (debut === null) return null

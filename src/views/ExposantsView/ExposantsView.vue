@@ -10,6 +10,7 @@ import { exposantHandler } from '../../handlers/exposant'
 import { toExposantCards } from '../../lib/cards/cards'
 import { usePaginatedList } from '../../composables/usePaginatedList/usePaginatedList'
 import { useScrollReveal } from '../../composables/useScrollReveal/useScrollReveal'
+import { toOptions } from '../../lib/options/options'
 
 // Valeurs de l'enum `categories_exposants`, dans l'ordre de la base.
 const categories = ref<string[]>([])
@@ -31,7 +32,7 @@ const filters = computed<FilterConfig[]>(() => [
     key: 'categorie',
     label: 'Catégorie',
     allLabel: 'Toutes les catégories',
-    options: categories.value.map((categorie) => ({ value: categorie, label: categorie })),
+    options: toOptions(categories.value),
   },
 ])
 

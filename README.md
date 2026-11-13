@@ -206,7 +206,7 @@ Pour mettre à jour après un changement dans Figma : exporter les 4 collections
 ```ts
 import { useTheme } from './composables/useTheme' // chemin relatif au fichier appelant
 
-const { preference, resolvedTheme, setPreference, toggleTheme } = useTheme()
+const { preference, resolvedTheme, setPreference } = useTheme()
 ```
 
 Par défaut, le thème suit la préférence de l'appareil (`prefers-color-scheme`). Un choix explicite (`setPreference('light' | 'dark' | 'system')`) est mémorisé dans `localStorage` et posé sur `<html data-theme="...">`. Le sélecteur clair/sombre/défaut de la Navbar en est la seule interface pour l'instant.

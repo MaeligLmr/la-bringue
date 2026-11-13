@@ -11,10 +11,6 @@ type ConcertArtisteValues = Partial<Pick<ConcertArtiste, 'artiste_annonce' | 'fe
 // Table de liaison à clé primaire composite (id_artiste, id_concert) : pas de
 // createCrudHandler, chaque opération cible le couple d'identifiants.
 export const concertArtisteHandler = {
-  async getAll(): Promise<ConcertArtiste[]> {
-    return unwrap<ConcertArtiste[]>(TABLE, await supabase.from(TABLE).select('id_artiste, id_concert, artiste_annonce, featuring'))
-  },
-
   async getArtistesByConcert(idConcert: number): Promise<(ConcertArtiste & { Artiste: ArtisteResume | null })[]> {
     return unwrap(
       TABLE,

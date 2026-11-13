@@ -73,16 +73,6 @@ describe('artisteHandler', () => {
 })
 
 describe('concertArtisteHandler', () => {
-  it('getAll lit toute la table de liaison', async () => {
-    const { from, chain } = mockSupabase()
-    const { concertArtisteHandler } = await import('./concert-artiste')
-
-    await concertArtisteHandler.getAll()
-
-    expect(from).toHaveBeenCalledWith('ConcertArtiste')
-    expect(chain.select).toHaveBeenCalledWith('id_artiste, id_concert, artiste_annonce, featuring')
-  })
-
   it('getArtistesByConcert et getConcertsByArtiste joignent l’autre table', async () => {
     const { chain } = mockSupabase()
     const { concertArtisteHandler } = await import('./concert-artiste')
@@ -202,15 +192,12 @@ describe('conferenceHandler', () => {
     expect(from).not.toHaveBeenCalled()
   })
 
-  it('getDetailById, getByJour et getByTheme filtrent sur la bonne colonne', async () => {
+  it('getDetailById et getByTheme filtrent sur la bonne colonne', async () => {
     const { chain } = mockSupabase({ data: null })
     const { conferenceHandler } = await import('./conference')
 
     await conferenceHandler.getDetailById(7)
     expect(chain.eq).toHaveBeenCalledWith('id_conference', 7)
-
-    await conferenceHandler.getByJour('2026-08-29')
-    expect(chain.eq).toHaveBeenCalledWith('jour', '2026-08-29')
 
     await conferenceHandler.getByTheme('Écologie')
     expect(chain.eq).toHaveBeenCalledWith('theme', 'Écologie')
@@ -241,16 +228,6 @@ describe('conferenceHandler', () => {
 })
 
 describe('exposantHandler', () => {
-  it('getAllByNom trie par nom', async () => {
-    const { from, chain } = mockSupabase()
-    const { exposantHandler } = await import('./exposant')
-
-    await exposantHandler.getAllByNom()
-
-    expect(from).toHaveBeenCalledWith('Exposant')
-    expect(chain.order).toHaveBeenCalledWith('nom')
-  })
-
   it('getByCategorie filtre sur la catégorie', async () => {
     const { chain } = mockSupabase()
     const { exposantHandler } = await import('./exposant')
@@ -342,18 +319,6 @@ describe('participationHandler', () => {
 })
 
 describe('likeHandler', () => {
-  it('getMyDetails joint artiste et conférence sans filtrer par utilisatrice (RLS), du plus récent au plus ancien', async () => {
-    const { from, chain } = mockSupabase()
-    const { likeHandler } = await import('./like')
-
-    await likeHandler.getMyDetails()
-
-    expect(from).toHaveBeenCalledWith('Like')
-    expect(chain.select).toHaveBeenCalledWith(expect.stringContaining('Conference(id_conference, titre'))
-    expect(chain.eq).not.toHaveBeenCalled()
-    expect(chain.order).toHaveBeenCalledWith('created_at', { ascending: false })
-  })
-
   it('getMine appelle get_my_likes et renvoie les cibles likées', async () => {
     const targets = [{ type: 'artiste', id: 4 }, { type: 'conference', id: 9 }]
     const { rpc } = mockSupabase({ data: targets })
@@ -493,7 +458,9 @@ describe('infoPratiqueHandler', () => {
 describe('handlers CRUD simples', () => {
   it('sceneHandler et conferenciereHandler pointent sur leur table', async () => {
     const { from } = mockSupabase()
-    const { sceneHandler, conferenciereHandler } = await import('./index')
+    const { sceneHandler } = await import('./scene')
+    const { conferenciereHandler } = await import('./conferenciere')
+
 
     await sceneHandler.getAll()
     expect(from).toHaveBeenLastCalledWith('Scene')

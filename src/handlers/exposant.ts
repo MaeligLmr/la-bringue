@@ -8,11 +8,6 @@ export type ExposantResume = Pick<Exposant, 'id_exposant' | 'nom' | 'photo' | 'c
 export const exposantHandler = {
   ...createCrudHandler<Exposant, 'id_exposant'>(TABLE, 'id_exposant', 'id_exposant, nom, photo, categorie, description'),
 
-  // Tous les exposants, par ordre alphabétique.
-  async getAllByNom(): Promise<ExposantResume[]> {
-    return unwrap<ExposantResume[]>(TABLE, await supabase.from(TABLE).select('id_exposant, nom, photo, categorie').order('nom'))
-  },
-
   // Une page de la liste (page Exposants), par ordre alphabétique ; `search`
   // filtre sur le nom, `categorie` sur la catégorie.
   async getPage({

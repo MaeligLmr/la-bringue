@@ -86,13 +86,13 @@ describe('AdminForm', () => {
   it('marque les champs obligatoires d’un astérisque, et eux seuls', () => {
     const wrapper = mountForm(makeHandler())
 
-    const stars = wrapper.findAll('.admin-form__field').map((field) => field.find('.admin-form__required').exists())
+    const stars = wrapper.findAll('.form-field').map((field) => field.find('.form-field__required').exists())
 
     // Nom (obligatoire), puis description, catégorie et photo.
     expect(stars).toEqual([true, false, false, false])
     expect(wrapper.find('label[for="admin-nom"]').text()).toBe('Nom *')
     // L'astérisque est décoratif : le lecteur d'écran lit « Nom » seul.
-    expect(wrapper.find('.admin-form__required').attributes('aria-hidden')).toBe('true')
+    expect(wrapper.find('.form-field__required').attributes('aria-hidden')).toBe('true')
   })
 
   it('affiche un message sous un champ obligatoire vide, sans appel au serveur', async () => {
@@ -101,7 +101,7 @@ describe('AdminForm', () => {
 
     await wrapper.find('form').trigger('submit')
 
-    expect(wrapper.find('.admin-form__error').text()).toBe('Ce champ est obligatoire.')
+    expect(wrapper.find('.form-field__error').text()).toBe('Ce champ est obligatoire.')
     expect(handler.create).not.toHaveBeenCalled()
   })
 
@@ -254,7 +254,7 @@ describe('AdminForm', () => {
     await wrapper.find('#admin-description').setValue('interdit')
     await wrapper.find('form').trigger('submit')
 
-    expect(wrapper.find('.admin-form__error').text()).toBe('Description refusée.')
+    expect(wrapper.find('.form-field__error').text()).toBe('Description refusée.')
     expect(handler.create).not.toHaveBeenCalled()
   })
 
@@ -267,5 +267,20 @@ describe('AdminForm', () => {
     await wrapper.find('#admin-nom').setValue('Angèle')
 
     expect(wrapper.find('.apercu').text()).toBe('Angèle')
+  })
+
+  it('affiche l’avertissement calculé sur la saisie, sans bloquer l’envoi', async () => {
+    const handler = makeHandler()
+    const warning = (values: Record<string, unknown>) => (values.nom === 'Angèle' ? 'Déjà programmée ce jour-là.' : '')
+    const wrapper = mount(AdminForm<Artiste>, { props: { fields: FIELDS, handler, warning } })
+
+    expect(wrapper.find('.admin-form__warning').exists()).toBe(false)
+
+    await wrapper.find('#admin-nom').setValue('Angèle')
+    expect(wrapper.find('.admin-form__warning').text()).toBe('Déjà programmée ce jour-là.')
+
+    await wrapper.find('form').trigger('submit')
+    await flushPromises()
+    expect(handler.create).toHaveBeenCalled()
   })
 })

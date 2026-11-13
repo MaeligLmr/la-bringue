@@ -1,5 +1,5 @@
 <script setup lang="ts" generic="T extends object">
-import { onMounted, reactive, ref } from 'vue'
+import { computed, onMounted, reactive, ref } from 'vue'
 import { toast } from 'vue-sonner'
 import { supabase } from '../../../supabase.js'
 import Button from '../../ui/Button/Button.vue'
@@ -16,6 +16,7 @@ const props = defineProps<{
   handler: AdminFormHandler<T>
   id?: string | number
   rules?: (values: Record<string, unknown>) => Partial<Record<string, string>>
+  warning?: (values: Record<string, unknown>) => string
 }>()
 
 const emit = defineEmits<{ saved: [item: T] }>()
@@ -27,6 +28,8 @@ const values = reactive<Record<string, any>>({})
 const files = reactive<Record<string, File | undefined>>({})
 const errors = reactive<Record<string, string | undefined>>({})
 const submitting = ref(false)
+
+const warningText = computed(() => props.warning?.(values) ?? '')
 
 function toFormValue(field: AdminFormField<T>, value: unknown) {
   if (field.type === 'checkbox') return Boolean(value)
@@ -129,10 +132,10 @@ async function submit() {
 
 <template>
   <form class="admin-form" novalidate @submit.prevent="submit">
-    <div v-for="field in fields" :key="field.key" class="admin-form__field">
+    <div v-for="field in fields" :key="field.key" class="form-field">
       <label :for="`admin-${field.key}`">
         {{ field.label }}
-        <span v-if="field.required" class="admin-form__required" aria-hidden="true">*</span>
+        <span v-if="field.required" class="form-field__required" aria-hidden="true">*</span>
       </label>
 
       <textarea v-if="field.type === 'textarea'" :id="`admin-${field.key}`" v-model="values[field.key]" />
@@ -176,8 +179,10 @@ async function submit() {
         :step="field.type === 'number' ? 'any' : undefined"
       />
 
-      <p v-if="errors[field.key]" class="admin-form__error">{{ errors[field.key] }}</p>
+      <p v-if="errors[field.key]" class="form-field__error">{{ errors[field.key] }}</p>
     </div>
+
+    <p v-if="warningText" class="admin-form__warning" role="status">{{ warningText }}</p>
 
     <slot :values="values" />
 
@@ -195,37 +200,12 @@ async function submit() {
   gap: var(--space-4);
 }
 
-.admin-form__field {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-1);
-  width: 100%;
-}
-
-.admin-form__field label {
-  font-weight: var(--font-weight-medium);
-  color: var(--text-h);
-}
-
-.admin-form__field input,
-.admin-form__field textarea {
-  width: 100%;
-  box-sizing: border-box;
-  padding: var(--space-2);
-  border: 1px solid var(--border);
-  border-radius: var(--radius-small);
-  background: var(--bg);
-  color: var(--text-h);
-  font: inherit;
-}
-
-.admin-form__required {
-  color: var(--alert-danger-text);
-}
-
-.admin-form__error {
+.admin-form__warning {
   margin: 0;
+  padding: var(--space-3) var(--space-4);
+  border: 1px solid var(--alert-danger-border);
+  border-radius: var(--radius-medium);
+  background: var(--alert-danger-background);
   color: var(--alert-danger-text);
-  font-size: 0.85em;
 }
 </style>

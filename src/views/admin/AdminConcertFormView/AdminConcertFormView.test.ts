@@ -163,7 +163,7 @@ describe('AdminConcertFormView', () => {
     ])
     const { wrapper } = await mountView(7)
 
-    const warning = wrapper.find('.admin-concert-form__warning')
+    const warning = wrapper.find('.admin-form__warning')
     expect(warning.text()).toBe('Ce concert chevauche sur la même scène : Angèle (20h30 – 21h30).')
     expect(wrapper.find('button[type="submit"]').attributes('disabled')).toBeUndefined()
   })
@@ -171,6 +171,6 @@ describe('AdminConcertFormView', () => {
   it('n’avertit pas quand la scène est libre', async () => {
     const { wrapper } = await mountView(7)
 
-    expect(wrapper.find('.admin-concert-form__warning').exists()).toBe(false)
+    expect(wrapper.find('.admin-form__warning').exists()).toBe(false)
   })
 })

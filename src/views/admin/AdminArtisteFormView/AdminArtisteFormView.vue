@@ -8,6 +8,7 @@ import { artisteHandler } from '../../../handlers/artiste'
 import type { Artiste } from '../../../types/database/artiste'
 import type { AdminFormField } from '../../../types/ui/admin-form'
 import type { SelectOption } from '../../../types/ui/select'
+import { toOptions } from '../../../lib/options/options'
 
 defineProps<{ id?: number }>()
 
@@ -19,8 +20,7 @@ const ready = ref(false)
 onMounted(async () => {
   try {
     const artistes = await artisteHandler.getAll()
-    const noms = new Set(artistes.map((artiste) => artiste.categorie).filter((categorie): categorie is string => !!categorie))
-    categories.value = [...noms].sort((a, b) => a.localeCompare(b)).map((categorie) => ({ value: categorie, label: categorie }))
+    categories.value = toOptions(artistes.map((artiste) => artiste.categorie), { sorted: true })
   } catch {
     toast.error('Impossible de charger les catégories.')
   } finally {

@@ -21,6 +21,11 @@ export function formatHeure(heure: string | null) {
   return heure ? heure.slice(0, 5).replace(':', 'h') : ''
 }
 
+// "22h15 – 23h30", ou "22h15" sans heure de fin.
+export function formatHoraire(debut: string | null, fin: string | null) {
+  return [formatHeure(debut), formatHeure(fin)].filter(Boolean).join(' – ')
+}
+
 export function labelOf(options: SelectOption[], value: string) {
   return options.find((option) => option.value === value)?.label ?? value
 }

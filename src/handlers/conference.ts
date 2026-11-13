@@ -69,14 +69,6 @@ export const conferenceHandler = {
     )
   },
 
-  // `jour` au format ISO "YYYY-MM-DD".
-  async getByJour(jour: string): Promise<ConferenceResume[]> {
-    return unwrap<ConferenceResume[]>(
-      TABLE,
-      await supabase.from(TABLE).select(LIST_SELECT).eq('jour', jour).order('heure_debut')
-    )
-  },
-
   async getThemes(): Promise<string[]> {
     return unwrap<string[]>(TABLE, await supabase.rpc('get_themes_conferences'))
   },

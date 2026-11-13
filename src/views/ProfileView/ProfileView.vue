@@ -5,7 +5,7 @@ import { toast } from 'vue-sonner'
 import { useAuth } from '../../composables/useAuth/useAuth'
 import { useAuthModal } from '../../composables/useAuthModal/useAuthModal'
 import { useProfilePicture } from '../../composables/useProfilePicture/useProfilePicture'
-import { validateProfileFields, type FieldErrors } from '../../lib/auth-validation/auth-validation'
+import { clearErrors, validateProfileFields, type FieldErrors } from '../../lib/auth-validation/auth-validation'
 import { mapAuthError } from '../../lib/auth-errors/auth-errors'
 import { withTimeout } from '../../lib/with-timeout/with-timeout'
 import { supabase } from '../../supabase.js'
@@ -44,9 +44,7 @@ watchEffect(() => {
 async function handleSave() {
   if (isSaving.value) return
 
-  errors.firstName = undefined
-  errors.lastName = undefined
-  errors.username = undefined
+  clearErrors(errors)
 
   const fieldErrors = validateProfileFields({
     firstName: firstName.value,
@@ -115,7 +113,7 @@ async function handleSignOut() {
     </div>
 
     <form v-else class="profile__form" novalidate @submit.prevent="handleSave">
-      <div class="profile__field">
+      <div class="form-field">
         <label for="profile-photo">Photo de profil</label>
         <FileUpload
           id="profile-photo"
@@ -127,8 +125,8 @@ async function handleSignOut() {
         />
       </div>
 
-      <div class="profile__field">
-        <label for="profile-first-name">Prénom <span class="profile__required" aria-hidden="true">*</span></label>
+      <div class="form-field">
+        <label for="profile-first-name">Prénom <span class="form-field__required" aria-hidden="true">*</span></label>
         <input
           id="profile-first-name"
           v-model="firstName"
@@ -138,13 +136,13 @@ async function handleSignOut() {
           :aria-invalid="Boolean(errors.firstName)"
           :aria-describedby="errors.firstName ? 'profile-first-name-error' : undefined"
         />
-        <p v-if="errors.firstName" id="profile-first-name-error" class="profile__error" role="alert">
+        <p v-if="errors.firstName" id="profile-first-name-error" class="form-field__error" role="alert">
           {{ errors.firstName }}
         </p>
       </div>
 
-      <div class="profile__field">
-        <label for="profile-last-name">Nom <span class="profile__required" aria-hidden="true">*</span></label>
+      <div class="form-field">
+        <label for="profile-last-name">Nom <span class="form-field__required" aria-hidden="true">*</span></label>
         <input
           id="profile-last-name"
           v-model="lastName"
@@ -154,13 +152,13 @@ async function handleSignOut() {
           :aria-invalid="Boolean(errors.lastName)"
           :aria-describedby="errors.lastName ? 'profile-last-name-error' : undefined"
         />
-        <p v-if="errors.lastName" id="profile-last-name-error" class="profile__error" role="alert">
+        <p v-if="errors.lastName" id="profile-last-name-error" class="form-field__error" role="alert">
           {{ errors.lastName }}
         </p>
       </div>
 
-      <div class="profile__field">
-        <label for="profile-username">Nom d'utilisateur <span class="profile__required" aria-hidden="true">*</span></label>
+      <div class="form-field">
+        <label for="profile-username">Nom d'utilisateur <span class="form-field__required" aria-hidden="true">*</span></label>
         <input
           id="profile-username"
           v-model="username"
@@ -170,7 +168,7 @@ async function handleSignOut() {
           :aria-invalid="Boolean(errors.username)"
           :aria-describedby="errors.username ? 'profile-username-error' : undefined"
         />
-        <p v-if="errors.username" id="profile-username-error" class="profile__error" role="alert">
+        <p v-if="errors.username" id="profile-username-error" class="form-field__error" role="alert">
           {{ errors.username }}
         </p>
       </div>
@@ -217,11 +215,6 @@ async function handleSignOut() {
   gap: var(--space-6);
 }
 
-
-.profile__header h1 {
-  margin: 0;
-}
-
 .profile__guest {
   display: flex;
   flex-direction: column;
@@ -239,43 +232,5 @@ async function handleSignOut() {
   flex-direction: column;
   gap: var(--space-4);
   width: 100%;
-}
-
-.profile__field {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-1);
-  width: 100%;
-}
-
-.profile__field label,
-.profile__field-label {
-  font-weight: var(--font-weight-medium);
-  color: var(--text-h);
-}
-
-.profile__required {
-  color: var(--alert-danger-text);
-}
-
-.profile__field input {
-  width: 100%;
-  box-sizing: border-box;
-  padding: var(--space-2);
-  border: 1px solid var(--border);
-  border-radius: var(--radius-small);
-  background: var(--bg);
-  color: var(--text-h);
-  font: inherit;
-}
-
-.profile__field input[aria-invalid='true'] {
-  border-color: var(--alert-danger-border);
-}
-
-.profile__error {
-  margin: 0;
-  color: var(--alert-danger-text);
-  font-size: 0.85em;
 }
 </style>

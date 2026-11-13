@@ -96,20 +96,6 @@ describe('useTheme', () => {
     expect(resolvedTheme.value).toBe('dark') // le système simulé préfère le sombre
   })
 
-  it('toggleTheme bascule entre clair et sombre', async () => {
-    mockMatchMedia(false)
-    const { useTheme } = await import('./useTheme')
-    const { toggleTheme, resolvedTheme } = useTheme()
-
-    expect(resolvedTheme.value).toBe('light')
-
-    toggleTheme()
-    expect(resolvedTheme.value).toBe('dark')
-
-    toggleTheme()
-    expect(resolvedTheme.value).toBe('light')
-  })
-
   it('réagit en direct à un changement de préférence système tant que rien n\'a été forcé', async () => {
     const { fireChange } = mockMatchMedia(false)
     const { useTheme } = await import('./useTheme')

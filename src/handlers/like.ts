@@ -1,32 +1,13 @@
 import { supabase } from '../supabase.js'
-import type { Like } from '../types/database/like'
 import type { LikeTarget } from '../types/ui/like'
-import type { ArtisteResume } from './artiste'
-import type { ConferenceResume } from './conference'
 import { HandlerError, unwrap } from './crud'
 
 const TABLE = 'Like'
 
-export interface LikeDetail extends Like {
-  Artiste: ArtisteResume | null
-  Conference: ConferenceResume | null
-}
-
 // Les écritures et la lecture des likes de l'utilisatrice connectée passent
 // par les fonctions Postgres set_like / get_my_likes : elles utilisent
 // auth.uid() côté base, on n'envoie donc jamais l'id de l'utilisatrice.
-// getMyDetails n'a pas besoin de filtrer : les RLS ne renvoient que ses likes.
 export const likeHandler = {
-  async getMyDetails(): Promise<LikeDetail[]> {
-    return unwrap<LikeDetail[]>(
-      TABLE,
-      await supabase
-        .from(TABLE)
-        .select('id_like, id_utilisatrice, id_conference, id_artiste, Artiste(id_artiste, nom, photo, categorie), Conference(id_conference, titre, photo, theme, jour, heure_debut, heure_fin)')
-        .order('created_at', { ascending: false })
-    )
-  },
-
   async getMine(): Promise<LikeTarget[]> {
     const targets = unwrap<unknown>('get_my_likes', await supabase.rpc('get_my_likes'))
     // Une fonction mal déclarée en base (retour void par exemple) renvoie null :

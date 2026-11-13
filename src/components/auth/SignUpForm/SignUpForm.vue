@@ -2,7 +2,7 @@
 import { nextTick, reactive, ref } from 'vue'
 import { toast } from 'vue-sonner'
 import { supabase } from '../../../supabase.js'
-import { validateSignupFields, type FieldErrors } from '../../../lib/auth-validation/auth-validation'
+import { clearErrors, validateSignupFields, type FieldErrors } from '../../../lib/auth-validation/auth-validation'
 import { mapAuthError, isObfuscatedDuplicateSignup, EMAIL_ALREADY_USED_MESSAGE } from '../../../lib/auth-errors/auth-errors'
 import { withTimeout } from '../../../lib/with-timeout/with-timeout'
 import Button from '../../ui/Button/Button.vue'
@@ -55,12 +55,7 @@ function focusFirstInvalidField(fieldErrors: FieldErrors) {
 async function handleSubmit() {
   if (isSubmitting.value) return
 
-  errors.firstName = undefined
-  errors.lastName = undefined
-  errors.username = undefined
-  errors.email = undefined
-  errors.password = undefined
-  errors.confirmPassword = undefined
+  clearErrors(errors)
 
   const fieldErrors = validateSignupFields({
     firstName: firstName.value,
@@ -152,8 +147,8 @@ async function handleSubmit() {
   </div>
 
   <form v-else class="auth-form" novalidate @submit.prevent="handleSubmit">
-    <div class="auth-form__field">
-      <label for="signup-first-name">Prénom <span class="auth-form__required" aria-hidden="true">*</span></label>
+    <div class="form-field">
+      <label for="signup-first-name">Prénom <span class="form-field__required" aria-hidden="true">*</span></label>
       <input
         id="signup-first-name"
         ref="firstNameInputEl"
@@ -164,13 +159,13 @@ async function handleSubmit() {
         :aria-invalid="Boolean(errors.firstName)"
         :aria-describedby="errors.firstName ? 'signup-first-name-error' : undefined"
       />
-      <p v-if="errors.firstName" id="signup-first-name-error" class="auth-form__error" role="alert">
+      <p v-if="errors.firstName" id="signup-first-name-error" class="form-field__error" role="alert">
         {{ errors.firstName }}
       </p>
     </div>
 
-    <div class="auth-form__field">
-      <label for="signup-last-name">Nom <span class="auth-form__required" aria-hidden="true">*</span></label>
+    <div class="form-field">
+      <label for="signup-last-name">Nom <span class="form-field__required" aria-hidden="true">*</span></label>
       <input
         id="signup-last-name"
         ref="lastNameInputEl"
@@ -181,13 +176,13 @@ async function handleSubmit() {
         :aria-invalid="Boolean(errors.lastName)"
         :aria-describedby="errors.lastName ? 'signup-last-name-error' : undefined"
       />
-      <p v-if="errors.lastName" id="signup-last-name-error" class="auth-form__error" role="alert">
+      <p v-if="errors.lastName" id="signup-last-name-error" class="form-field__error" role="alert">
         {{ errors.lastName }}
       </p>
     </div>
 
-    <div class="auth-form__field">
-      <label for="signup-username">Nom d'utilisateur <span class="auth-form__required" aria-hidden="true">*</span></label>
+    <div class="form-field">
+      <label for="signup-username">Nom d'utilisateur <span class="form-field__required" aria-hidden="true">*</span></label>
       <input
         id="signup-username"
         ref="usernameInputEl"
@@ -198,13 +193,13 @@ async function handleSubmit() {
         :aria-invalid="Boolean(errors.username)"
         :aria-describedby="errors.username ? 'signup-username-error' : undefined"
       />
-      <p v-if="errors.username" id="signup-username-error" class="auth-form__error" role="alert">
+      <p v-if="errors.username" id="signup-username-error" class="form-field__error" role="alert">
         {{ errors.username }}
       </p>
     </div>
 
-    <div class="auth-form__field">
-      <label for="signup-email">Email <span class="auth-form__required" aria-hidden="true">*</span></label>
+    <div class="form-field">
+      <label for="signup-email">Email <span class="form-field__required" aria-hidden="true">*</span></label>
       <input
         id="signup-email"
         ref="emailInputEl"
@@ -215,13 +210,13 @@ async function handleSubmit() {
         :aria-invalid="Boolean(errors.email)"
         :aria-describedby="errors.email ? 'signup-email-error' : undefined"
       />
-      <p v-if="errors.email" id="signup-email-error" class="auth-form__error" role="alert">
+      <p v-if="errors.email" id="signup-email-error" class="form-field__error" role="alert">
         {{ errors.email }}
       </p>
     </div>
 
-    <div class="auth-form__field">
-      <label for="signup-password">Mot de passe <span class="auth-form__required" aria-hidden="true">*</span></label>
+    <div class="form-field">
+      <label for="signup-password">Mot de passe <span class="form-field__required" aria-hidden="true">*</span></label>
       <PasswordInput
         id="signup-password"
         ref="passwordInputEl"
@@ -231,13 +226,13 @@ async function handleSubmit() {
         :aria-invalid="Boolean(errors.password)"
         :aria-describedby="errors.password ? 'signup-password-error' : undefined"
       />
-      <p v-if="errors.password" id="signup-password-error" class="auth-form__error" role="alert">
+      <p v-if="errors.password" id="signup-password-error" class="form-field__error" role="alert">
         {{ errors.password }}
       </p>
     </div>
 
-    <div class="auth-form__field">
-      <label for="signup-confirm-password">Confirmer le mot de passe <span class="auth-form__required" aria-hidden="true">*</span></label>
+    <div class="form-field">
+      <label for="signup-confirm-password">Confirmer le mot de passe <span class="form-field__required" aria-hidden="true">*</span></label>
       <PasswordInput
         id="signup-confirm-password"
         ref="confirmPasswordInputEl"
@@ -247,7 +242,7 @@ async function handleSubmit() {
         :aria-invalid="Boolean(errors.confirmPassword)"
         :aria-describedby="errors.confirmPassword ? 'signup-confirm-password-error' : undefined"
       />
-      <p v-if="errors.confirmPassword" id="signup-confirm-password-error" class="auth-form__error" role="alert">
+      <p v-if="errors.confirmPassword" id="signup-confirm-password-error" class="form-field__error" role="alert">
         {{ errors.confirmPassword }}
       </p>
     </div>
@@ -280,41 +275,5 @@ async function handleSubmit() {
   display: flex;
   flex-direction: column;
   gap: var(--space-4);
-}
-
-.auth-form__field {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-1);
-}
-
-.auth-form__field label {
-  font-weight: var(--font-weight-medium);
-  color: var(--text-h);
-}
-
-.auth-form__required {
-  color: var(--alert-danger-text);
-}
-
-.auth-form__field input {
-  width: 100%;
-  box-sizing: border-box;
-  padding: var(--space-2);
-  border: 1px solid var(--border);
-  border-radius: var(--radius-small);
-  background: var(--bg);
-  color: var(--text-h);
-  font: inherit;
-}
-
-.auth-form__field input[aria-invalid='true'] {
-  border-color: var(--alert-danger-border);
-}
-
-.auth-form__error {
-  margin: 0;
-  color: var(--alert-danger-text);
-  font-size: 0.85em;
 }
 </style>

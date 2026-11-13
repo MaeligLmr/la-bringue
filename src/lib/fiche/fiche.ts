@@ -6,7 +6,7 @@ import type { FicheData, FicheSuggestion, FicheTag, FicheType } from '../../type
 import { JOURS, SCENES, type ArtisteCard } from '../../types/ui/programmation'
 import type { ConferenceCard } from '../../types/ui/conferences'
 import type { ExposantCard } from '../../types/ui/exposants'
-import { formatHeure, labelOf, sceneValue, toArtisteCards, toConferenceCards, toExposantCards } from '../cards/cards'
+import { formatHoraire, labelOf, sceneValue, toArtisteCards, toConferenceCards, toExposantCards } from '../cards/cards'
 
 // Nombre de cartes « Ça peut aussi vous intéresser ». Les requêtes en demandent
 // une de plus : la fiche courante peut en faire partie et est filtrée ensuite.
@@ -18,11 +18,6 @@ export const SCENE_CONCERTS_LIMIT = SUGGESTIONS_COUNT * 4
 
 function ficheRoute(type: FicheType, id: number) {
   return { name: 'fiche', params: { type, id } }
-}
-
-// "22h15 – 23h30", ou "22h15" sans heure de fin.
-function horaire(debut: string | null, fin: string | null) {
-  return [formatHeure(debut), formatHeure(fin)].filter(Boolean).join(' – ')
 }
 
 function jourTag(page: string, jour: string): FicheTag[] {
@@ -107,7 +102,7 @@ async function loadArtiste(id: number): Promise<FicheData | null> {
       photo: artiste.photo,
       description: artiste.description,
       jour: jour || undefined,
-      heure: horaire(concert?.heure_debut ?? null, concert?.heure_fin ?? null) || undefined,
+      heure: formatHoraire(concert?.heure_debut ?? null, concert?.heure_fin ?? null) || undefined,
       scene: scene || undefined,
       categorie: artiste.categorie ? { label: artiste.categorie } : undefined,
       tags: [
@@ -138,7 +133,7 @@ async function loadConference(id: number): Promise<FicheData | null> {
       photo: conference.photo,
       description: conference.description,
       jour: conference.jour ?? undefined,
-      heure: horaire(conference.heure_debut, conference.heure_fin) || undefined,
+      heure: formatHoraire(conference.heure_debut, conference.heure_fin) || undefined,
       categorie: conference.theme
         ? { label: conference.theme, to: { name: 'conferences', query: { theme: conference.theme } } }
         : undefined,

@@ -57,21 +57,6 @@ export const concertHandler = {
     )
   },
 
-  async getDetailById(id: number): Promise<ConcertDetail | null> {
-    return unwrap<ConcertDetail | null>(
-      TABLE,
-      await supabase.from(TABLE).select(DETAIL_SELECT).eq('id_concert', id).maybeSingle()
-    )
-  },
-
-  // `jour` au format ISO "YYYY-MM-DD".
-  async getByJour(jour: string): Promise<ConcertDetail[]> {
-    return unwrap<ConcertDetail[]>(
-      TABLE,
-      await supabase.from(TABLE).select(DETAIL_SELECT).eq('jour', jour).order('heure_debut')
-    )
-  },
-
   // Une page de la programmation (page Programmation), par jour puis heure : la
   // page compte des concerts, chacun avec ses artistes. `jour` (ISO
   // "YYYY-MM-DD") filtre sur la colonne, `scene` sur le début du nom de la
@@ -103,13 +88,6 @@ export const concertHandler = {
     // id en second critère : un ordre stable évite doublons et trous entre les pages.
     query = query.order('jour').order('heure_debut').order('id_concert').range(...pageRange(offset, pageSize))
     return toPage(unwrap<ConcertDetail[]>(TABLE, await query), pageSize)
-  },
-
-  async getByScene(idScene: number): Promise<Concert[]> {
-    return unwrap<Concert[]>(
-      TABLE,
-      await supabase.from(TABLE).select('id_concert, id_scene, jour, heure_debut, heure_fin').eq('id_scene', idScene).order('jour').order('heure_debut')
-    )
   },
 
   // `limit` : les suggestions n'ont besoin que de quelques concerts.

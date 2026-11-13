@@ -185,7 +185,7 @@ describe('AdminConferenceFormView', () => {
     ])
     const { wrapper } = await mountView(5)
 
-    expect(wrapper.find('.admin-conference-form__warning').text()).toBe(
+    expect(wrapper.find('.admin-form__warning').text()).toBe(
       'Cette conférence a lieu en même temps que : Atelier écriture (14h30 – 15h30).'
     )
     expect(wrapper.find('button[type="submit"]').attributes('disabled')).toBeUndefined()
